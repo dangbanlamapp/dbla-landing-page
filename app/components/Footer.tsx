@@ -77,9 +77,9 @@ function Wordmark({ className }: { className?: string }) {
  * has to hold up on mobile.
  */
 const FOOTER_VARS = {
-  "--circle-d": "80vh",
+  "--circle-d": "140vh",
   "--circle-r": "calc(var(--circle-d) / 2)",
-  "--circle-y": "-5vh",
+  "--circle-y": "50vh",
   "--wordmark-y": "10vh",
 } as React.CSSProperties;
 
@@ -212,7 +212,7 @@ export default function Footer() {
         </nav>
       </div>
 
-      <div className="relative m-auto flex h-full w-[90vw] flex-col gap-[20vh] py-space-2x">
+      <div className="relative m-auto flex h-full w-[90vw] flex-col gap-[20vh] py-space-6x">
         <div className="flex w-full items-start justify-center text-center text-black">
           <p className="heading-style flex-1 text-left text-base">
             Hochiminh City, Vietnam <br />

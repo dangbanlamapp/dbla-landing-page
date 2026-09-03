@@ -66,79 +66,38 @@ export default function WhyUs() {
         });
       });
 
-      // The copy column then holds still while the numbered list scrolls past
-      // it. The pin picks up exactly where the entrance above ends — both are
-      // measured off the same element at "center center" — so the lines land
-      // and the column locks in the same frame, with no gap to scroll through.
+      // The copy column drifts down as the section scrolls, so it travels
+      // slower than the numbered list beside it and the two read as different
+      // depths. yPercent, not y: the shift is half the column's own height, so
+      // it stays proportional when the copy reflows instead of being a pixel
+      // number tuned against one breakpoint.
       //
-      // endTrigger moves the finish line onto the section: the column is short
-      // and its own bottom passes long before the list is done, so the release
-      // has to be measured against the whole section reaching the viewport
-      // bottom.
+      // ease: "none" — the scroll is the timing function; any curve here would
+      // make the column speed up and slow down against a list moving linearly,
+      // which reads as a glitch rather than as depth.
       //
-      // pinSpacing is off because the pin's distance is already inside the
-      // section's natural height — the list below is what fills it — so adding
-      // a spacer would push the rest of the page down by that distance twice.
-      // ScrollTrigger would default it to false here anyway (a flex parent
-      // opts out, see its pinSpacing normalisation), but leaving it implicit
-      // means the layout quietly depends on the parent staying display: flex.
-      //
-      // The slot in the flex row is safe either way: pinning always wraps the
-      // element in a pin-spacer that inherits its flex-basis and measured
-      // width, so the right column cannot expand into the space while the
-      // column is position: fixed.
-      ScrollTrigger.create({
-        trigger: copy.current,
-        start: "center center",
-        endTrigger: container.current,
-        end: "bottom bottom",
-        pin: copy.current,
-        pinSpacing: false,
-        invalidateOnRefresh: true,
-      });
-
-      // Each numbered block fades up as it crosses the viewport and back down
-      // as it leaves, so only the one nearest the middle reads as active.
-      //
-      // The range is the block's whole passage across the screen — top edge
-      // entering at the bottom through to bottom edge leaving at the top — so
-      // the midpoint of the scrub is exactly the moment the block's centre
-      // meets the viewport centre. That is what puts full opacity in the
-      // middle without any of it being written as a scroll offset.
-      const boxes = gsap.utils.toArray<HTMLElement>(
-        "[data-box]",
-        container.current,
-      );
-
-      boxes.forEach((box) => {
-        const tl = gsap.timeline({
+      // The tween moves its own trigger element, which is only safe because of
+      // invalidateOnRefresh: ScrollTrigger reverts the animation before it
+      // measures start/end, so the column is back at yPercent 0 whenever the
+      // positions are read. Without it, a refresh mid-scroll would measure the
+      // already-shifted column and bake the offset into its own range. Writing
+      // both ends out as a fromTo is what keeps that revert-and-re-init cycle
+      // landing on the same two numbers every time.
+      gsap.fromTo(
+        copy.current,
+        { yPercent: 0 },
+        {
+          yPercent: 50,
+          ease: "none",
           scrollTrigger: {
-            trigger: box,
-            start: "bottom bottom",
-            end: "top top",
+            trigger: copy.current,
+            start: "top bottom",
+            end: "bottom top",
             scrub: true,
             invalidateOnRefresh: true,
           },
-        });
-
-        // The timeline totals 1, so each duration below is a straight fraction
-        // of the range: 0.4 in, 0.2 held, 0.4 out. Read the numbers as the
-        // shape of the fade rather than as seconds — the scrub maps them onto
-        // scroll distance, and only their ratio survives.
-        //
-        // ease: "none" because the scroll is already the timing function
-        // here; anything else would double up with it and pull the fully-lit
-        // window off the centre.
-        tl.fromTo(
-          box,
-          { opacity: 0.05 },
-          { opacity: 1, duration: 0.4, ease: "none" },
-        )
-          // A dead hold — empty tween on a throwaway object, the same way Intro
-          // buys scroll distance with nothing to render.
-          .to({}, { duration: 0.2 })
-          .to(box, { opacity: 0.05, duration: 0.4, ease: "none" });
-      });
+        },
+      );
     },
     { scope: container },
   );
@@ -148,7 +107,7 @@ export default function WhyUs() {
       <div className="grid grid-cols-2 gap-space-4x py-[15vh]">
         <div
           ref={copy}
-          className="flex h-fit flex-col gap-[5vh] items-end justify-center px-space-base"
+          className="flex h-fit flex-col items-end justify-center gap-[5vh] px-space-base"
         >
           <div className="flex flex-col items-end">
             <p
@@ -166,20 +125,20 @@ export default function WhyUs() {
             </h2>
           </div>
           <div className="flex flex-col items-end py-space-2x">
-            <p className="max-w-[36ch] pb-space-base text-right text-md leading-body">
-              Our developers have 15+ years building at some of the world's most
-              respected tech companies. You get the caliber of talent.
+            <p className="max-w-[36ch] pb-space-base text-right text-lg leading-body">
+              Our developers have 15+ years building at some of the world&apos;s
+              most respected tech companies. You get the caliber of talent.
             </p>
             <p className="heading-style text-md">Kao Bui</p>
             <p className="text-base text-foreground/50">CEO of Company</p>
           </div>
         </div>
-        <div className="flex flex-col gap-space-base px-space-base pt-[50vh]">
-          <div data-box className="flex flex-col gap-space--2x opacity-15">
-            <p className="text-3xl leading-none tracking-tighter uppercase opacity-5">
+        <div className="flex flex-col gap-space-4x px-space-base pt-[50vh]">
+          <div className="flex flex-col">
+            <p className="text-md leading-none tracking-tighter uppercase opacity-50">
               01
             </p>
-            <h3 className="heading-style text-lg font-medium text-accent">
+            <h3 className="heading-style pb-space--1x text-2xl font-medium text-accent">
               Senior Expertise
             </h3>
             <p className="max-w-[48ch] text-base leading-body">
@@ -187,11 +146,11 @@ export default function WhyUs() {
               world&apos;s most respected tech companies.
             </p>
           </div>
-          <div data-box className="flex flex-col gap-space--2x opacity-15">
-            <p className="text-3xl leading-none tracking-tighter uppercase opacity-5">
+          <div className="flex flex-col">
+            <p className="text-md leading-none tracking-tighter uppercase opacity-50">
               02
             </p>
-            <h3 className="heading-style text-lg font-medium text-accent">
+            <h3 className="heading-style pb-space--1x text-2xl font-medium text-accent">
               One team fullstack
             </h3>
             <p className="max-w-[48ch] text-base leading-body">
@@ -200,11 +159,11 @@ export default function WhyUs() {
               nothing gets lost in a handoff.
             </p>
           </div>
-          <div data-box className="flex flex-col gap-space--2x opacity-15">
-            <p className="text-3xl leading-none tracking-tighter uppercase opacity-5">
+          <div className="flex flex-col">
+            <p className="text-md leading-none tracking-tighter uppercase opacity-50">
               03
             </p>
-            <h3 className="heading-style text-lg font-medium text-accent">
+            <h3 className="heading-style pb-space--1x text-2xl font-medium text-accent">
               Driven by results
             </h3>
             <p className="max-w-[48ch] text-base leading-body">

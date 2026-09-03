@@ -660,11 +660,7 @@ export default function Projects() {
     // position: fixed — transformed children hanging off it can extend the
     // document's horizontal scroll area. It is also what the crosshair below
     // has always assumed was trimming its oversized vmax rules.
-    <section
-      id="projects"
-      ref={container}
-      className="relative h-screen "
-    >
+    <section id="projects" ref={container} className="relative h-screen">
       <div className="flex h-full justify-center gap-space-base">
         <div className="flex flex-1 flex-col items-end">
           <div
