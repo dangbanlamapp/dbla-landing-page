@@ -7,6 +7,8 @@ import { useGSAP } from "@gsap/react";
 
 import DashedCircle from "./DashedCircle";
 import LocalTime from "./LocalTime";
+// Shared with MenuPanel, which prints the same legal row inside the open menu.
+import { LEGAL_LINKS, YEAR } from "./legal";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -120,23 +122,6 @@ const LAYER = "absolute flex-col inset-0 flex items-center justify-end";
  * text baseline and would add a descender's worth of gap under the mark.
  */
 const WORDMARK = "block h-auto w-[90vw] translate-y-[var(--wordmark-y)]";
-
-/**
- * Hard-coded rather than `new Date().getFullYear()`. This is a Server
- * Component on a fully static page, so a computed year is evaluated once at
- * build time and then frozen into the HTML — it would be right today, go
- * stale silently on the next 1 January, and only unstick itself whenever the
- * site next happens to be rebuilt. Moving the call to the client swaps that
- * for a hydration mismatch. An explicit constant at least fails visibly.
- */
-const YEAR = 2026;
-
-/** href is a placeholder — these routes do not exist yet. */
-const LEGAL_LINKS = [
-  { label: "Terms of Service", href: "#" },
-  { label: "Privacy Policy", href: "#" },
-  { label: "Cookie Settings", href: "#" },
-];
 
 /**
  * How far the footer sits below its resting place at the start of the reveal,
