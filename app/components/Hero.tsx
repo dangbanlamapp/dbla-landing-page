@@ -8,6 +8,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
+ScrollTrigger.config({ ignoreMobileResize: true });
+
 export default function Hero() {
   const container = useRef<HTMLDivElement>(null);
 
@@ -122,30 +124,58 @@ export default function Hero() {
     <div
       id="hero"
       ref={container}
-      className="grid h-screen w-full grid-cols-2 grid-rows-2"
+      /**
+       * svh, not vh/dvh. On mobile `100vh` is the LARGE viewport — the height
+       * the page only gets once the URL bar has scrolled away — so at load the
+       * bottom row (paragraph + CTA) sits under the browser chrome, and
+       * ScrollLock's 2s freeze means the reader cannot scroll it into view.
+       * dvh would fix that but re-lays out the pinned hero every time the bar
+       * collapses; svh always fits and never moves. The pin's `end: "+=100%"`
+       * is measured off this element, so it follows whatever svh resolves to.
+       *
+       * One column until lg, where the two headings finally have room to sit
+       * diagonally opposite each other. Stacked, the rows keep the same
+       * bottom-right / top-left pairing, so the diagonal reading order
+       * survives the collapse.
+       */
+      className="grid h-svh w-full grid-cols-1 grid-rows-2 lg:grid-cols-2"
     >
-      <div className="flex items-end justify-end p-space-2x">
+      <div className="flex items-end justify-end p-space-base sm:p-space-2x">
+        {/* The type steps down the modular scale rather than taking an
+            arbitrary value — the steps *are* the design token. text-4xl is
+            ~61px at base and grows fluid past 1536px, which no phone can hold
+            "DIGITAL PRODUCTs" at; it only comes back at xl, where the column
+            is wide enough for it again. */}
         <h1
           data-split="up"
-          className="text-right text-4xl leading-heading font-bold tracking-tighter uppercase"
+          className="text-right text-xl leading-heading font-bold tracking-tighter uppercase sm:text-2xl lg:text-3xl xl:text-4xl"
         >
           We build <br /> <span className="text-accent">DIGITAL PRODUCTs</span>
         </h1>
       </div>
-      <div className="col-start-2 row-start-2 flex flex-col items-start justify-start gap-space-base p-space-2x">
+      {/* row-start-2 holds in both layouts; only the column moves, so this
+          block is the bottom half when stacked and the bottom-right quadrant
+          once the grid splits. */}
+      <div className="row-start-2 flex flex-col items-start justify-start gap-space-base p-space-base sm:p-space-2x lg:col-start-2">
         <h1
           data-split="down"
-          className="text-4xl leading-heading font-bold tracking-tighter uppercase"
+          className="text-xl leading-heading font-bold tracking-tighter uppercase sm:text-2xl lg:text-3xl xl:text-4xl"
         >
           THAT GROW your <br /> <span className="text-accent">business</span>
         </h1>
-        <p data-fade className="max-w-[48ch] text-md leading-none">
+        {/* leading-none is a desktop luxury: at text-base on a phone the copy
+            wraps to four or five lines and needs the body leading to stay
+            readable. */}
+        <p
+          data-fade
+          className="max-w-[48ch] text-base leading-body sm:text-md sm:leading-none"
+        >
           We are a product studio that helps non-technical founders go digital,
           with a focus on business outcomes
         </p>
         <a
           data-fade
-          className="rounded-md bg-accent px-space-2x py-space--2x text-md font-bold tracking-tighter uppercase"
+          className="rounded-md bg-accent px-space-2x py-space--2x text-base font-bold tracking-tighter uppercase sm:text-md"
           href=""
         >
           Contact us

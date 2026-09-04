@@ -2,7 +2,9 @@
 // useGSAP/scope shape the other sections use) only once it actually animates.
 
 /**
- * Purely the mark and its link — Header owns where it sits. It carried the
+ * Purely the mark and its link — Header owns where it sits, and now its
+ * colour too: the mark inverts while the menu panel is down, so the one
+ * `currentColor` here has to be settable from outside. It carried the
  * `fixed` shell itself while it was a lone corner element; now that it is one
  * cell of the bar, positioning it from in here would fight the grid.
  *
@@ -10,7 +12,7 @@
  * same reason the footer wordmark is: the exported file hard-codes `black` on
  * every path, which is a colour outside the token system that no theme change
  * can reach. `currentColor` on the fill *and* the strokes hands it back to
- * Tailwind, so the colour is set once below with a real token class.
+ * Tailwind, so the colour is set once by whatever class Header passes in.
  *
  * width/height stay on the element alongside viewBox — that is what the
  * browser derives the intrinsic aspect ratio from, so `h-auto` has a ratio to
@@ -18,11 +20,7 @@
  */
 export default function Logo({ className }: { className?: string }) {
   return (
-    <a
-      href="#"
-      aria-label="DBLA — home"
-      className={`block text-foreground ${className ?? ""}`}
-    >
+    <a href="#" aria-label="DBLA — home" className={`block ${className ?? ""}`}>
       <svg
         width="89"
         height="18"
