@@ -22,7 +22,7 @@ gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 // pixel number so a resize (or a mobile URL bar collapsing) re-measures against
 // the new viewport: the trigger's end is a function and invalidateOnRefresh is
 // what makes ScrollTrigger call it again.
-const PIN_VIEWPORTS = 3;
+const PIN_VIEWPORTS = 5;
 
 // Content drives the schedule. The projects split the pin evenly between them
 // (see SLICE below), so adding a fifth entry here re-divides the same 300vh
@@ -100,7 +100,7 @@ const QUADRANT = 90;
 // purpose — the frame clips at the circle, so anything past this is spent
 // outside the visible area, and the point is a sense of the image still being
 // alive rather than a second entrance.
-const ZOOM_SCALE = 1.1;
+const ZOOM_SCALE = 1.2;
 
 // The copy's share of a slice, in and out. The remainder is hold — at 0.35 and
 // 0.25 the block stands still for the middle 40% of its project, which is what
@@ -405,7 +405,7 @@ export default function Projects() {
       // the last photo's ZOOM_SCALE — are never written down a second time.
       tl.to(
         ["#projects-rings", "#projects-progress"],
-        { scale: 0, duration: SLICE, ease: "power3.inOut" },
+        { scale: 0, rotate: "180deg", duration: SLICE/2, ease: "power3.inOut" },
         TEARDOWN_AT,
       )
         .to(
@@ -443,19 +443,13 @@ export default function Projects() {
           {
             xPercent: (i: number) => (i - (PROJECTS.length - 1) / 2) * ROW_STEP,
             duration: SLICE,
-            ease: "power3.inOut",
+            ease: "power4.inOut",
           },
           TEARDOWN_AT,
         )
-        // The orange goes with them. It is the zero state and has no job left
-        // by now, and once the circles spread there is a lens of bare frame
-        // showing between the middle two — the point where they come closest
-        // without meeting. Fading the fill rather than the frame is the whole
-        // reason it is a node of its own: autoAlpha on [data-project-frame]
-        // would take the four images with it.
         .to(
           "[data-frame-fill]",
-          { autoAlpha: 0, duration: SLICE, ease: "power3.inOut" },
+          { autoAlpha: 0, duration: 0, ease: "none" },
           TEARDOWN_AT,
         );
 

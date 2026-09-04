@@ -139,7 +139,7 @@ export default function Hero() {
         >
           THAT GROW your <br /> <span className="text-accent">business</span>
         </h1>
-        <p data-fade className="max-w-[48ch] text-base leading-none">
+        <p data-fade className="max-w-[48ch] text-md leading-none">
           We are a product studio that helps non-technical founders go digital,
           with a focus on business outcomes
         </p>

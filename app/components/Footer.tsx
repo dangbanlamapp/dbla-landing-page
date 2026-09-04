@@ -1,9 +1,14 @@
-// No "use client": nothing here animates yet, so it stays a Server Component.
-// Add the directive (and the useGSAP/scope shape the other sections use) only
-// once it actually needs one.
+"use client";
+
+import { useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 
 import DashedCircle from "./DashedCircle";
 import LocalTime from "./LocalTime";
+
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 /**
  * The wordmark is inlined rather than pulled from public/DBLA.svg through
@@ -79,7 +84,7 @@ function Wordmark({ className }: { className?: string }) {
 const FOOTER_VARS = {
   "--circle-d": "140vh",
   "--circle-r": "calc(var(--circle-d) / 2)",
-  "--circle-y": "50vh",
+  "--circle-y": "40vh",
   "--wordmark-y": "10vh",
 } as React.CSSProperties;
 
@@ -133,125 +138,255 @@ const LEGAL_LINKS = [
   { label: "Cookie Settings", href: "#" },
 ];
 
-export default function Footer() {
-  return (
-    // overflow-hidden earns its keep twice now — it clips the disc that
-    // --circle-y hangs past the bottom edge, and it is what turns the
-    // wordmark's --wordmark-y overhang into a crop instead of letting the
-    // letters spill past the end of the document.
-    <section
-      id="footer"
-      style={FOOTER_VARS}
-      className="relative h-screen overflow-hidden"
-    >
-      <div
-        id="footer-circle"
-        style={{
-          width: "var(--circle-d)",
-          height: "var(--circle-d)",
-          bottom: "calc(var(--circle-y) * -1)",
-        }}
-        className="absolute left-1/2 -translate-x-1/2 rounded-full bg-accent"
-      />
+/**
+ * How far the footer sits below its resting place at the start of the reveal,
+ * as a share of its own height, so it drifts up into place while main slides
+ * off it. Percent rather than vh so it stays tied to the element GSAP is
+ * moving.
+ *
+ * Safe up to 100 without opening a gap under main: at reveal progress p, main's
+ * bottom edge is at (1 - p) * 100vh and the footer's top edge is at
+ * SHIFT * (1 - p) vh, so the footer's top stays above the exposed strip for any
+ * SHIFT below 100. It is the strip that would show the beige canvas otherwise.
+ */
+const REVEAL_SHIFT = 15;
 
-      <div className={LAYER}>
-        <Wordmark className={`${WORDMARK} text-accent`} />
-      </div>
-      {/* mask-repeat defaults to `repeat`, and the gradient is sized to this
+export default function Footer() {
+  const container = useRef<HTMLElement>(null);
+  const runway = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      /**
+       * A fixed element has no scroll position of its own — but ScrollTrigger
+       * never needed one. The trigger and the thing being animated are
+       * separate arguments, and only the *trigger* has to scroll. So the
+       * runway, the one block whose scroll-through IS the reveal, drives a
+       * tween on the fixed section.
+       *
+       * start/end are the same instants as triggering off the previous section
+       * with "bottom bottom" / "bottom top": the runway's top edge and main's
+       * bottom edge are the same line, since they are adjacent with no margin
+       * between them. The runway is the safer handle of the two — Cta, the
+       * last section in main, is pinned, so its own bottom is measured inside a
+       * pin-spacer that moves whenever the pin re-measures. The runway is plain
+       * static layout that cannot drift.
+       *
+       * So: start when the runway's top reaches the viewport bottom — main's
+       * last pixel, the reveal begins — and end when it reaches the viewport
+       * top, which is the document's maximum scroll and the moment main has
+       * fully cleared. The tween spans exactly the reveal, no more.
+       *
+       * NO START VALUE IN THE MARKUP, and that is deliberate — it is the one
+       * place this component departs from the house rule, because obeying the
+       * rule here actively broke the tween.
+       *
+       * GSAP does not store a transform as the string you wrote. It reads the
+       * *computed* matrix and decomposes it, and a matrix has no memory of
+       * having been a percentage: `translateY(15%)` on an 824px-tall box comes
+       * back as 123.667px, so GSAP records that as `y`, with `yPercent` still
+       * 0. The tween's `from: { yPercent: 15 }` then stacks its own 15% on top
+       * of that recorded y, and tweening yPercent to 0 only unwinds the half
+       * GSAP considers its own — leaving the 123.667px baked in forever. The
+       * symptom is a footer that finishes the reveal still sitting exactly
+       * REVEAL_SHIFT low, permanently hiding the legal row behind the bottom
+       * edge.
+       *
+       * A pre-hydration start value buys nothing here anyway: at load the
+       * footer is a full viewport below the fold with main's opaque background
+       * over it, and ScrollLock has forced the scroll to 0, so there is no
+       * frame in which an un-tweened footer is visible. `fromTo` sets progress
+       * 0 on its own the moment it is built.
+       *
+       * If a start value ever IS needed on this element, it has to be one GSAP
+       * will read back as the same channel it tweens — `gsap.set(el, {
+       * yPercent: REVEAL_SHIFT })` inside the useGSAP callback, not CSS. And
+       * not a Tailwind class either: v4 compiles translate utilities to the
+       * standalone `translate` property, which the spec applies BEFORE
+       * `transform`, so it would stack rather than be overridden. (That trap
+       * is live on the wordmarks' translate-y-[var(--wordmark-y)] — GSAP's own
+       * output writes `translate: none` to clear it.)
+       */
+      gsap.fromTo(
+        container.current,
+        { yPercent: REVEAL_SHIFT },
+        {
+          yPercent: 0,
+          // Linear, and scrubbed 1:1 rather than the eased `scrub: 1` used
+          // elsewhere in the project. This one is chasing an edge — main's
+          // bottom — that tracks the scrollbar exactly, and any smoothing puts
+          // the footer's drift out of step with the thing uncovering it.
+          ease: "none",
+          scrollTrigger: {
+            trigger: runway.current,
+            start: "top bottom",
+            end: "top top",
+            scrub: true,
+            invalidateOnRefresh: true,
+          },
+        },
+      );
+    },
+    { scope: container },
+  );
+
+  return (
+    <>
+      {/*
+        The runway. The footer below is fixed, so it is out of flow and adds
+        nothing to the document height — without this block the page would end
+        at main's last pixel and there would be no scroll left to perform the
+        reveal with. This is the scroll distance the reveal takes, so it
+        matches the footer's own h-screen: main clears the viewport exactly as
+        the last of the footer comes out.
+
+        It has to live outside main and stay transparent — that is the window
+        the footer is seen through. Anything opaque here, or moving this inside
+        main, and it is main's background sliding past a hidden footer.
+
+        aria-hidden on an empty box is belt and braces, but it is a real
+        landmark-sized hole in the page otherwise.
+      */}
+      <div ref={runway} aria-hidden className="h-screen" />
+
+      {/*
+        Fixed, not scrolled: the footer never moves. main slides up off it and
+        uncovers it from the bottom edge upward, so what reads as the footer
+        rising into view is really the sheet above it being pulled away.
+
+        -z-1 puts it under main (which carries `relative z-1` and the opaque
+        background that does the covering). Same idiom HeaderBg's backdrop
+        uses. Nothing paints over it from below: html has no background of its
+        own, so body's beige is propagated to the canvas, which is painted
+        before any negative-z-index content.
+
+        This survives Lenis only because SmoothScroll runs it in `root` mode,
+        where it drives a genuine native window scroll. A transform-based
+        smooth-scroll rig moves the content in a wrapper instead, and every
+        `position: fixed` child of it silently becomes a scrolling one — the
+        footer would ride up with the page and the effect would vanish. Worth
+        remembering if the Lenis config is ever revisited.
+
+        overflow-hidden earns its keep three times over now — it clips the disc
+        that --circle-y hangs past the bottom edge, turns the wordmark's
+        --wordmark-y overhang into a crop, and keeps a fixed, viewport-sized
+        box from contributing scrollable overflow of its own.
+      */}
+      <section
+        id="footer"
+        ref={container}
+        style={FOOTER_VARS}
+        className="fixed bottom-0 left-0 -z-1 h-screen w-full overflow-hidden"
+      >
+        <div
+          id="footer-circle"
+          style={{
+            width: "var(--circle-d)",
+            height: "var(--circle-d)",
+            bottom: "calc(var(--circle-y) * -1)",
+          }}
+          className="absolute left-1/2 -translate-x-1/2 rounded-full bg-accent"
+        />
+
+        <div className={LAYER}>
+          <Wordmark className={`${WORDMARK} text-accent`} />
+        </div>
+        {/* mask-repeat defaults to `repeat`, and the gradient is sized to this
         box — so once the shifted svg pokes out below, the tile underneath
         would paint a second circle's worth of beige into the overhang. The
         section's clip hides it today; no-repeat means it is not waiting for
         someone to raise --wordmark-y past the crop. */}
-      <div
-        className={LAYER}
-        style={{
-          WebkitMaskImage: CIRCLE_MASK,
-          maskImage: CIRCLE_MASK,
-          WebkitMaskRepeat: "no-repeat",
-          maskRepeat: "no-repeat",
-        }}
-      >
-        <div className="absolute inset-0 top-[-100vh]">
-          <DashedCircle dots="vertical" spin={0} size="60vh" />
-          <DashedCircle dots="vertical" spin={0} size="120vh" />
-          <DashedCircle dots="vertical" spin={0} size="180vh" />
-        </div>
-
-        <div id="cross-lines" className="absolute inset-0">
-          <div
-            id="y-line"
-
-            className="absolute inset-0 flex items-center justify-center"
-          >
-            <div className="h-screen w-px bg-black opacity-10"></div>
+        <div
+          className={LAYER}
+          style={{
+            WebkitMaskImage: CIRCLE_MASK,
+            maskImage: CIRCLE_MASK,
+            WebkitMaskRepeat: "no-repeat",
+            maskRepeat: "no-repeat",
+          }}
+        >
+          <div className="absolute inset-0 top-[-100vh]">
+            <DashedCircle dots="vertical" spin={0} size="60vh" />
+            <DashedCircle dots="vertical" spin={0} size="120vh" />
+            <DashedCircle dots="vertical" spin={0} size="180vh" />
           </div>
+
+          <div id="cross-lines" className="absolute inset-0">
+            <div
+              id="y-line"
+
+              className="absolute inset-0 flex items-center justify-center"
+            >
+              <div className="h-screen w-px bg-black opacity-10"></div>
+            </div>
+          </div>
+
+          <Wordmark className={`${WORDMARK} text-background`} />
         </div>
 
-        <Wordmark className={`${WORDMARK} text-background`} />
-      </div>
-
-      <div className="absolute inset-x-0 bottom-0 m-auto flex w-[90vw] items-end justify-between gap-space-2x py-space-base text-sm text-black">
-        {/* Not <p>: this is a lone piece of metadata, not prose. */}
-        <span className="flex-1 text-left">&copy; {YEAR} DBLA</span>
-        <p className="flex-1 text-center">
-          Site by{" "}
-          <a className="hover:underline" href="www.kaobui.com">
-            Kaobui
-          </a>
-        </p>
-        <nav aria-label="Legal" className="flex-1">
-          <ul className="flex justify-end gap-space-2x">
-            {LEGAL_LINKS.map(({ label, href }) => (
-              <li key={label}>
-                <a href={href} className="hover:underline">
-                  {label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </div>
-
-      <div className="relative m-auto flex h-full w-[90vw] flex-col gap-[20vh] py-space-6x">
-        <div className="flex w-full items-start justify-center text-center text-black">
-          <p className="heading-style flex-1 text-left text-base">
-            Hochiminh City, Vietnam <br />
-            <LocalTime timeZone="Asia/Ho_Chi_Minh" className="opacity-50" />
+        <div className="absolute inset-x-0 bottom-0 m-auto flex w-[90vw] items-end justify-between gap-space-2x py-space-base text-sm text-black">
+          {/* Not <p>: this is a lone piece of metadata, not prose. */}
+          <span className="flex-1 text-left">&copy; {YEAR} DBLA</span>
+          <p className="flex-1 text-center">
+            Site by{" "}
+            <a className="hover:underline" href="www.kaobui.com">
+              Kaobui
+            </a>
           </p>
-          <p className="heading-style flex-1 text-base">Working Worldwide.</p>
-          <p className="heading-style flex-1 text-right text-base">
-            Paris, France <br />
-            <LocalTime timeZone="Europe/Paris" className="opacity-50" />
-          </p>{" "}
-        </div>
-        <div className="flex w-full items-end justify-between">
-          <nav className="flex-1 text-md font-medium uppercase">
-            <ul>
-              <li>home</li>
-              <li>about</li>
-              <li>services</li>
-              <li>contact</li>
+          <nav aria-label="Legal" className="flex-1">
+            <ul className="flex justify-end gap-space-2x">
+              {LEGAL_LINKS.map(({ label, href }) => (
+                <li key={label}>
+                  <a href={href} className="hover:underline">
+                    {label}
+                  </a>
+                </li>
+              ))}
             </ul>
           </nav>
-          <div className="flex flex-col items-center gap-space--1x">
-            <p className="heading-style text-3xl">bring your ideas to life</p>
-            <a
-              className="rounded-md bg-background px-space-2x py-space--2x text-md font-bold tracking-tighter uppercase"
-              href=""
-            >
-              get in touch
-            </a>
-            <a className="text-md text-black" href="">
-              contact@dbla.com
-            </a>
-          </div>
-          <ul className="flex-1 text-right text-md font-medium uppercase">
-            <li>instagram</li>
-            <li>tiktok</li>
-            <li>linkedIn</li>
-          </ul>
         </div>
-      </div>
-    </section>
+
+        <div className="relative m-auto flex h-full w-[90vw] flex-col gap-[16vh] py-space-6x">
+          <div className="flex w-full items-start justify-center text-center text-black">
+            <p className="heading-style flex-1 text-left text-base">
+              Hochiminh City, Vietnam <br />
+              <LocalTime timeZone="Asia/Ho_Chi_Minh" className="opacity-50" />
+            </p>
+            <p className="heading-style flex-1 text-base">Working Worldwide.</p>
+            <p className="heading-style flex-1 text-right text-base">
+              Paris, France <br />
+              <LocalTime timeZone="Europe/Paris" className="opacity-50" />
+            </p>{" "}
+          </div>
+          <div className="flex w-full items-end justify-between">
+            <nav className="flex-1 text-md font-medium uppercase">
+              <ul>
+                <li>home</li>
+                <li>about</li>
+                <li>services</li>
+                <li>contact</li>
+              </ul>
+            </nav>
+            <div className="flex flex-col items-center gap-space--1x">
+              <p className="heading-style text-3xl">bring your ideas to life</p>
+              <a
+                className="rounded-md bg-background px-space-2x py-space--2x text-md font-bold tracking-tighter uppercase"
+                href=""
+              >
+                get in touch
+              </a>
+              <a className="text-md text-black" href="">
+                contact@dbla.com
+              </a>
+            </div>
+            <ul className="flex-1 text-right text-md font-medium uppercase">
+              <li>instagram</li>
+              <li>tiktok</li>
+              <li>linkedIn</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }

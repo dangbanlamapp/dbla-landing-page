@@ -11,6 +11,7 @@ gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 export default function WhyUs() {
   const container = useRef<HTMLElement>(null);
   const copy = useRef<HTMLDivElement>(null);
+  const list = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
@@ -24,7 +25,7 @@ export default function WhyUs() {
       // be a line where onLeave fires and the lines would land long before it.
       const blocks = gsap.utils.toArray<HTMLElement>(
         "[data-split]",
-        container.current,
+        copy.current,
       );
 
       blocks.forEach((block) => {
@@ -98,6 +99,76 @@ export default function WhyUs() {
           },
         },
       );
+
+      // The card headings run the same SplitText recipe on the same data-split
+      // contract, but they are their own entrance rather than part of the
+      // column's: each one waits for its own box to come up the screen, so the
+      // three fire one after another as the list scrolls rather than together.
+      // That is the whole reason the two loops read from different roots
+      // instead of one [data-split] sweep over the section — the selector root
+      // is what keeps each group on the trigger that belongs to it.
+      //
+      // data-split="down" is the direction flip the design asks for: -150
+      // starts each line above its mask, so these drop in from the top while
+      // the section heading rises from the bottom.
+      const cards = gsap.utils.toArray<HTMLElement>(
+        "[data-split]",
+        list.current,
+      );
+
+      cards.forEach((card) => {
+        const yPercent = card.dataset.split === "down" ? -150 : 150;
+
+        SplitText.create(card, {
+          type: "lines",
+          mask: "lines",
+          linesClass: "pb-[0.1em]",
+          autoSplit: true,
+          // Not scrubbed: an entrance with no end position runs on its own
+          // clock, the shape Intro uses. toggleActions plays it on the way
+          // down and rewinds it if the reader scrolls back off the bottom, so
+          // the heading is never left half-arrived. A plain from() is safe here
+          // precisely because there is no invalidateOnRefresh to re-read the
+          // end value off a line that is still moving.
+          onSplit: (self) =>
+            gsap.from(self.lines, {
+              yPercent,
+              duration: 1,
+              ease: "power3.out",
+              stagger: 0.12,
+              scrollTrigger: {
+                trigger: card,
+                start: "top 90%",
+                toggleActions: "play none none reverse",
+              },
+            }),
+        });
+      });
+
+      // The descriptions get the plain version: no split, no travel, just
+      // transparent to opaque. data-fade is the marker Hero already uses for
+      // supporting copy, and as there it ships without an opacity class —
+      // from() applies its start value on init, so there is nothing to flash,
+      // and the text stays readable if JS never runs.
+      //
+      // Each paragraph triggers on itself at the same 85% line as the heading
+      // above it. Because it sits lower in the box it crosses that line a
+      // moment later, so the pair arrives as a heading-then-body cascade
+      // without either delay being written down.
+      gsap.utils
+        .toArray<HTMLElement>("[data-fade]", list.current)
+        .forEach((description) => {
+          gsap.from(description, {
+            opacity: 0,
+            duration: 0.8,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: description,
+              start: "top 85%",
+              toggleActions: "play none none reverse",
+            },
+          });
+        });
     },
     { scope: container },
   );
@@ -133,15 +204,21 @@ export default function WhyUs() {
             <p className="text-base text-foreground/50">CEO of Company</p>
           </div>
         </div>
-        <div className="flex flex-col gap-space-4x px-space-base pt-[50vh]">
+        <div
+          ref={list}
+          className="flex flex-col gap-space-4x px-space-base pt-[50vh]"
+        >
           <div className="flex flex-col">
             <p className="text-md leading-none tracking-tighter uppercase opacity-50">
               01
             </p>
-            <h3 className="heading-style pb-space--1x text-2xl font-medium text-accent">
+            <h3
+              data-split="down"
+              className="heading-style pb-space--1x text-2xl font-medium text-accent"
+            >
               Senior Expertise
             </h3>
-            <p className="max-w-[48ch] text-base leading-body">
+            <p data-fade className="max-w-[48ch] text-base leading-body">
               Our developers bring 15+ years building at some of the
               world&apos;s most respected tech companies.
             </p>
@@ -150,10 +227,13 @@ export default function WhyUs() {
             <p className="text-md leading-none tracking-tighter uppercase opacity-50">
               02
             </p>
-            <h3 className="heading-style pb-space--1x text-2xl font-medium text-accent">
+            <h3
+              data-split="down"
+              className="heading-style pb-space--1x text-2xl font-medium text-accent"
+            >
               One team fullstack
             </h3>
-            <p className="max-w-[48ch] text-base leading-body">
+            <p data-fade className="max-w-[48ch] text-base leading-body">
               Design, development, launch, even marketing — all under one roof.
               The people you talk to are the people who build your product, so
               nothing gets lost in a handoff.
@@ -163,10 +243,13 @@ export default function WhyUs() {
             <p className="text-md leading-none tracking-tighter uppercase opacity-50">
               03
             </p>
-            <h3 className="heading-style pb-space--1x text-2xl font-medium text-accent">
+            <h3
+              data-split="down"
+              className="heading-style pb-space--1x text-2xl font-medium text-accent"
+            >
               Driven by results
             </h3>
-            <p className="max-w-[48ch] text-base leading-body">
+            <p data-fade className="max-w-[48ch] text-base leading-body">
               We measure our success by yours. Every decision comes back to one
               question: does this move your business forward?
             </p>
