@@ -145,30 +145,33 @@ const ROW_STEP = 110;
 // should not look wedged in.
 const ROW_FIT = 0.9;
 
-// The frame's height as a fraction of the viewport, mirroring the h-[75vh] in
-// the markup. Written down here because rowScale() has to know how wide a
-// circle is to know whether four of them fit.
-const FRAME_VH = 0.75;
-
 /**
  * How far the frame draws back during the teardown — FRAME_EXIT_SCALE, unless
  * the row of circles it produces would not fit across the viewport.
  *
- * The row is PROJECTS.length * ROW_STEP diameters wide, and a diameter is
- * FRAME_VH viewport heights, so its width is driven entirely by the window's
- * aspect ratio. At 0.5 that is 165vh of row: comfortable at 16:9, flush at 3:2,
+ * The row is PROJECTS.length * ROW_STEP diameters wide, so whether it fits is
+ * driven entirely by the diameter against the window width. At 0.5 and the
+ * desktop 75vh frame that is 165vh of row: comfortable at 16:9, flush at 3:2,
  * over the edge at 4:3. Rather than pick a scale small enough for the worst
  * case and leave widescreen looking timid, the fit is solved per viewport.
+ *
+ * The diameter is MEASURED off the frame rather than recomputed from a
+ * viewport fraction, and that is what lets --frame-d change at a breakpoint
+ * without a matching constant here quietly going stale. GSAP hands a
+ * function-based value its own target as the second argument, and this tween's
+ * target IS the frame, so the measurement costs nothing extra. offsetWidth is a
+ * layout box and ignores the transform the teardown is in the middle of
+ * writing, so it reads the resting diameter at any point in the scrub.
  *
  * Called as a function-based tween value so invalidateOnRefresh re-runs it on
  * resize, the same contract the pin's `end` has — the same reason neither is a
  * fixed number.
  */
-const rowScale = () =>
+const rowScale = (_index: number, frame: HTMLElement) =>
   Math.min(
     FRAME_EXIT_SCALE,
     (window.innerWidth * ROW_FIT) /
-      (window.innerHeight * FRAME_VH * PROJECTS.length * (ROW_STEP / 100)),
+      (frame.offsetWidth * PROJECTS.length * (ROW_STEP / 100)),
   );
 
 // How far into a project's slice the counter ticks over to it, as a fraction of
@@ -405,7 +408,12 @@ export default function Projects() {
       // the last photo's ZOOM_SCALE — are never written down a second time.
       tl.to(
         ["#projects-rings", "#projects-progress"],
-        { scale: 0, rotate: "180deg", duration: SLICE/2, ease: "power3.inOut" },
+        {
+          scale: 0,
+          rotate: "180deg",
+          duration: SLICE / 2,
+          ease: "power3.inOut",
+        },
         TEARDOWN_AT,
       )
         .to(
@@ -652,23 +660,37 @@ export default function Projects() {
     // overflow-hidden is load-bearing now, not tidiness: the teardown throws
     // the four layers well outside the centre column, and a pinned section is
     // position: fixed — transformed children hanging off it can extend the
-    // document's horizontal scroll area. It is also what the crosshair below
-    // has always assumed was trimming its oversized vmax rules.
-    <section id="projects" ref={container} className="relative h-screen">
-      <div className="flex h-full justify-center gap-space-base">
-        <div className="flex flex-1 flex-col items-end">
+    // document's horizontal scroll area. It is also what trims the crosshair
+    // below and, on a phone, the dashed ring — which at 1.3 frame diameters is
+    // deliberately wider than a portrait viewport.
+    <section
+      id="projects"
+      ref={container}
+      className="relative h-screen overflow-hidden"
+    >
+      {/*
+        Three tracks — heading/counter, the circle, the copy — laid out as ROWS
+        on a phone and as the original columns from lg up. Only the direction
+        changes: the outer two tracks keep flex-1 and so keep splitting whatever
+        the circle leaves over, which in column mode is height instead of width.
+        That is the whole reason the switch is one class rather than a second
+        layout — the sizing was already expressed as "the circle takes what it
+        needs, the copy shares the rest".
+      */}
+      <div className="flex h-full flex-col justify-center gap-space-base lg:flex-row">
+        <div className="flex flex-1 flex-col items-center lg:items-end">
           <div
             id="projects-heading"
-            className="flex flex-1 items-end justify-end p-space-base"
+            className="flex flex-1 items-end justify-center p-space-base lg:justify-end"
           >
             <h2
               data-split="up"
-              className="heading-style text-right text-4xl leading-heading"
+              className="heading-style text-center text-2xl leading-heading lg:text-right lg:text-4xl"
             >
               our <br /> projects
             </h2>
           </div>
-          <div className="flex-1 p-space-base">
+          <div className="flex-1 p-space-base text-center lg:text-left">
             {/*
               minimumIntegerDigits pads to "00".."04", which keeps the digit
               count — and so the width — fixed for every value the counter can
@@ -685,7 +707,7 @@ export default function Projects() {
             */}
             <p
               data-counter
-              className="heading-style text-xl text-secondary opacity-75"
+              className="heading-style text-lg text-secondary opacity-75 lg:text-xl"
             >
               <NumberFlow
                 value={landed}
@@ -696,7 +718,24 @@ export default function Projects() {
             </p>
           </div>
         </div>
-        <div className="relative flex items-center">
+        {/*
+          --frame-d is the section's one diameter, declared here so the frame and
+          both rings are derived from a single number instead of three that have
+          to be kept in agreement across a breakpoint.
+
+          min(80vw, 40vh) is what makes the stacked layout fit: the frame has to
+          clear the width of a phone AND leave room above and below for the two
+          copy tracks, and those are different constraints on different axes, so
+          neither alone is enough. min() takes whichever binds — 80vw on a
+          portrait phone, 40vh on a short landscape one — with no breakpoint
+          needed between the two.
+
+          shrink-0 because the frame's width comes from aspect-square and cannot
+          respond to the track being squeezed: without it a tight viewport
+          shrinks this box and the circle simply overflows it instead of the
+          flex-1 tracks giving way, which is what should happen.
+        */}
+        <div className="relative flex shrink-0 items-center justify-center [--dash-d:calc(var(--frame-d)*1.3)] [--frame-d:min(80vw,40vh)] lg:[--dash-d:90vw] lg:[--frame-d:75vh]">
           {/*
             The frame. Deliberately NOT overflow-hidden: it sizes and positions
             the stack, and the teardown then slides the four layers clean out of
@@ -705,7 +744,7 @@ export default function Projects() {
           */}
           <div
             data-project-frame
-            className="relative aspect-square h-[75vh] rounded-full"
+            className="relative aspect-square h-[var(--frame-d)] rounded-full"
           >
             {/*
               The accent fill, and the zero state made literal: before the first
@@ -741,7 +780,7 @@ export default function Projects() {
                   src={project.src}
                   alt={project.alt}
                   fill
-                  sizes="75vh"
+                  sizes="(min-width: 64rem) 75vh, 80vw"
                   // The drift's target, and the reason it is tagged on the
                   // picture rather than tweened through the layer: the mask
                   // lives on the layer, so scaling the layer would scale the
@@ -759,8 +798,21 @@ export default function Projects() {
             Services. Scaling the centering layer rather than the ring inside it
             means one transform takes the circle and its dots together.
           */}
-          <DashedCircle id="projects-rings" dots="horizontal" size="90vw" />
-          <ProgressRing id="projects-progress" size="80vh" />
+          <DashedCircle
+            id="projects-rings"
+            dots="horizontal"
+            size="var(--dash-d)"
+          />
+          {/*
+            16/15 is exactly the 80vh/75vh the desktop used to spell out, so the
+            dial keeps sitting the same hair outside the frame — now at any
+            diameter, from one expression, rather than as two vh values that
+            only happen to be in proportion at one breakpoint.
+          */}
+          <ProgressRing
+            id="projects-progress"
+            size="calc(var(--frame-d)*16/15)"
+          />
         </div>
         {/*
           The copy stack, the mirror of the image stack opposite: every block

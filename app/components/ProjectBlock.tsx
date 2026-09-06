@@ -31,21 +31,21 @@ export default function ProjectBlock({ type, name, blurb }: ProjectCopy) {
   return (
     <div
       data-project-block
-      className="invisible absolute inset-0 flex flex-col items-start"
+      className="invisible absolute inset-0 flex flex-col items-center lg:items-start"
     >
-      <div className="flex flex-1 items-end justify-end p-space-base">
+      <div className="flex flex-1 items-end justify-center p-space-base lg:justify-end">
         <h3
           data-split="up"
-          className="heading-style text-base leading-heading text-secondary opacity-75"
+          className="heading-style text-sm leading-heading text-secondary opacity-75 lg:text-base"
         >
           {type}
         </h3>
       </div>
-      <div className="flex flex-1 flex-col gap-space-base p-space-base">
-        <p data-split="down" className="heading-style text-xl">
+      <div className="flex flex-1 flex-col items-center gap-space-base p-space-base text-center lg:items-start lg:text-left">
+        <p data-split="down" className="heading-style text-lg lg:text-xl">
           {name}
         </p>
-        <p data-split="down" className="max-w-[32ch] text-base">
+        <p data-split="down" className="max-w-[32ch] text-sm lg:text-base">
           {blurb}
         </p>
       </div>

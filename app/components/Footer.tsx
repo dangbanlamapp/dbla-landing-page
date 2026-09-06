@@ -63,45 +63,73 @@ function Wordmark({ className }: { className?: string }) {
  * keeps that true: an inverted mask on the base would put the seam under two
  * independent clips that both have to agree, instead of one.
  *
- * These are the only knobs, and both the disc and the mask read them, so the
- * mask cannot fall out of register with the shape it is tracing. `--circle-y`
- * is how far the disc hangs *below* the section's bottom edge — kept positive
- * so every calc() operand below stays positive and no `- -4vw` has to be
- * trusted to parse.
+ * These are the only knobs, and the disc, the mask and the dashed rings all
+ * read them, so nothing can fall out of register with the shape it is tracing.
  *
- * y is most of the radius on purpose. It puts the centre at r - y = 11vw above
- * the bottom edge, which is roughly where the wordmark's own centre line falls
- * (90vw * 344/1264 / 2, less the --wordmark-y shift, ≈ 9.3vw) — so the disc
- * reads as centred on the mark rather than floating above it, and the top of
- * the arc lands ~42vw up, well inside a landscape viewport. Anything much
- * smaller pushes the crown off the top of the fold: at y = 4vw the arc peaked
- * at 58vw, above the ~56vw height of a 16:9 screen, so the circle looked like
- * a flat-topped wall.
+ * --circle-cy is the disc's CENTRE, measured up from the section's bottom
+ * edge, and that is a deliberate re-anchoring. The knob used to be how far the
+ * disc hung *below* the bottom edge, which can only describe a disc that does
+ * hang below. A centred one does not, so in those terms it is a negative
+ * number — and the note that used to sit here was explicitly about keeping
+ * every operand positive so no `+ -10vh` had to be trusted to parse. Naming
+ * the centre keeps both layouts positive and leaves the two derived offsets
+ * reading as what they are: the disc's top is cy + r, its bottom cy - r.
  *
- * That comparison is vw against vh, which only holds while the viewport is
- * wider than it is tall. On a portrait screen 100vh dwarfs 62vw and the disc
- * becomes a small puck near the bottom — worth a breakpoint if the footer ever
- * has to hold up on mobile.
+ * The two layouts:
+ *
+ *   lg and up   d 140vh, cy 30vh — the tuned desktop composition, untouched.
+ *               30vh is exactly the old r - y (70vh - 40vh), so the disc, the
+ *               mask and the rings all land on the pixel they always did.
+ *
+ *   below lg    d 100vh, cy 40vh — the same idea as the desktop, scaled to a
+ *               tall screen: the disc hangs cy - r = 10vh past the bottom
+ *               edge, just enough to read as anchored there rather than
+ *               floating, and crowns at cy + r = 90vh, so it covers all but a
+ *               sliver of the footer.
+ *
+ * A vh diameter is much wider than a portrait screen — 100vh is 932px against
+ * a 430px phone — so the disc reads as a full-bleed band with a curved crown
+ * rather than as a circle. That is what makes it cover, and it is also why the
+ * two-tone wordmark does not survive down here: the seam exists because the
+ * disc is NARROWER than the mark at the mark's own height, leaving the ends
+ * orange, and a disc this wide is 279px of half-width where the mark has 258.
+ * The mark therefore falls entirely inside the disc and renders solid beige.
+ *
+ * That is a real trade, not an oversight. Coverage and the seam pull in
+ * opposite directions: hanging the disc lower widens it at the mark's band and
+ * swallows the mark, and the arithmetic only reverses once the hang drops
+ * under ~4vh, by which point the overhang is a few pixels and invisible
+ * anyway. Coverage wins here; the lever if the seam is ever wanted back is a
+ * SMALLER diameter (78vw put the disc at 324px against the mark's 387px), at
+ * the cost of the disc no longer filling the footer.
+ *
+ * --wordmark-y is a PERCENTAGE, which fixes a genuine bug rather than a taste
+ * call. The shift crops the bottom of the mark, the mark's height comes from
+ * its own width (× 344/1264), and 10vh against that is only a sane crop while
+ * the viewport is landscape: on an iPhone 10vh was 93px of a 105px-tall mark,
+ * so 88% of the wordmark was cropped away and the logo had all but vanished.
+ * A percentage resolves against the element's own box, so 23% is 23% of the
+ * mark at every viewport — and at 1920x1080 it is 108px, the same pixel the
+ * old 10vh produced.
+ *
+ * They live in a class string rather than a style object because the diameter
+ * and the centre both need a breakpoint, and an inline style cannot carry one.
  */
-const FOOTER_VARS = {
-  "--circle-d": "140vh",
-  "--circle-r": "calc(var(--circle-d) / 2)",
-  "--circle-y": "40vh",
-  "--wordmark-y": "10vh",
-} as React.CSSProperties;
+const FOOTER_VARS =
+  "[--circle-d:100vh] [--circle-r:calc(var(--circle-d)/2)] [--circle-cy:40vh] [--wordmark-y:23%] lg:[--circle-d:140vh] lg:[--circle-cy:30vh]";
 
 /**
  * The masked layer is `inset-0`, i.e. the whole section, so `100%` here is the
- * section's height and the gradient's centre resolves in the same coordinates
- * as the disc's own offset: 100% + y is the disc's bottom edge, minus r is its
- * centre line.
+ * section's height. The gradient is placed from the TOP and the disc from the
+ * bottom, so `100% - cy` is the single conversion between the two — with the
+ * centre named outright there is nothing left to derive.
  *
  * The stops are a hair apart rather than hard at 100% because a single-stop
  * radial edge aliases into a staircase; half a percent of the radius reads as
  * a clean curve without visibly softening the seam.
  */
 const CIRCLE_MASK =
-  "radial-gradient(circle var(--circle-r) at 50% calc(100% + var(--circle-y) - var(--circle-r)), #000 99.5%, transparent 100%)";
+  "radial-gradient(circle var(--circle-r) at 50% calc(100% - var(--circle-cy)), #000 99.5%, transparent 100%)";
 
 /**
  * Identical on both copies on purpose — same box, same alignment, so "same
@@ -120,8 +148,17 @@ const LAYER = "absolute flex-col inset-0 flex items-center justify-end";
  *
  * `block` matters for the same reason it always did: an inline svg sits on the
  * text baseline and would add a descender's worth of gap under the mark.
+ *
+ * 120vw below lg is wider than the viewport ON PURPOSE — the mark is meant to
+ * run off both edges rather than sit inside a margin the way the desktop's
+ * 90vw does. It stays centred while doing so only because LAYER centres with
+ * flex: `justify-center`/`items-center` split the overflow evenly, where auto
+ * margins would hit the over-constrained case and pin the whole 120vw against
+ * the left edge. The section's overflow-hidden is what turns the two ends into
+ * a crop instead of horizontal scroll.
  */
-const WORDMARK = "block h-auto w-[90vw] translate-y-[var(--wordmark-y)]";
+const WORDMARK =
+  "block h-auto w-[120vw] translate-y-[var(--wordmark-y)] lg:w-[90vw]";
 
 /**
  * How far the footer sits below its resting place at the start of the reveal,
@@ -252,23 +289,24 @@ export default function Footer() {
         footer would ride up with the page and the effect would vanish. Worth
         remembering if the Lenis config is ever revisited.
 
-        overflow-hidden earns its keep three times over now — it clips the disc
-        that --circle-y hangs past the bottom edge, turns the wordmark's
-        --wordmark-y overhang into a crop, and keeps a fixed, viewport-sized
-        box from contributing scrollable overflow of its own.
+        overflow-hidden earns its keep four times over now — it clips the disc
+        wherever it runs past an edge (below the bottom at lg, where cy - r is
+        -40vh; past both sides below it, where an 80vh diameter is wider than a
+        portrait screen), trims the wordmark now that it is a full 100vw,
+        turns the --wordmark-y overhang into a crop, and keeps a fixed,
+        viewport-sized box from contributing scrollable overflow of its own.
       */}
       <section
         id="footer"
         ref={container}
-        style={FOOTER_VARS}
-        className="fixed bottom-0 left-0 -z-1 h-screen w-full overflow-hidden"
+        className={`${FOOTER_VARS} fixed bottom-0 left-0 -z-1 h-screen w-full overflow-hidden`}
       >
         <div
           id="footer-circle"
           style={{
             width: "var(--circle-d)",
             height: "var(--circle-d)",
-            bottom: "calc(var(--circle-y) * -1)",
+            bottom: "calc(var(--circle-cy) - var(--circle-r))",
           }}
           className="absolute left-1/2 -translate-x-1/2 rounded-full bg-accent"
         />
@@ -290,10 +328,41 @@ export default function Footer() {
             maskRepeat: "no-repeat",
           }}
         >
-          <div className="absolute inset-0 top-[-100vh]">
-            <DashedCircle dots="vertical" spin={0} size="60vh" />
-            <DashedCircle dots="vertical" spin={0} size="120vh" />
-            <DashedCircle dots="vertical" spin={0} size="180vh" />
+          {/*
+            A zero-height line rather than a 200vh box, holding the rings'
+            shared centre. It sits exactly r above the disc's own centre — the
+            relationship the old `inset-0 top-[-100vh]` expressed as a viewport
+            unit that only happened to equal it while the disc was 140vh at
+            30vh (30 + 70 = 100vh, the section's top edge). Written against the
+            disc, it survives both the diameter and the centre moving at lg.
+
+            The children are `absolute inset-0 flex items-center justify-center`,
+            so a zero-height parent centres each ring on the line and lets it
+            overflow evenly both ways — the same property that centres an
+            oversized box where auto margins cannot.
+
+            3/7, 6/7 and 9/7 of the diameter are the 60vh, 120vh and 180vh this
+            used to name, exactly, at a 140vh disc.
+          */}
+          <div
+            style={{ bottom: "calc(var(--circle-cy) + var(--circle-r))" }}
+            className="absolute inset-x-0 h-0"
+          >
+            <DashedCircle
+              dots="vertical"
+              spin={0}
+              size="calc(var(--circle-d)*3/7)"
+            />
+            <DashedCircle
+              dots="vertical"
+              spin={0}
+              size="calc(var(--circle-d)*6/7)"
+            />
+            <DashedCircle
+              dots="vertical"
+              spin={0}
+              size="calc(var(--circle-d)*9/7)"
+            />
           </div>
 
           <div id="cross-lines" className="absolute inset-0">
@@ -309,7 +378,7 @@ export default function Footer() {
           <Wordmark className={`${WORDMARK} text-background`} />
         </div>
 
-        <div className="absolute inset-x-0 bottom-0 m-auto flex w-[90vw] items-end justify-between gap-space-2x py-space-base text-sm text-black">
+        <div className="absolute inset-x-0 bottom-0 m-auto flex w-[90vw] items-end justify-between gap-space--2x py-space--2x text-xs text-black lg:gap-space-2x lg:py-space-base lg:text-sm">
           {/* Not <p>: this is a lone piece of metadata, not prose. */}
           <span className="flex-1 text-left">&copy; {YEAR} DBLA</span>
           <p className="flex-1 text-center">
@@ -319,7 +388,7 @@ export default function Footer() {
             </a>
           </p>
           <nav aria-label="Legal" className="flex-1">
-            <ul className="flex justify-end gap-space-2x">
+            <ul className="flex flex-col items-end gap-space--3x lg:flex-row lg:justify-end lg:gap-space-2x">
               {LEGAL_LINKS.map(({ label, href }) => (
                 <li key={label}>
                   <a href={href} className="hover:underline">
@@ -331,21 +400,23 @@ export default function Footer() {
           </nav>
         </div>
 
-        <div className="relative m-auto flex h-full w-[90vw] flex-col gap-[16vh] py-space-6x">
-          <div className="flex w-full items-start justify-center text-center text-black">
-            <p className="heading-style flex-1 text-left text-base">
+        <div className="relative m-auto flex h-full w-[90vw] flex-col gap-space-4x py-space-4x pb-space-6x lg:gap-[16vh] lg:py-space-6x">
+          <div className="flex w-full flex-col items-center gap-space--1x text-center text-black lg:flex-row lg:items-start lg:gap-0">
+            <p className="heading-style text-sm lg:flex-1 lg:text-left lg:text-base">
               Hochiminh City, Vietnam <br />
               <LocalTime timeZone="Asia/Ho_Chi_Minh" className="opacity-50" />
             </p>
-            <p className="heading-style flex-1 text-base">Working Worldwide.</p>
-            <p className="heading-style flex-1 text-right text-base">
+            <p className="heading-style text-sm lg:flex-1 lg:text-base">
+              Working Worldwide.
+            </p>
+            <p className="heading-style text-sm lg:flex-1 lg:text-right lg:text-base">
               Paris, France <br />
               <LocalTime timeZone="Europe/Paris" className="opacity-50" />
             </p>{" "}
           </div>
-          <div className="flex w-full items-end justify-between">
-            <nav className="flex-1 text-md font-medium uppercase">
-              <ul>
+          <div className="flex w-full flex-col items-center gap-space-3x lg:flex-row lg:items-end lg:gap-0">
+            <nav className="text-base font-medium uppercase lg:flex-1 lg:text-md">
+              <ul className="text-center lg:text-left">
                 <li>home</li>
                 <li>about</li>
                 <li>services</li>
@@ -353,18 +424,20 @@ export default function Footer() {
               </ul>
             </nav>
             <div className="flex flex-col items-center gap-space--1x">
-              <p className="heading-style text-3xl">bring your ideas to life</p>
+              <p className="heading-style text-center text-xl lg:text-3xl">
+                bring your ideas to life
+              </p>
               <a
-                className="rounded-md bg-background px-space-2x py-space--2x text-md font-bold tracking-tighter uppercase"
+                className="rounded-md bg-background px-space-2x py-space--2x text-base font-bold tracking-tighter uppercase lg:text-md"
                 href=""
               >
                 get in touch
               </a>
-              <a className="text-md text-black" href="">
+              <a className="text-base text-black lg:text-md" href="">
                 contact@dbla.com
               </a>
             </div>
-            <ul className="flex-1 text-right text-md font-medium uppercase">
+            <ul className="text-center text-base font-medium uppercase lg:flex-1 lg:text-right lg:text-md">
               <li>instagram</li>
               <li>tiktok</li>
               <li>linkedIn</li>

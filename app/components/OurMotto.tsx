@@ -227,10 +227,10 @@ export default function OurMotto() {
         >
           our motto
         </p>
-        <p data-split="up" className="heading-style text-4xl">
+        <p data-split="up" className="heading-style text-center text-2xl lg:text-4xl">
           More than just products
         </p>{" "}
-        <h2 data-split="up" className="heading-style text-center text-4xl">
+        <h2 data-split="up" className="heading-style text-center text-2xl lg:text-4xl">
           we build <span className="text-accent">results</span> that <br />{" "}
           matter to your business.
         </h2>

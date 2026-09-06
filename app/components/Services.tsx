@@ -559,28 +559,83 @@ export default function Services() {
       ref={container}
       className="relative mt-[-150vh] h-screen overflow-hidden"
     >
-      <div
-        id="accent-circle"
-        ref={accentCircle}
-        className="absolute inset-0 m-auto aspect-square w-[100vw] scale-0 rounded-full bg-accent"
-      ></div>
+      {/*
+        vmax, not vw, and that is what makes the orange actually flood the
+        screen on a portrait viewport. A centred circle covers its viewport only
+        once its diameter reaches the DIAGONAL, sqrt(vw² + vh²) — and the tween
+        above takes this to scale 1.5, so the resting diameter must satisfy
+        1.5 × d >= sqrt(vw² + vh²). At 100vw that holds comfortably in landscape
+        (1920x1080: 2880 against a 2202 diagonal) and fails badly in portrait
+        (430x932: 645 against 1026), which is why the circle read as a growing
+        orange disc on a phone instead of the full-bleed wash it is on desktop.
+
+        100vmax fixes it for every aspect ratio at once rather than at a
+        breakpoint: the diagonal can never exceed sqrt(2) × vmax ~ 1.414 vmax,
+        which is always under the 1.5 vmax this ends at. In landscape vmax IS vw,
+        so desktop renders exactly as before.
+
+        Flex-centred rather than `inset-0 m-auto` for the reason spelled out on
+        the foreground circle below — and now unavoidably so, since 100vmax is
+        wider than the section in portrait and auto margins would collapse it
+        against the left edge. Even at 100vw it was already exposed: while the
+        section is pinned ScrollTrigger freezes an inline `width` on it measured
+        at the last refresh, so any moment 100vw and that frozen width disagree
+        — a resize before the debounced refresh lands, device-emulation
+        toggling, a refresh taken while ScrollLock has `overflow: clip` on
+        <html> — hits the same fault.
+      */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div
+          id="accent-circle"
+          ref={accentCircle}
+          className="aspect-square w-[100vmax] scale-0 rounded-full bg-accent"
+        ></div>
+      </div>
       <div className="relative flex h-full w-full flex-col">
         <div
           id="services-intro"
           className="flex h-1/2 flex-col items-center justify-end pb-space-2x"
         >
-          <p data-fade className="text-sm text-white/75 uppercase">
+          <p data-fade className="text-xs text-white/75 uppercase sm:text-sm">
             our services
           </p>
-          <h2 data-split="up" className="heading-style text-4xl text-white">
+          <h2
+            data-split="up"
+            className="heading-style text-xl text-white sm:text-2xl lg:text-4xl"
+          >
             What we do
           </h2>
         </div>
       </div>
-      <div
-        ref={foregroundCircle}
-        className="absolute inset-0 m-auto aspect-square h-[80vh] scale-0 rounded-full bg-background"
-      ></div>
+      {/*
+        Centred by a flex layer rather than by `inset-0 m-auto` on the circle
+        itself, and that is load-bearing rather than stylistic. The circle is
+        80vh ACROSS — on any portrait viewport that is wider than the section,
+        which makes the absolute box over-constrained horizontally (left: 0,
+        right: 0 and a width it already has from aspect-square). Auto margins
+        have no answer for that: CSS 10.3.7 says when equal auto margins would
+        come out negative, margin-left is forced to 0 in an ltr containing block
+        and the entire deficit is dumped into margin-right — so the circle stops
+        being centred and hangs off the right edge. At 430x932 that is
+        margin-right: -315.594px and a left edge pinned to 0, i.e. shifted right
+        by half of that. The vertical axis has no such clause, which is why the
+        same box stays perfectly centred top-to-bottom (margin: 93.203px).
+
+        justify-center/items-center centre an oversized item by construction —
+        the overflow splits evenly on both sides — so the circle stays on the
+        crosshair at every viewport. Same pattern as #center-cross, #y-line and
+        DashedCircle below, and as the accent circle above — see its note for the
+        variant of this that bites there.
+
+        The wrapper carries no transform of its own: GSAP scales the inner div,
+        so the two never write the same property.
+      */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div
+          ref={foregroundCircle}
+          className="aspect-square h-[80vh] scale-0 rounded-full bg-background"
+        ></div>
+      </div>
       <ScopeBar id="scope-bar" collapsed />
       <div
         ref={centerCross}

@@ -39,17 +39,23 @@ export default function ServiceBlock({ label, title, blurb, items }: Service) {
         <p className="rotate-180">{label}</p> */}
       </div>
       <div className="flex h-1/2 flex-col items-center justify-end gap-space-base pb-space-4x">
-        <h3 data-split="up" className="heading-style text-2xl text-accent">
+        <h3
+          data-split="up"
+          className="heading-style text-xl text-accent sm:text-2xl"
+        >
           {title}
         </h3>
-        <p data-split="up" className="max-w-[36ch] text-center text-base">
+        <p
+          data-split="up"
+          className="max-w-[36ch] px-space-base text-center text-sm sm:text-base"
+        >
           {blurb}
         </p>
       </div>
       <div className="flex h-1/2 flex-col items-center justify-start gap-space-base pt-space-4x">
         <ul
           data-split="down"
-          className="heading-style text-center text-md leading-body"
+          className="heading-style text-center text-base leading-body sm:text-md"
         >
           {items.map((item) => (
             <li key={item}>{item}</li>

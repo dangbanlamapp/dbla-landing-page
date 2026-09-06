@@ -33,6 +33,15 @@ const TESTIMONIALS = [
 ];
 
 const SLIDE_SECONDS = 4;
+
+// Tailwind's `lg` in pixels. The parallax below is the one piece of this
+// section that cannot be expressed as a class, so the number has to exist on
+// the JS side too — keep it in step with the `lg:` variants in the markup, or
+// the columns will collapse at a different width than the drift stops at.
+const LG_BREAKPOINT = 1024;
+
+// How far the copy column drifts, as a percentage of its own height.
+const PARALLAX_SHIFT = 50;
 const barTrack =
   "block h-[3px] w-full overflow-hidden rounded-full bg-foreground/15 transition-colors group-hover:bg-foreground/30 group-focus-visible:bg-foreground/30";
 const barFill =
@@ -208,11 +217,20 @@ export default function WhyUs() {
       // already-shifted column and bake the offset into its own range. Writing
       // both ends out as a fromTo is what keeps that revert-and-re-init cycle
       // landing on the same two numbers every time.
+      //
+      // Zero below lg, because there is no second column to read against once
+      // the grid stacks — the copy would simply slide half its own height down
+      // over the numbered list beneath it. A function-based value rather than a
+      // matchMedia branch: invalidateOnRefresh is already on for the reason
+      // above, and it re-resolves this on every refresh, so the same mechanism
+      // that keeps the range honest across a resize also switches the drift off
+      // and on as the layout changes under it.
       gsap.fromTo(
         copy.current,
         { yPercent: 0 },
         {
-          yPercent: 50,
+          yPercent: () =>
+            window.innerWidth >= LG_BREAKPOINT ? PARALLAX_SHIFT : 0,
           ease: "none",
           scrollTrigger: {
             trigger: copy.current,
@@ -398,21 +416,21 @@ export default function WhyUs() {
 
   return (
     <section ref={container} id="why-us" className="relative">
-      <div className="grid grid-cols-2 gap-space-4x py-[15vh] relative z-1">
+      <div className="relative z-1 grid grid-cols-1 gap-space-4x py-[15vh] lg:grid-cols-2">
         <div
           ref={copy}
-          className="flex h-fit flex-col items-end justify-center gap-[5vh] px-space-base"
+          className="flex h-fit flex-col items-start justify-center gap-[5vh] px-space-base lg:items-end"
         >
-          <div className="flex flex-col items-end">
+          <div className="flex flex-col items-start lg:items-end">
             <p
               data-split="up"
-              className="pr-space-4x text-sm text-foreground/75 uppercase"
+              className="text-xs text-foreground/75 uppercase lg:pr-space-4x lg:text-sm"
             >
               why us
             </p>
             <h2
               data-split="up"
-              className="heading-style text-right text-4xl leading-heading"
+              className="heading-style text-2xl leading-heading lg:text-right lg:text-4xl"
             >
               the team you can <br />{" "}
               <span className="text-accent"> count on</span>
@@ -429,7 +447,7 @@ export default function WhyUs() {
           <div
             role="group"
             aria-label="Testimonials"
-            className="flex w-full max-w-[36ch] flex-col items-end text-lg"
+            className="flex w-full max-w-[36ch] flex-col items-start text-base lg:items-end lg:text-lg"
             onMouseEnter={hold}
             onMouseLeave={release}
             onFocus={hold}
@@ -446,13 +464,15 @@ export default function WhyUs() {
             <div
               ref={quote}
               key={index}
-              className="flex flex-col items-end py-space-2x"
+              className="flex flex-col items-start py-space-2x lg:items-end"
             >
-              <p className="pb-space-base text-right text-lg leading-body">
+              <p className="pb-space-base text-base leading-body lg:text-right lg:text-lg">
                 {slide.quote}
               </p>
-              <p className="heading-style text-md">{slide.name}</p>
-              <p className="text-base text-foreground/50">{slide.role}</p>
+              <p className="heading-style text-base lg:text-md">{slide.name}</p>
+              <p className="text-sm text-foreground/50 lg:text-base">
+                {slide.role}
+              </p>
             </div>
 
             {/*
@@ -516,57 +536,66 @@ export default function WhyUs() {
         </div>
         <div
           ref={list}
-          className="flex flex-col gap-space-4x px-space-base pt-[50vh]"
+          className="flex flex-col gap-space-4x px-space-base lg:pt-[50vh]"
         >
           <div className="flex flex-col">
-            <p className="text-md leading-none tracking-tighter uppercase opacity-50">
+            <p className="text-sm leading-none tracking-tighter uppercase opacity-50 lg:text-md">
               01
             </p>
             <h3
               data-split="down"
-              className="heading-style pb-space--1x text-2xl font-medium text-accent"
+              className="heading-style pb-space--1x text-xl font-medium text-accent lg:text-2xl"
             >
               Senior Expertise
             </h3>
-            <p data-fade className="max-w-[48ch] text-base leading-body">
+            <p
+              data-fade
+              className="max-w-[48ch] text-sm leading-body lg:text-base"
+            >
               Our developers bring 15+ years building at some of the
               world&apos;s most respected tech companies.
             </p>
           </div>
           <div className="flex flex-col">
-            <p className="text-md leading-none tracking-tighter uppercase opacity-50">
+            <p className="text-sm leading-none tracking-tighter uppercase opacity-50 lg:text-md">
               02
             </p>
             <h3
               data-split="down"
-              className="heading-style pb-space--1x text-2xl font-medium text-accent"
+              className="heading-style pb-space--1x text-xl font-medium text-accent lg:text-2xl"
             >
               One team fullstack
             </h3>
-            <p data-fade className="max-w-[48ch] text-base leading-body">
+            <p
+              data-fade
+              className="max-w-[48ch] text-sm leading-body lg:text-base"
+            >
               Design, development, launch, even marketing — all under one roof.
               The people you talk to are the people who build your product, so
               nothing gets lost in a handoff.
             </p>
           </div>
           <div className="flex flex-col">
-            <p className="text-md leading-none tracking-tighter uppercase opacity-50">
+            <p className="text-sm leading-none tracking-tighter uppercase opacity-50 lg:text-md">
               03
             </p>
             <h3
               data-split="down"
-              className="heading-style pb-space--1x text-2xl font-medium text-accent"
+              className="heading-style pb-space--1x text-xl font-medium text-accent lg:text-2xl"
             >
               Driven by results
             </h3>
-            <p data-fade className="max-w-[48ch] text-base leading-body">
+            <p
+              data-fade
+              className="max-w-[48ch] text-sm leading-body lg:text-base"
+            >
               We measure our success by yours. Every decision comes back to one
               question: does this move your business forward?
             </p>
           </div>
         </div>
       </div>
-      <div id="cross-lines" className="absolute inset-0">
+      <div id="cross-lines" className="absolute inset-0 hidden lg:block">
         <div
           id="y-line"
           className="absolute inset-0 flex items-center justify-center"

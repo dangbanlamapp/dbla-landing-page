@@ -100,7 +100,7 @@ export default function Intro() {
       {/* Scaled by the exit tween — nothing else may write to its transform. */}
       <div
         ref={content}
-        className="grid h-full w-full grid-rows-2 flex-col items-center justify-center gap-space-4x"
+        className="grid h-full w-full grid-rows-2 flex-col items-center justify-center gap-space-4x px-space-base"
       >
         <div className="flex h-full flex-col items-center justify-end">
           <p data-split="up" className="text-sm text-secondary uppercase">
@@ -108,7 +108,7 @@ export default function Intro() {
           </p>
           <p
             data-split="up"
-            className="heading-style max-w-[32ch] text-center text-3xl"
+            className="heading-style max-w-[32ch] text-center text-2xl lg:text-3xl"
           >
             Every business deserves to compete in the digital world, not just
             the ones with a tech team.{" "}
@@ -117,7 +117,7 @@ export default function Intro() {
         <div className="flex h-full items-start justify-center">
           <p
             data-split="up"
-            className="heading-style max-w-[32ch] text-center text-3xl text-accent"
+            className="heading-style max-w-[32ch] text-center text-2xl text-accent lg:text-3xl"
           >
             That&apos;s the gap we close.
           </p>
