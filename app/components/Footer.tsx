@@ -400,7 +400,7 @@ export default function Footer() {
           </nav>
         </div>
 
-        <div className="relative m-auto flex h-full w-[90vw] flex-col gap-space-4x py-space-4x pb-space-6x lg:gap-[16vh] lg:py-space-6x">
+        <div className="relative m-auto flex h-full w-[90vw] flex-col justify-center lg:justify-start gap-space-4x py-space-4x pb-space-6x lg:gap-[16vh] lg:py-space-6x">
           <div className="flex w-full flex-col items-center gap-space--1x text-center text-black lg:flex-row lg:items-start lg:gap-0">
             <p className="heading-style text-sm lg:flex-1 lg:text-left lg:text-base">
               Hochiminh City, Vietnam <br />

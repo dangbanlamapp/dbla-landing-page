@@ -66,7 +66,7 @@ export default function Header() {
             what is left keeps Menu dead centre on the viewport no matter what
             flanks it. */}
         <div
-          className={`mx-auto flex lg:grid justify-between w-full items-center px-[1vw] py-space--2x lg:w-[92vw] grid-cols-[1fr_auto_1fr] ${
+          className={`mx-auto flex w-full grid-cols-[1fr_auto_1fr] items-center justify-between px-space-base lg:px-[1vw] py-space--2x lg:grid lg:w-[92vw] ${
             open ? "" : BAR_SURFACE
           }`}
         >
