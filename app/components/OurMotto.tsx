@@ -72,7 +72,6 @@ export default function OurMotto() {
           trigger: copy.current,
           start: "top bottom",
           end: "center center",
-          // pin: true,
           scrub: true,
           invalidateOnRefresh: true,
         },
@@ -83,13 +82,6 @@ export default function OurMotto() {
       // time. Nothing is held back any more: the sequence opens at position 0,
       // so the first line is already moving the instant the start is crossed.
       const ENTER = 0.8;
-
-      // The label first: the plain fade-and-rise Hero and Services give their
-      // supporting copy. autoAlpha rather than opacity so it is visibility-
-      // hidden at 0 and cannot be read out or hit-tested before it arrives.
-      //
-      // ease "none" throughout, because this is scrubbed: the copy tracks the
-      // scrollbar exactly, and an eased curve reads as the scroll lagging.
       tl.from("[data-fade]", {
         autoAlpha: 0,
         y: 16,
@@ -97,8 +89,6 @@ export default function OurMotto() {
         ease: "power2.inOut",
       });
 
-      // Same contract as Hero and Intro: data-split declares which way the
-      // lines travel, so the direction sits in the markup next to the copy.
       const blocks = gsap.utils.toArray<HTMLElement>(
         "[data-split]",
         container.current,
@@ -110,17 +100,9 @@ export default function OurMotto() {
         SplitText.create(block, {
           type: "lines",
           mask: "lines",
-          // The mask is cut to the line box, which at leading-heading (0.75)
-          // stops above the descenders — the "j" in "just" and the "y" in
-          // "your" get shaved. Padding the line grows the box the mask follows.
-          // linesClass: "pb-[0.15em]",
+
           autoSplit: true,
           onSplit: (self) => {
-            // Built inside onSplit and added to the shared timeline from here,
-            // the shape Services uses: autoSplit re-splits on font load and
-            // resize, and GSAP kills whatever onSplit returned before doing so —
-            // killing it also lifts it out of tl, and the next onSplit drops a
-            // replacement in at the same position.
             const lines = gsap.timeline();
 
             lines.from(
@@ -128,9 +110,6 @@ export default function OurMotto() {
               { yPercent, duration: ENTER, ease: "power2.inOut", stagger: 0.1 },
               0,
             );
-
-            // One beat between the two blocks, so the second reads as an answer
-            // to the first rather than arriving on top of it.
             tl.add(lines, i * 0.15);
             return lines;
           },
@@ -153,21 +132,46 @@ export default function OurMotto() {
       // entrance occupies. Sharing tl would have squeezed the whole slide into
       // that short window; a separate ScrollTrigger is what lets the two live at
       // different scales over the same element.
-      gsap.fromTo(
-        copy.current,
-        { yPercent: 0 },
-        {
-          yPercent: 200,
-          ease: "none",
-          scrollTrigger: {
-            trigger: container.current,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: true,
-            invalidateOnRefresh: true,
+      // Desktop only. Gated with gsap.matchMedia() rather than a width check,
+      // because the two differ on resize: matchMedia reverts everything built
+      // inside the callback the instant the query stops matching, so crossing
+      // `lg` — or flipping a tablet to portrait — puts yPercent back to 0 and
+      // kills the ScrollTrigger with it. A one-shot `window.innerWidth` test
+      // decides at mount only, and would strand the copy at whatever offset the
+      // scrub happened to have reached.
+      //
+      // Safe to build inside useGSAP: MatchMedia's constructor registers itself
+      // on the enclosing gsap.context(), so the hook's cleanup reverts it on
+      // unmount the same way it reverts a bare tween.
+      //
+      // 64rem is Tailwind's `lg` — the same line Header, MenuPanel and
+      // HeaderBg's outer ring split on. One breakpoint for the small-screen
+      // story rather than four.
+      //
+      // Note what leaves with it: this tween is what carried the block down the
+      // screen, so without it `justify-start` would leave the motto pinned to
+      // the section's top edge with most of a viewport empty beneath it. The
+      // section centres below `lg` to replace that — the two are a pair, and
+      // re-enabling the drift on mobile means undoing that class too.
+      const mm = gsap.matchMedia();
+
+      mm.add("(min-width: 64rem)", () => {
+        gsap.fromTo(
+          copy.current,
+          { yPercent: 0 },
+          {
+            yPercent: 200,
+            ease: "none",
+            scrollTrigger: {
+              trigger: container.current,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: true,
+              invalidateOnRefresh: true,
+            },
           },
-        },
-      );
+        );
+      });
 
       // Unhide the block here, last, once every `from` above has stamped its
       // start value on. That is the flash: the server-rendered copy paints at
@@ -198,7 +202,7 @@ export default function OurMotto() {
     <section
       ref={container}
       id="our-motto"
-      className="relative mt-[-75vh] flex h-[101vh] flex-col items-center justify-start bg-background pt-space-4x"
+      className="relative mt-[-75vh] flex h-[101vh] flex-col items-center justify-end bg-background pt-space-4x lg:justify-start"
     >
       <div className="absolute inset-0">
         <DashedCircle dots="vertical" id="right-outie" spin={0} size="58vh" />

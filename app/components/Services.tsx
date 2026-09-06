@@ -700,11 +700,7 @@ export default function Services() {
       {SERVICES.map((service) => (
         <ServiceBlock key={service.title} {...service} />
       ))}
-      {/*
-        One ring per service, all identical: every one ships collapsed at 0 and
-        is placed entirely by the conveyor above, which reads them in DOM order.
-        No per-ring diameters here — a ring's whole life is STOPS plus its index.
-      */}
+
       <div
         ref={ringsContainer}
         className="absolute inset-0 h-full w-full scale-0"

@@ -33,7 +33,7 @@ export default function ProjectBlock({ type, name, blurb }: ProjectCopy) {
       data-project-block
       className="invisible absolute inset-0 flex flex-col items-center lg:items-start"
     >
-      <div className="flex lg:flex-1 items-end justify-center p-space-base lg:justify-end">
+      <div className="flex items-end justify-center p-space-base lg:flex-1 lg:justify-end">
         <h3
           data-split="up"
           className="heading-style text-sm leading-heading text-secondary opacity-75 lg:text-base"
@@ -41,7 +41,7 @@ export default function ProjectBlock({ type, name, blurb }: ProjectCopy) {
           {type}
         </h3>
       </div>
-      <div className="flex flex-1 flex-col items-center gap-space--1x lg:gap-space-base p-space-base text-center lg:items-start lg:text-left">
+      <div className="flex flex-1 flex-col items-center gap-space--1x p-space-base text-center lg:items-start lg:gap-space-base lg:text-left">
         <p data-split="down" className="heading-style text-lg lg:text-xl">
           {name}
         </p>
