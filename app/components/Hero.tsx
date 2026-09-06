@@ -140,7 +140,7 @@ export default function Hero() {
        */
       className="grid h-svh w-full grid-cols-1 grid-rows-2 gap-space-2x lg:grid-cols-2 lg:gap-0"
     >
-      <div className="flex items-end p-space-base sm:p-space-2x justify-center lg:justify-end">
+      <div className="flex items-end justify-center p-space-base sm:p-space-2x lg:justify-end">
         {/* The type steps down the modular scale rather than taking an
             arbitrary value — the steps *are* the design token. text-4xl is
             ~61px at base and grows fluid past 1536px, which no phone can hold

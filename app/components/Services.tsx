@@ -700,7 +700,7 @@ export default function Services() {
       {SERVICES.map((service) => (
         <ServiceBlock key={service.title} {...service} />
       ))}
- 
+
       <div
         ref={ringsContainer}
         className="absolute inset-0 h-full w-full scale-0"
