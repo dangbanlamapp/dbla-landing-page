@@ -677,7 +677,7 @@ export default function Projects() {
         layout — the sizing was already expressed as "the circle takes what it
         needs, the copy shares the rest".
       */}
-      <div className="flex h-full flex-col justify-center gap-space-base lg:flex-row">
+      <div className="flex h-full flex-col justify-end gap-space-base lg:flex-row lg:justify-center">
         <div className="flex flex-1 flex-col items-center lg:items-end">
           <div
             id="projects-heading"
@@ -690,21 +690,7 @@ export default function Projects() {
               our <br /> projects
             </h2>
           </div>
-          <div className="flex-1 p-space-base text-center lg:text-left">
-            {/*
-              minimumIntegerDigits pads to "00".."04", which keeps the digit
-              count — and so the width — fixed for every value the counter can
-              hold, so the slide never shoves the column around.
-
-              `trend` is left at its default, which reads the direction off the
-              value change: the digits roll up on the way down the page and back
-              down on the way up, matching the scrub instead of always spinning
-              one way. respectMotionPreference is on by default too, so this is
-              the one piece of the section that does quiet itself down.
-
-              The two timings override NumberFlow's 900ms default — see the
-              constants for why.
-            */}
+          <div className="text-center lg:flex-1 lg:p-space-base lg:text-left">
             <p
               data-counter
               className="heading-style text-lg text-secondary opacity-75 lg:text-xl"

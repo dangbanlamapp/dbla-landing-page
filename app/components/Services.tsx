@@ -11,6 +11,27 @@ import ServiceBlock, { type Service } from "./ServiceBlock";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
+// Tailwind's `lg` in pixels. A tween value cannot be a class, so the width the
+// rest of the responsive pass treats as the mobile line has to exist here too —
+// keep it in step with the `lg:` variants in the markup.
+const LG_BREAKPOINT = 1024;
+
+// What the accent circle grows to once it has finished opening.
+//
+// 1.5 is a covering value by construction: the circle is 100vmax across, the
+// viewport diagonal can never exceed sqrt(2) vmax, and 1.5 clears that at every
+// aspect ratio — see the note on the element itself.
+//
+// The portrait target is far past covering, and what it buys is TIMING, not
+// reach: once the disc has swallowed the diagonal the rest of the growth
+// happens off-screen either way, and the beige foreground circle is painted
+// over the middle of it regardless. Growing harder makes the orange edge clear
+// the frame sooner — on a 430x932 phone the corners close about 27% into the
+// beat rather than 40%. It also keeps the flood covering if the diameter is
+// ever pulled back off vmax, which 1.5 alone would not survive.
+const ACCENT_GROW = 1.5;
+const ACCENT_GROW_PORTRAIT = 3.5;
+
 // Content drives the pin length: one service is one viewport of scrolling, so
 // adding an entry here grows the pin by 100vh and slots its block into the
 // sequence without a single position needing to be rewritten below.
@@ -147,7 +168,15 @@ export default function Services() {
         .to(
           accentCircle.current,
           {
-            scale: 1.5,
+            // Function-based rather than a matchMedia branch: the pin's
+            // ScrollTrigger already carries invalidateOnRefresh (its `end` is a
+            // function for the same reason), and that re-resolves this on every
+            // refresh — so one mechanism keeps the scroll range and the scale
+            // target honest across a resize.
+            scale: () =>
+              window.innerWidth >= LG_BREAKPOINT
+                ? ACCENT_GROW
+                : ACCENT_GROW_PORTRAIT,
             duration: 1,
             ease: "power4.inOut",
           },
@@ -571,8 +600,11 @@ export default function Services() {
 
         100vmax fixes it for every aspect ratio at once rather than at a
         breakpoint: the diagonal can never exceed sqrt(2) × vmax ~ 1.414 vmax,
-        which is always under the 1.5 vmax this ends at. In landscape vmax IS vw,
-        so desktop renders exactly as before.
+        which is always under the 1.5 vmax ACCENT_GROW ends at. In landscape
+        vmax IS vw, so desktop renders exactly as before. Portrait grows further
+        still — see ACCENT_GROW_PORTRAIT — but that is about how fast the edge
+        clears the frame, not about whether it covers at all; this sizing is
+        what makes covering true at either target.
 
         Flex-centred rather than `inset-0 m-auto` for the reason spelled out on
         the foreground circle below — and now unavoidably so, since 100vmax is

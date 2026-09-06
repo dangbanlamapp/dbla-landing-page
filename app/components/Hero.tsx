@@ -138,7 +138,7 @@ export default function Hero() {
        * bottom-right / top-left pairing, so the diagonal reading order
        * survives the collapse.
        */
-      className="grid h-svh w-full grid-cols-1 grid-rows-2 lg:grid-cols-2"
+      className="grid h-svh w-full grid-cols-1 grid-rows-2 gap-space-2x lg:grid-cols-2 lg:gap-0"
     >
       <div className="flex items-end p-space-base sm:p-space-2x lg:justify-end">
         {/* The type steps down the modular scale rather than taking an
@@ -148,16 +148,16 @@ export default function Hero() {
             is wide enough for it again. */}
         <h1
           data-split="up"
-          className="text-left text-3xl leading-heading font-bold tracking-tighter uppercase lg:text-right lg:text-3xl xl:text-4xl"
+          className="text-center text-3xl leading-heading font-bold tracking-tighter uppercase lg:text-right lg:text-3xl xl:text-4xl"
         >
           We build <br /> <span className="text-accent">DIGITAL PRODUCTs</span>
         </h1>
       </div>
 
-      <div className="row-start-2 flex flex-col items-end justify-start gap-space-base p-space-base sm:p-space-2x lg:col-start-2 lg:items-start">
+      <div className="row-start-2 flex flex-col items-center justify-start gap-space-2x p-space-base sm:p-space-2x lg:col-start-2 lg:items-start lg:gap-space-base">
         <h1
           data-split="down"
-          className="text-right text-3xl leading-heading font-bold tracking-tighter uppercase sm:text-2xl lg:text-left lg:text-3xl xl:text-4xl"
+          className="text-center text-3xl leading-heading font-bold tracking-tighter uppercase sm:text-2xl lg:text-left lg:text-3xl xl:text-4xl"
         >
           THAT GROW your <br /> <span className="text-accent">business</span>
         </h1>
@@ -166,7 +166,7 @@ export default function Hero() {
             readable. */}
         <p
           data-fade
-          className="max-w-[48ch] text-base leading-body sm:text-md sm:leading-none"
+          className="max-w-[48ch] text-center text-base leading-body sm:text-md sm:leading-none lg:text-left"
         >
           We are a product studio that helps non-technical founders go digital,
           with a focus on business outcomes
