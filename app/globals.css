@@ -77,6 +77,7 @@
 }
 
 @theme inline {
+  --breakpoint-3xl: 120rem;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-secondary: var(--secondary);
@@ -156,7 +157,20 @@
   opacity: 0.9;
   mix-blend-mode: color;
 } */
-
+  @media (min-width: 1280px) {
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 99;
+      pointer-events: none;
+      background-image: url("/halftone-bg.jpg");
+      background-repeat: repeat;
+      background-size: 70vw auto;
+      opacity: 0.6;
+      mix-blend-mode: soft-light;
+    }
+  }
   body::after {
     content: "";
     position: fixed;
@@ -165,7 +179,7 @@
     pointer-events: none;
     background-image: url("/halftone-bg.jpg");
     background-repeat: repeat;
-    background-size: 70vw auto;
+    background-size: 150vw auto;
     opacity: 0.6;
     mix-blend-mode: soft-light;
   }
@@ -176,47 +190,6 @@
   }
 }
 
-/* ── Quadrant reveal ──────────────────────────────────────────────────────────
-   The mask behind the Projects image stack. Four conic gradients share the
-   element's centre, each confined to one quadrant and unioned by the default
-   additive mask compositing, so the four corners of a single <Image> can be
-   revealed on four independent clocks without four copies of the picture.
-
-   Layer n is opaque only from n * 90deg to n * 90deg + --sweep-n, and nothing
-   drives a sweep past 90deg, so a gradient cannot spill into its neighbour's
-   corner: the quadrant boundaries fall out of the gradient's own maths rather
-   than needing a clip-path per corner.
-
-   The vars are BOTH declared here and registered with @property below. The
-   registration is what type-checks them as angles; the declaration is the
-   fallback, because a var() that resolves to nothing makes the whole
-   mask-image invalid and an invalid mask does not hide the element — it shows
-   it in full, which would pile all four projects on top of each other.
-
-   Only the sweeping stop is feathered. It is the only edge that moves; the
-   fixed edges sit on the axes and antialias as the vertical and horizontal
-   lines they are.
-
-   That feather runs OUTWARD, past the sweep rather than back into it, and the
-   distinction is the difference between a clean circle and four visible seams.
-   Fading over the half degree BEFORE the sweep line puts the soft band inside
-   the wedge's own quadrant, so at a full 90deg each wedge is already partly
-   transparent where it meets its neighbour and the neighbour does not begin
-   contributing until exactly 90deg — a sub-1.0 alpha strip on all four
-   boundaries, which reads as an orange ray from the frame beneath. Fading
-   outward instead lands the soft band ON the neighbour's opaque territory,
-   where the two sum back to 1.
-
-   The overlap costs nothing because all four wedges reveal the same picture:
-   spilling half a degree into the next corner exposes pixels identical to the
-   ones already there. It stays honest under a per-corner stagger too — a
-   leading wedge would show half a degree of its neighbour's corner early,
-   which is what an antialiased edge is.
-
-   min() is what keeps that outward feather from painting at rest: it holds the
-   fade to the sweep's own width, so at 0deg all three stops collapse onto 0deg
-   and the gradient paints nothing at all. Without it the resting state is a
-   hairline of image over the orange frame. */
 @property --sweep-0 {
   syntax: "<angle>";
   initial-value: 0deg;

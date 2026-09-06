@@ -140,7 +140,7 @@ export default function Hero() {
        */
       className="grid h-svh w-full grid-cols-1 grid-rows-2 lg:grid-cols-2"
     >
-      <div className="flex items-end justify-end p-space-base sm:p-space-2x">
+      <div className="flex items-end p-space-base sm:p-space-2x lg:justify-end">
         {/* The type steps down the modular scale rather than taking an
             arbitrary value — the steps *are* the design token. text-4xl is
             ~61px at base and grows fluid past 1536px, which no phone can hold
@@ -148,18 +148,16 @@ export default function Hero() {
             is wide enough for it again. */}
         <h1
           data-split="up"
-          className="text-right text-xl leading-heading font-bold tracking-tighter uppercase sm:text-2xl lg:text-3xl xl:text-4xl"
+          className="text-left text-3xl leading-heading font-bold tracking-tighter uppercase lg:text-right lg:text-3xl xl:text-4xl"
         >
           We build <br /> <span className="text-accent">DIGITAL PRODUCTs</span>
         </h1>
       </div>
-      {/* row-start-2 holds in both layouts; only the column moves, so this
-          block is the bottom half when stacked and the bottom-right quadrant
-          once the grid splits. */}
-      <div className="row-start-2 flex flex-col items-start justify-start gap-space-base p-space-base sm:p-space-2x lg:col-start-2">
+
+      <div className="row-start-2 flex flex-col items-end justify-start gap-space-base p-space-base sm:p-space-2x lg:col-start-2 lg:items-start">
         <h1
           data-split="down"
-          className="text-xl leading-heading font-bold tracking-tighter uppercase sm:text-2xl lg:text-3xl xl:text-4xl"
+          className="text-right text-3xl leading-heading font-bold tracking-tighter uppercase sm:text-2xl lg:text-left lg:text-3xl xl:text-4xl"
         >
           THAT GROW your <br /> <span className="text-accent">business</span>
         </h1>
