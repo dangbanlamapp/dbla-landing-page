@@ -1,8 +1,23 @@
 type DashedCircleProps = {
-  /** Diameter as any CSS length, e.g. "80vh" or "180vh". */
+  /** Diameter as any CSS length, e.g. "80vmin" or "180vmin". */
   size: string;
   /** Applied to the full-bleed centering layer, for animation targeting. */
   id?: string;
+  /**
+   * Extra classes for that same centering layer. Meant for responsive
+   * visibility — `max-lg:hidden` to drop a ring on small screens — and not for
+   * layout: the layer is `absolute inset-0` and the ring inside it is sized by
+   * an animated height, so anything here that touches the box model is
+   * fighting the timeline rather than configuring it.
+   *
+   * Hiding is `display: none` on purpose, rather than the parent choosing not
+   * to render the ring at all. The intro staggers rings by their index in a
+   * `[data-ring]` query (`i * 0.25`), so a ring that disappears from the DOM
+   * renumbers every ring after it and re-times the whole entrance. Hidden, it
+   * still answers the query, still holds its slot, and costs one wasted height
+   * write per frame.
+   */
+  className?: string;
   /**
    * Render at zero diameter so a GSAP tween can open it to `size` without the
    * server-rendered circle flashing at full size first. Requires JS.
@@ -43,6 +58,7 @@ type DashedCircleProps = {
 export default function DashedCircle({
   size,
   id,
+  className = "",
   collapsed = false,
   dots = "horizontal",
   spin,
@@ -61,7 +77,10 @@ export default function DashedCircle({
         ];
 
   return (
-    <div id={id} className="absolute inset-0 flex items-center justify-center">
+    <div
+      id={id}
+      className={`absolute inset-0 flex items-center justify-center ${className}`}
+    >
       <div
         data-ring
         data-size={size}

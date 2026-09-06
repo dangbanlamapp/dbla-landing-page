@@ -10,8 +10,8 @@ import { useEffect, useState } from "react";
 import Logo from "./Logo";
 import MenuButton from "./MenuButton";
 import MenuPanel from "./MenuPanel";
-const PILL =
-  "heading-style rounded-md px-space-2x py-space--2x text-base transition-opacity hover:opacity-80";
+import { PILL } from "./pill";
+
 const BAR_SURFACE = "rounded-md bg-background/15 backdrop-blur-2xl";
 export default function Header() {
   const [open, setOpen] = useState(false);
@@ -66,7 +66,7 @@ export default function Header() {
             what is left keeps Menu dead centre on the viewport no matter what
             flanks it. */}
         <div
-          className={`mx-auto grid w-[92vw] grid-cols-[1fr_auto_1fr] items-center px-[1vw] py-space--2x ${
+          className={`mx-auto flex lg:grid justify-between w-full items-center px-[1vw] py-space--2x lg:w-[92vw] grid-cols-[1fr_auto_1fr] ${
             open ? "" : BAR_SURFACE
           }`}
         >
@@ -78,10 +78,16 @@ export default function Header() {
             className={`${PILL} pointer-events-auto justify-self-center bg-accent text-background`}
           />
 
-      
+          {/* Gone below `lg`, where the bar has only the width for the logo
+              and the Menu toggle. It is not dropped for those readers, only
+              moved: MenuPanel prints the same CTA at the foot of its nav
+              column behind a matching `lg:hidden`, so exactly one copy is
+              ever reachable and the small-screen route to the footer is a tap
+              deeper rather than missing. The two breakpoints are a pair —
+              move one and the CTA either doubles up or vanishes. */}
           <a
             href="#footer"
-            className={`${PILL} pointer-events-auto justify-self-end bg-foreground text-background`}
+            className={`${PILL} pointer-events-auto hidden justify-self-end bg-foreground text-background lg:block`}
           >
             Get in touch
           </a>

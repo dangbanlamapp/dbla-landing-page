@@ -9,6 +9,11 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 // The same two constants the footer's legal row reads, so the routes and the
 // copyright year cannot say one thing down there and another up here.
 import { LEGAL_LINKS, YEAR } from "./legal";
+// The header CTA's shape, shared for the same reason: below `lg` the header
+// hides its "Get in touch" and this panel prints it instead, so the two are
+// the same button in two places rather than two buttons that resemble one
+// another.
+import { PILL } from "./pill";
 
 gsap.registerPlugin(useGSAP, CustomEase, ScrollTrigger);
 
@@ -375,38 +380,74 @@ export default function MenuPanel({
         curve="text-accent"
       >
         <div className="mx-auto flex w-[90vw] justify-between pb-space-2x">
-          <nav aria-label="Main" className="">
-            <ul className="flex flex-col">
-              {NAV_LINKS.map(({ label, href }) => (
-                <li key={label}>
-                  {/* hover goes to foreground, not accent: accent is the sheet
-                    itself now, so the usual accent hover would erase the word
-                    it was meant to pick out. Dark on orange is the same pair
-                    the pills in Hero and Cta already use.
+          {/* A column rather than the bare <nav> it used to be, so the CTA
+              below can stack under the links while the contact block opposite
+              stays where it was. items-start keeps the pill the width of its
+              own label instead of stretching it down the left gutter. */}
+          <div className="flex flex-col items-start gap-space-base">
+            <nav aria-label="Main">
+              <ul className="flex flex-col">
+                {NAV_LINKS.map(({ label, href }) => (
+                  <li key={label}>
+                    {/* hover goes to foreground, not accent: accent is the sheet
+                      itself now, so the usual accent hover would erase the word
+                      it was meant to pick out. Dark on orange is the same pair
+                      the pills in Hero and Cta already use.
 
-                    Closing on click is required, not a nicety: the scroll lock
-                    below stops Lenis, so without this the sheet stays down
-                    over a page the reader cannot move.
+                      Closing on click is required, not a nicety: the scroll lock
+                      below stops Lenis, so without this the sheet stays down
+                      over a page the reader cannot move.
 
-                    It is not yet enough to make the anchors *navigate*, and
-                    that is a known gap rather than an oversight. Lenis handles
-                    the anchor click synchronously, while the instance is still
-                    stopped, so the scrollTo is dropped; React only closes the
-                    menu and restarts Lenis afterwards. Separately, #footer is
-                    a poor target regardless — the footer is pinned, so it
-                    reports position: fixed and offsetTop 0. Both belong to the
-                    same follow-up. */}
-                  <a
-                    href={href}
-                    onClick={onNavigate}
-                    className="heading-style block text-5xl transition-colors hover:text-foreground"
-                  >
-                    {label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
+                      It is not yet enough to make the anchors *navigate*, and
+                      that is a known gap rather than an oversight. Lenis handles
+                      the anchor click synchronously, while the instance is still
+                      stopped, so the scrollTo is dropped; React only closes the
+                      menu and restarts Lenis afterwards. Separately, #footer is
+                      a poor target regardless — the footer is pinned, so it
+                      reports position: fixed and offsetTop 0. Both belong to the
+                      same follow-up. */}
+                    <a
+                      href={href}
+                      onClick={onNavigate}
+                      className="heading-style block text-5xl transition-colors hover:text-foreground"
+                    >
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            {/* The header's "Get in touch", relocated for small screens — the
+                bar has no room for it beside the logo and the Menu toggle, so
+                it hides there below `lg` and appears here instead. The two
+                breakpoints are complements: change one without the other and
+                the CTA is either printed twice or nowhere.
+
+                Outside the <nav> on purpose. It points at the same #footer as
+                the Contact link above it, and listing it as a fifth navigation
+                item would read to a screen reader as a duplicate destination
+                rather than as the call to action it is.
+
+                foreground-on-background, the same pair the header uses — the
+                sheet behind it is accent now, so the header's own colours land
+                as dark-on-orange here, which is what Hero and Cta's pills
+                already do.
+
+                onNavigate for the reason the links have it: the panel stops
+                Lenis while it is open, so a CTA that did not close the menu
+                would leave the sheet down over a page that cannot scroll. It
+                carries the same known gap as those links, too — Lenis handles
+                the anchor synchronously while it is still stopped, so the
+                jump to #footer is dropped and only the close happens. */}
+            <a
+              href="#footer"
+              onClick={onNavigate}
+              className={`${PILL} bg-foreground text-background lg:hidden`}
+            >
+              Get in touch
+            </a>
+          </div>
           <div className="flex flex-col items-end justify-end gap-space-base">
             <div className="flex flex-col items-end">
               <p>email</p>
