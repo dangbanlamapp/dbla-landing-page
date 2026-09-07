@@ -148,7 +148,7 @@ export default function Hero() {
             is wide enough for it again. */}
         <h1
           data-split="up"
-          className="text-center text-3xl leading-heading font-bold tracking-tighter uppercase lg:text-right lg:text-3xl xl:text-4xl"
+          className="text-center text-4xl leading-heading font-bold tracking-tighter uppercase lg:text-right lg:text-3xl xl:text-4xl"
         >
           We build <br /> <span className="text-accent">DIGITAL PRODUCTs</span>
         </h1>
@@ -157,7 +157,7 @@ export default function Hero() {
       <div className="row-start-2 flex flex-col items-center justify-start gap-space-2x p-space-base sm:p-space-2x lg:col-start-2 lg:items-start lg:gap-space-base">
         <h1
           data-split="down"
-          className="text-center text-3xl leading-heading font-bold tracking-tighter uppercase sm:text-2xl lg:text-left lg:text-3xl xl:text-4xl"
+          className="text-center text-4xl leading-heading font-bold tracking-tighter uppercase sm:text-2xl lg:text-left lg:text-3xl xl:text-4xl"
         >
           THAT GROW your <br /> <span className="text-accent">business</span>
         </h1>

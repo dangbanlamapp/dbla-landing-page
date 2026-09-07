@@ -157,7 +157,19 @@
   opacity: 0.9;
   mix-blend-mode: color;
 } */
-  @media (min-width: 1280px) {
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+    pointer-events: none;
+    background-image: url("/halftone-bg.jpg");
+    background-repeat: repeat;
+    background-size: 150vw auto;
+    opacity: 0.6;
+    mix-blend-mode: soft-light;
+  }
+  @media (min-width: 768px) {
     body::after {
       content: "";
       position: fixed;
@@ -170,18 +182,6 @@
       opacity: 0.6;
       mix-blend-mode: soft-light;
     }
-  }
-  body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 99;
-    pointer-events: none;
-    background-image: url("/halftone-bg.jpg");
-    background-repeat: repeat;
-    background-size: 150vw auto;
-    opacity: 0.6;
-    mix-blend-mode: soft-light;
   }
 }
 @layer components {

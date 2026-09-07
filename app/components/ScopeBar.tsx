@@ -22,6 +22,31 @@ type ScopeBarProps = {
   count?: number;
   /** Every Nth tick out from the centre is drawn long — the major graduations. */
   major?: number;
+  /**
+   * Below `lg`, keep only every Nth tick counted out from the centre and hide
+   * the rest. 1, the default, draws every tick at every width.
+   *
+   * A CSS thinning rather than a smaller `count`, and it has to be: `count`
+   * decides how many spans EXIST, so a value read from the viewport would
+   * differ between the server render and hydration — the very reason `count`
+   * is fixed in the first place. Rendering every tick and hiding the surplus
+   * keeps one deterministic DOM and lets a media query do the responsive part.
+   * `justify-between` then redistributes whatever survives, so the bar stays
+   * full-bleed at any density.
+   *
+   * It must DIVIDE `major`, or a long graduation lands on a hidden tick and
+   * the ruler loses the marks that make it readable. With the default major of
+   * 6 that leaves 1, 2, 3 and 6 — and 6 hides every minor, so there is nothing
+   * left to graduate against. The half-span is a whole number of steps too, so
+   * the ticks on the centre line and on both screen edges survive any of them.
+   *
+   * The entrance and pulse tweens still target every tick, hidden ones
+   * included. That is deliberate: GSAP's `from: "center"` stagger is pure
+   * index arithmetic when no `grid` is given (distance is |i - mid|, no layout
+   * is read), so the surviving ticks keep exactly the timing they had and the
+   * wave still leaves the true centre. A hidden tick just scales nothing.
+   */
+  mobileEvery?: number;
   /** Long-tick length, as any CSS length. */
   majorLength?: string;
   /** Short-tick length. */
@@ -47,6 +72,7 @@ export default function ScopeBar({
   collapsed = false,
   count = 157,
   major = 6,
+  mobileEvery = 1,
   majorLength = "1rem",
   minorLength = "0.375rem",
   align = "center",
@@ -73,16 +99,20 @@ export default function ScopeBar({
         // exactly on the centre line (under the crosshair), and every tick has
         // a twin the same distance away on the other side, so the two halves —
         // and therefore the two screen edges — mirror each other.
-        const isMajor = Math.abs(i - mid) % major === 0;
+        const offset = Math.abs(i - mid);
+        const isMajor = offset % major === 0;
+        // Dropped below lg — see `mobileEvery`. Derived from the index, never
+        // from the viewport, so the server and the client agree on it.
+        const thinned = offset % mobileEvery !== 0;
         return (
           <span
             key={i}
             data-tick
             data-tick-major={isMajor || undefined}
             style={{ height: isMajor ? majorLength : minorLength }}
-            className={`w-px shrink-0 ${collapsed ? "scale-y-0" : ""} ${
-              isMajor ? "bg-foreground/60" : "bg-foreground/25"
-            }`}
+            className={`w-px shrink-0 ${thinned ? "max-lg:hidden" : ""} ${
+              collapsed ? "scale-y-0" : ""
+            } ${isMajor ? "bg-foreground/60" : "bg-foreground/25"}`}
           ></span>
         );
       })}

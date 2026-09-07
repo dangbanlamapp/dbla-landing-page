@@ -108,7 +108,7 @@ export default function Intro() {
           </p>
           <p
             data-split="up"
-            className="heading-style max-w-[32ch] text-center text-3xl lg:text-3xl"
+            className="heading-style max-w-[32ch] text-center text-xl lg:text-3xl"
           >
             Every business deserves to compete in the digital world, not just
             the ones with a tech team.{" "}
@@ -117,7 +117,7 @@ export default function Intro() {
         <div className="flex h-full items-start justify-center">
           <p
             data-split="up"
-            className="heading-style max-w-[32ch] text-center text-3xl text-accent lg:text-3xl"
+            className="heading-style max-w-[32ch] text-center text-xl text-accent lg:text-3xl"
           >
             That&apos;s the gap we close.
           </p>

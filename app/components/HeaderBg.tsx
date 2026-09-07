@@ -296,7 +296,7 @@ export default function HeaderBg() {
             className="absolute inset-0 flex flex-col items-center justify-center"
           >
             <div className="relative flex h-5 w-5 items-center justify-center">
-              <div className="h-1.75 w-1.75 rounded-full bg-black"></div>
+              <div className="h-1 w-1 rounded-full bg-black lg:h-1.5 lg:w-1.5"></div>
               <div className="absolute inset-0 flex items-center">
                 <div className="h-px w-full bg-black"></div>
               </div>

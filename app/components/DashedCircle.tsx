@@ -92,7 +92,7 @@ export default function DashedCircle({
         {dotPositions.map((position) => (
           <div
             key={position}
-            className={`absolute ${position} h-1.5 w-1.5 rounded-full bg-black`}
+            className={`absolute ${position} h-1 w-1 rounded-full bg-black lg:h-1.5 lg:w-1.5`}
           ></div>
         ))}
         {label && (

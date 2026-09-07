@@ -54,7 +54,7 @@ export default function Header() {
        * on an ancestor turns any descendant's `position: fixed` into an
        * absolute, and MenuPanel is exactly that kind of descendant.
        */}
-      <header className="pointer-events-none fixed inset-x-0 top-space--1x z-50">
+      <header className="pointer-events-none fixed inset-x-0 top-space--2x lg:top-space--1x z-50">
         {/* w-[90vw] is the site's gutter — the footer's rows and the panel's
             own nav use the same measure, so the logo lines up with the menu
             links below it and with the copyright line far down the page.
