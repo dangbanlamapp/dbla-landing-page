@@ -90,7 +90,7 @@ export default function WhyUs() {
   // not the whole column (which the parallax below already owns).
   const quote = useRef<HTMLDivElement>(null);
 
-  // The fills, in render order. Collected by ref rather than re-queried each
+  // The fills, in render orde. Collected by ref rather than re-queried each
   // run because the progress tween needs the exact element for the active
   // slide, and a selector would depend on the row's DOM order staying the
   // array's order.

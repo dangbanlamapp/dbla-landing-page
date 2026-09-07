@@ -216,11 +216,7 @@ export default function OurMotto() {
           <div className="h-[150vh] w-px bg-black opacity-10"></div>
         </div>
       </div>
-      {/* Ships hidden and is unhidden by a gsap.set once the entrance has been
-          built — see that line for why. Note this has to stay `invisible`
-          (visibility), not `opacity-0`: SplitText measures line boxes when it
-          splits, and a display- or layout-affecting hide would give it nothing
-          to measure. */}
+ 
       <div
         ref={copy}
         className="invisible flex flex-col items-center justify-center px-space-base"
@@ -233,13 +229,13 @@ export default function OurMotto() {
         </p>
         <p
           data-split="up"
-          className="heading-style text-center text-4xl lg:text-4xl"
+          className="heading-style text-center text-xl lg:text-4xl"
         >
           More than just products
         </p>{" "}
         <h2
           data-split="up"
-          className="heading-style text-center text-4xl lg:text-4xl"
+          className="heading-style text-center text-xl lg:text-4xl"
         >
           we build <span className="text-accent">results</span> that <br />{" "}
           matter to your business.

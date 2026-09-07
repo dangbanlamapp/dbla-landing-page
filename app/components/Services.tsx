@@ -668,7 +668,14 @@ export default function Services() {
           className="aspect-square h-[80vh] scale-0 rounded-full bg-background"
         ></div>
       </div>
-      <ScopeBar id="scope-bar" collapsed />
+      {/*
+        157 ticks across a phone is a 1.75px gap between 1px lines, which reads
+        as a solid rule rather than as graduations. Every other tick is dropped
+        below lg, leaving 79 at a 4.5px gap — and 2 divides the major of 6, so
+        every long graduation, including the ones on the centre line and on both
+        screen edges, survives the thinning.
+      */}
+      <ScopeBar id="scope-bar" collapsed mobileEvery={2} />
       <div
         ref={centerCross}
         id="center-cross"
