@@ -586,7 +586,7 @@ export default function Services() {
     <section
       id="services"
       ref={container}
-      className="relative mt-[-150vh] h-screen overflow-hidden"
+      className="relative h-screen overflow-hidden lg:mt-[-150vh]"
     >
       {/*
         vmax, not vw, and that is what makes the orange actually flood the

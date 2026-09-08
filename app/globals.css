@@ -122,20 +122,12 @@
   html {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    overflow-x: hidden;
 
-    /* No scrollbar on the document. Deliberately scoped to the root scroller
-       and not to `*`, so any inner panel marked data-lenis-prevent keeps a
-       visible one — that is the only affordance telling a reader it scrolls.
+    overflow-x: clip;
 
-       This also removes a flash the load lock would otherwise cause: ScrollLock
-       stops Lenis, which puts `overflow: clip` on <html>, and on a platform
-       with classic overlay-less scrollbars losing the gutter widens the
-       viewport by ~15px and reflows the page for the length of the lock. */
     scrollbar-width: none; /* Firefox, Chrome 121+, Safari 18.2+ */
   }
-  /* Older Chrome / Safari, which predate scrollbar-width. The root scroller
-     reads this off <html>. */
+
   html::-webkit-scrollbar {
     display: none;
   }
@@ -217,9 +209,6 @@
     --sweep-1: 0deg;
     --sweep-2: 0deg;
     --sweep-3: 0deg;
-
-    /* How soft the moving edge is. One number for all four wedges, so a corner
-       cannot end up sharper than the one beside it. */
     --sweep-feather: 0.5deg;
 
     mask-image:

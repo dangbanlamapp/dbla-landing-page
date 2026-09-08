@@ -199,10 +199,25 @@ export default function OurMotto() {
     // The inset class matches the tween's start value so the server-rendered
     // frame is already closed — no flash of a full-height section before GSAP
     // runs. Keep the two in step: they are the same shape written twice.
+    // overflow-x-clip, NOT overflow-hidden: the y-line below is deliberately
+    // 150vh tall inside a 101vh section and is meant to run past the bottom
+    // edge, so the vertical axis has to stay visible. `clip` on one axis with
+    // `visible` on the other is the one overflow pairing CSS honours as
+    // written — `hidden` would silently promote the other axis to `auto` and
+    // turn this into a scroll container.
+    //
+    // What it contains: #right-outie is a DashedCircle, and DashedCircle sizes
+    // its ring by HEIGHT on an aspect-square box, so `size="58vh"` is a WIDTH
+    // of 58vh too. On any phone that is wider than the screen — 490px against
+    // a 390px viewport on a 390x844 handset — and this section had nothing
+    // clipping it, so the ring pushed the document's scroll width out and the
+    // whole page could be panned sideways. Desktop never showed it: 58vh is
+    // 626px against a 1920px viewport, and the root scrollbar is hidden, so
+    // there was no bar to reveal the extra width.
     <section
       ref={container}
       id="our-motto"
-      className="relative mt-[-75vh] flex h-[101vh] flex-col items-center justify-end bg-background pt-space-4x lg:justify-start"
+      className="relative mt-[-75vh] flex h-[101vh] flex-col items-center justify-end overflow-x-clip bg-background pt-space-4x lg:justify-start"
     >
       <div className="absolute inset-0">
         <DashedCircle dots="vertical" id="right-outie" spin={0} size="58vh" />
@@ -216,7 +231,7 @@ export default function OurMotto() {
           <div className="h-[150vh] w-px bg-black opacity-10"></div>
         </div>
       </div>
- 
+
       <div
         ref={copy}
         className="invisible flex flex-col items-center justify-center px-space-base"

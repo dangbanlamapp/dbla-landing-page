@@ -23,12 +23,39 @@ export default function Hero() {
 
       // Hold the hero against the top for one viewport of scrolling, which is
       // the room the exit tween needs before Intro slides up over it.
-      ScrollTrigger.create({
-        trigger: container.current,
-        start: "top top",
-        end: "+=100%",
-        pin: true,
-        pinSpacing: false,
+      //
+      // Desktop only. Pinning costs a phone more than it buys it: the pin puts
+      // `position: fixed` on the hero, and a fixed element is the one thing a
+      // mobile browser cannot scroll — which is what keeps the URL bar from
+      // collapsing and makes the gesture feel dead for a full viewport at the
+      // top of the page. Below lg the hero simply scrolls away.
+      //
+      // The pin is the whole reason this trigger exists, so below lg it is not
+      // created at all rather than built with `pin: false` and left doing
+      // nothing. Nothing else goes with it: the exit tweens hang off their own
+      // trigger further down, keyed to an absolute scroll position, so they
+      // still play — the hero now animates out while it travels rather than
+      // while it is held. pinSpacing was already false, so the document height
+      // is identical either way.
+      //
+      // gsap.matchMedia rather than a one-shot innerWidth test, for the reason
+      // spelled out in OurMotto: it reverts what it built the instant the query
+      // stops matching, so crossing lg — or rotating a tablet — unpins cleanly
+      // instead of stranding the hero fixed. Its constructor registers on the
+      // enclosing gsap.context(), so useGSAP's cleanup still owns it.
+      //
+      // 64rem is Tailwind's lg, the same line the grid below collapses on: the
+      // hero stops being pinned exactly when it stops being two columns.
+      const mm = gsap.matchMedia();
+
+      mm.add("(min-width: 64rem)", () => {
+        ScrollTrigger.create({
+          trigger: container.current,
+          start: "top top",
+          end: "+=100%",
+          pin: true,
+          pinSpacing: false,
+        });
       });
 
       // Each heading declares which way its lines travel in data-split, so the
