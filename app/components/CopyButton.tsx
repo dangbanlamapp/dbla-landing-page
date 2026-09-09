@@ -95,7 +95,13 @@ export default function CopyButton({
       onClick={onClick}
       aria-label={`Copy ${label}`}
       title={`Copy ${label}`}
-      className={`flex cursor-pointer items-center gap-space--2x text-white transition-colors hover:text-foreground focus-visible:text-foreground ${className}`}
+      // No colour of its own. It is printed on the menu's orange sheet and on
+      // the contact panel's orange in two different pairs, and appending one
+      // through `className` could not reliably beat a baked-in `text-white`:
+      // two utilities setting the same property are settled by their order in
+      // the generated stylesheet, not in the class attribute. So it inherits,
+      // and the caller passes the colour along with its hover/focus states.
+      className={`flex cursor-pointer items-center gap-space--2x transition-colors ${className}`}
     >
       <span className="flex items-center text-sm">
         {copied ? CheckIcon : CopyIcon}

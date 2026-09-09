@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
+import BackHeader from "@/app/components/BackHeader";
 import Contact from "@/app/components/Contact";
-import Footer from "@/app/components/Footer";
-import Header from "@/app/components/Header";
 
 export const metadata: Metadata = {
   title: "Contact — DBLA",
@@ -10,31 +9,28 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   /*
-    Same three-part composition as page.tsx, and the parts are not
-    interchangeable — see the long note there.
+    No Footer here, unlike page.tsx, and that removes a whole mechanism rather
+    than one component: the footer is `fixed` at -z-1 and is revealed by main
+    sliding off it, which needs main to carry an opaque `bg-background` and a
+    `relative z-1` to win the paint order, plus the h-screen runway the footer
+    renders ahead of itself to buy the scroll distance. None of that has any
+    work to do now, so main is left plain — the beige comes from body's
+    background propagating to the canvas, as it did before main ever needed to
+    be a sheet.
 
-    Header first: the bar is `position: fixed` so its own order is moot, but
-    MenuPanel is a descendant of it and drops in at z-40, and main paints at
-    z-1. main has to be the later sibling for the panel to cover the page.
+    BackHeader in place of Header, which drops the menu and everything holding
+    it up — the `open` state, the Escape listener and MenuPanel itself, i.e. all
+    of the client JavaScript this route was shipping. Nothing on this page is
+    interactive yet, so it now hydrates nothing at all.
 
-    Footer OUTSIDE main and after it: it is `fixed` at -z-1 and never moves.
-    main's `bg-background` is the opaque sheet that hides it, and `relative z-1`
-    settles the paint order between two viewport-fixed siblings that DOM order
-    alone would resolve the wrong way round. Footer renders its own h-screen
-    runway ahead of itself, which is the scroll distance the reveal is
-    performed over — a fixed element adds no document height of its own.
-
-    That runway is also the whole reason main does not need extra height here.
-    Contact is min-h-dvh, so the page is one viewport of content and one of
-    reveal, and main clears the fold exactly as the last of the footer arrives.
+    Contact is exactly one viewport tall, so this route does not scroll.
   */
   return (
     <>
-      <Header />
-      <main className="relative z-1 bg-background">
+      <BackHeader />
+      <main>
         <Contact />
       </main>
-      <Footer />
     </>
   );
 }

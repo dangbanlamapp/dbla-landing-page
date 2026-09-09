@@ -1,3 +1,4 @@
+import ContactInfo from "./ContactInfo";
 import DashedCircle from "./DashedCircle";
 import { PILL } from "./pill";
 
@@ -45,29 +46,40 @@ export default function Contact() {
     <section
       id="contact"
       /**
-       * overflow-hidden clips the ring, which is deliberately wider than the
-       * viewport — html already carries `overflow-x: hidden`, but leaning on
-       * that would let the circle stretch the page's scroll width on any
-       * ancestor that ever gets its own scroll container.
+       * h-svh, and the unit is the whole point of "fits in the viewport".
        *
-       * justify-center-safe, not justify-center. The composition is taller than
-       * a short laptop viewport, and plain centring splits the overflow evenly
-       * — which pushes the top of the heading off the top of the screen and out
-       * of reach, since there is no scroll above a section's own start. The
-       * `safe` keyword falls back to flex-start the moment the content stops
-       * fitting, so it centres where there is room and never clips.
+       * svh is the SMALL viewport — the height the page has while the mobile
+       * URL bar is still showing — so the composition fits at the worst moment
+       * and never has to move. dvh fits too, but it re-lays the whole panel out
+       * every time the bar collapses or returns, and a page with no scroll of
+       * its own would jump for no reason a reader could see. lvh is the trap:
+       * it is the height available only AFTER the bar goes away, so at load the
+       * bottom of the form sits under the browser chrome with no scroll to
+       * reach it. Same reasoning as Hero.
        *
-       * The top pad is a calc rather than a vh for the same class of reason: it
-       * is there to clear the fixed header bar, and that bar is sized by a rem
-       * type step, so it does not shrink when the viewport does. 4rem is the
-       * bar plus air; the 2vh on top is the part that may breathe.
+       * NOT overflow-hidden. Clipping lives on the drawn layer below, which is
+       * the only thing that needs it. If the content ever does outgrow a very
+       * short viewport, it spills out of this box and stays reachable by
+       * scrolling — clipping here would silently eat the submit button instead.
+       *
+       * justify-center-safe, not justify-center, for the other half of that:
+       * plain centring splits any overflow evenly and pushes the top of the
+       * heading off the top of the screen, where nothing can scroll up to it.
+       * `safe` falls back to flex-start the moment the content stops fitting.
+       *
+       * The top pad is a calc rather than a vh because it exists to clear the
+       * fixed header bar, and that bar is sized by a rem type step — it does
+       * not shrink when the viewport does. 4rem is the bar plus air; the 2vh on
+       * top is the part that may breathe.
        */
-      className="relative flex min-h-dvh flex-col justify-center-safe overflow-hidden px-[1vw] pt-[calc(4rem+2vh)] pb-[6vh]"
+      className="relative flex h-svh flex-col justify-center-safe px-[1vw] pt-[calc(4rem+2vh)] pb-[4vh]"
     >
-      {/* Drawn layer, behind everything. aria-hidden and not merely decorative
-          by convention — none of it is content, and the ring's two dots would
-          otherwise be announced as empty structure. */}
-      <div aria-hidden className="absolute inset-0">
+      {/* Drawn layer, behind everything, and the one box that clips: the ring
+          is deliberately wider than the viewport, and without a clip here it
+          would stretch the page's scroll width. aria-hidden and not merely
+          decorative by convention — none of it is content, and the ring's two
+          dots would otherwise be announced as empty structure. */}
+      <div aria-hidden className="absolute inset-0 overflow-hidden">
         {/* Bigger than the viewport in both axes, so only four arcs cut the
             corners and no reader ever sees the ring close. max() rather than
             vmax: vmax alone collapses to the *short* side on a landscape
@@ -125,15 +137,37 @@ export default function Contact() {
           No padding of its own: each column owns its insets, because the two
           are not symmetric. The left runs its text right up to the divider,
           the right holds the form off it by more.
+
+          Those insets are what keep the section inside one viewport, so they
+          are viewport-relative at lg and fixed steps below it. A vh pad cannot
+          push the panel past a screen it is measured against; the space-6x this
+          replaced was 120px a side no matter how short the screen was, which is
+          most of a 600px laptop before a single field is drawn. Below lg the
+          columns stack and there is no room for that generosity in the first
+          place, so the small steps do the same job by being small.
         */}
         <div className={`${COLUMNS} w-full bg-accent`}>
-          {/* pt-space-4x also has to clear the heading's 0.3em overhang — at
-              the largest step that is ~29px against space-4x's 48–60. */}
-          <div className="flex flex-col items-center px-space-2x pt-space-4x pb-space-4x text-center lg:items-end lg:pr-space-2x lg:pb-space-6x lg:text-right">
-            <p className="max-w-[46ch] text-base leading-body">
+          {/* The top pad also has to clear the heading's 0.3em overhang — at
+              the largest step that is ~29px, which space-3x covers. */}
+          <div className="flex flex-col items-center justify-between px-space-2x pt-space-3x pb-space-2x text-center lg:items-end lg:pt-[8vh] lg:pr-space-2x lg:pb-[8vh] lg:text-right">
+            <p className="max-w-[46ch] text-base leading-body pt-space-base">
               Réservez un appel découverte de 15 minutes. On parlera de votre
               projet, vos objectifs, et si on est le bon partenaire.
             </p>
+
+            {/* The same block the menu prints, in the other colourway: this
+                panel is orange under the page's dark foreground rather than the
+                menu sheet's beige-on-orange, so the pair is inverted — dark
+                text resolving to beige on hover.
+
+                `align` differs from the menu's for the one reason the prop
+                exists: this column centres its text below lg, where the menu
+                stacks it left. Both flush right at lg. */}
+            <ContactInfo
+              align="items-center lg:items-end"
+              link="text-foreground hover:text-background focus-visible:text-background"
+              className="mt-space-2x text-base lg:mt-space-3x"
+            />
           </div>
 
           {/*
@@ -143,8 +177,12 @@ export default function Contact() {
             page's own vertical rule behind it, so the one line appears to pass
             through the orange. Move either the panel's width off centre or
             COLUMNS off 1fr 1fr and the two separate by exactly that error.
+
+            This is also the column that sets the panel's height — it is the
+            taller of the two — so its padding is the lever if the fit ever
+            needs adjusting.
           */}
-          <div className="flex flex-col justify-center px-space-2x py-space-4x lg:border-l lg:border-black/15 lg:py-space-6x lg:pr-space-6x lg:pl-space-2x">
+          <div className="flex flex-col justify-center px-space-2x py-space-3x lg:border-l lg:border-black/15 lg:py-[8vh] lg:pr-space-6x lg:pl-space-2x">
             {/*
               Real inputs, no wiring — the submit path is still to be built, so
               the button is a `button` and not a `submit`: a submit inside a
@@ -152,7 +190,7 @@ export default function Contact() {
               typed, which is a worse placeholder than a dead button. Swap the
               type and add the action together.
             */}
-            <form className="flex flex-col gap-space-2x">
+            <form className="flex flex-col gap-space-base lg:gap-space-2x">
               {FIELDS.map((field) => (
                 <div key={field.id}>
                   {/* The visible text is the placeholder, so the label has to
@@ -174,7 +212,7 @@ export default function Contact() {
 
               <button
                 type="button"
-                className={`${PILL} mt-space-3x self-start bg-background text-foreground`}
+                className={`${PILL} mt-space-2x self-start bg-background text-foreground lg:mt-space-3x`}
               >
                 Contact us
               </button>

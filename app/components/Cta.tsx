@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -269,12 +270,12 @@ export default function Cta() {
               Book a free call and let's talk through your goals, your
               challenges, and how we can help your business thrive.
             </p>
-            <a
+            <Link
               className="rounded-md bg-accent px-space-2x py-space--2x text-md font-bold tracking-tighter uppercase"
-              href=""
+              href="/contact"
             >
               Contact us
-            </a>
+            </Link>
           </div>
         </div>
       </section>
