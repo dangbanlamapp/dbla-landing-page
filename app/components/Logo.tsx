@@ -1,5 +1,9 @@
-// No "use client": the mark is static markup. Add the directive (and the
-// useGSAP/scope shape the other sections use) only once it actually animates.
+// No "use client" of its own: the mark is static markup, and its only handler
+// is one Header hands down — Header is already a client component, so this
+// compiles into the client bundle with it either way. Add the directive (and
+// the useGSAP/scope shape the other sections use) only once it animates itself.
+
+import Link from "next/link";
 
 /**
  * Purely the mark and its link — Header owns where it sits, and now its
@@ -7,6 +11,13 @@
  * `currentColor` here has to be settable from outside. It carried the
  * `fixed` shell itself while it was a lone corner element; now that it is one
  * cell of the bar, positioning it from in here would fight the grid.
+ *
+ * The mark is a real route link to `/`, not a `#` placeholder, because the bar
+ * now rides above pages other than the homepage. `onClick` exists for the same
+ * reason the panel's own links take one: the bar sits at z-50 over the open
+ * panel at z-40, so this stays clickable while the menu is down, and a
+ * client-side route change leaves Header mounted with `open` still true — the
+ * panel would stay draped over the page it navigated to.
  *
  * public/logo.svg is inlined rather than pulled in through next/image, for the
  * same reason the footer wordmark is: the exported file hard-codes `black` on
@@ -18,9 +29,20 @@
  * browser derives the intrinsic aspect ratio from, so `h-auto` has a ratio to
  * resolve against once the width class takes over.
  */
-export default function Logo({ className }: { className?: string }) {
+export default function Logo({
+  className,
+  onNavigate,
+}: {
+  className?: string;
+  onNavigate?: () => void;
+}) {
   return (
-    <a href="#" aria-label="DBLA — home" className={`block ${className ?? ""}`}>
+    <Link
+      href="/"
+      onClick={onNavigate}
+      aria-label="DBLA — home"
+      className={`block ${className ?? ""}`}
+    >
       <svg
         width="89"
         height="18"
@@ -48,6 +70,6 @@ export default function Logo({ className }: { className?: string }) {
           fill="currentColor"
         />
       </svg>
-    </a>
+    </Link>
   );
 }

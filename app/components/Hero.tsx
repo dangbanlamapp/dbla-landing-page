@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Link from "next/link";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { SplitText } from "gsap/SplitText";
@@ -44,8 +45,7 @@ export default function Hero() {
       // instead of stranding the hero fixed. Its constructor registers on the
       // enclosing gsap.context(), so useGSAP's cleanup still owns it.
       //
-      // 64rem is Tailwind's lg, the same line the grid below collapses on: the
-      // hero stops being pinned exactly when it stops being two columns.
+     
       const mm = gsap.matchMedia();
 
       mm.add("(min-width: 64rem)", () => {
@@ -198,13 +198,13 @@ export default function Hero() {
           We are a product studio that helps non-technical founders go digital,
           with a focus on business outcomes
         </p>
-        <a
+        <Link
           data-fade
           className="rounded-md bg-accent px-space-2x py-space--2x text-base font-bold tracking-tighter uppercase sm:text-md"
-          href=""
+          href="/contact"
         >
           Contact us
-        </a>
+        </Link>
       </div>
     </div>
   );

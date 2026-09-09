@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 import { useLenis } from "lenis/react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -8,7 +9,7 @@ import { CustomEase } from "gsap/CustomEase";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { LEGAL_LINKS, YEAR } from "./legal";
 import { PILL } from "./pill";
-import CopyButton from "./CopyButton";
+import ContactInfo from "./ContactInfo";
 
 gsap.registerPlugin(useGSAP, CustomEase, ScrollTrigger);
 
@@ -57,41 +58,12 @@ const NAV_LINKS = [
   { label: "Home", href: "#" },
   { label: "About", href: "#" },
   { label: "Services", href: "#" },
-  { label: "Contact", href: "#footer" },
+  { label: "Contact", href: "/contact" },
 ];
 
-const EMAIL = "contact@dbla.com";
-const PHONE = "(+94) 123 456 789";
-
-/** href is a placeholder — the real profile URLs are not wired up yet. */
-const SOCIAL_LINKS = [
-  { label: "linkedIn", href: "#" },
-  { label: "instagram", href: "#" },
-  { label: "tiktok", href: "#" },
-];
-
-function ContactDetail({
-  label,
-  value,
-  copyLabel,
-}: {
-  label: string;
-  value: string;
-  copyLabel: string;
-}) {
-  return (
-    <div className="flex flex-col items-start lg:items-end">
-      <p>{label}</p>
-      <CopyButton
-        value={value}
-        label={copyLabel}
-        className="flex-row-reverse lg:flex-row"
-      >
-        <span className="heading-style text-md font-normal">{value}</span>
-      </CopyButton>
-    </div>
-  );
-}
+/** In-page hashes stay plain anchors so Lenis keeps owning the scroll (its
+ *  `anchors: { offset: -80 }`); only real routes go through the router. */
+const isRoute = (href: string) => href.startsWith("/");
 
 export default function MenuPanel({
   open,
@@ -213,58 +185,43 @@ export default function MenuPanel({
           <div className="flex flex-col items-start gap-space-base">
             <nav aria-label="Main">
               <ul className="flex flex-col">
-                {NAV_LINKS.map(({ label, href }) => (
-                  <li key={label}>
-                    <a
-                      href={href}
-                      onClick={onNavigate}
-                      className="heading-style block text-2xl transition-colors hover:text-foreground lg:text-5xl"
-                    >
-                      {label}
-                    </a>
-                  </li>
-                ))}
+                {NAV_LINKS.map(({ label, href }) => {
+                  // Same element and styles either way — Link only when the
+                  // href leaves the page, so the route change is client-side.
+                  const Tag = isRoute(href) ? Link : "a";
+
+                  return (
+                    <li key={label}>
+                      <Tag
+                        href={href}
+                        onClick={onNavigate}
+                        className="heading-style block text-2xl transition-colors hover:text-foreground lg:text-5xl"
+                      >
+                        {label}
+                      </Tag>
+                    </li>
+                  );
+                })}
               </ul>
             </nav>
 
-            <a
-              href="#footer"
+            <Link
+              href="/contact"
               onClick={onNavigate}
               className={`${PILL} bg-foreground text-background lg:hidden`}
             >
               Get in touch
-            </a>
+            </Link>
           </div>
-          <div className="flex flex-col items-start justify-end gap-space-base lg:items-end">
-            <ContactDetail
-              label="email"
-              value={EMAIL}
-              copyLabel="email address"
-            />
-            <ContactDetail
-              label="phone"
-              value={PHONE}
-              copyLabel="phone number"
-            />
-            <div className="flex flex-col items-start lg:items-end">
-              <p>socials</p>
-              <nav aria-label="Social">
-                <ul className="flex flex-col items-start lg:items-end">
-                  {SOCIAL_LINKS.map(({ label, href }) => (
-                    <li key={label}>
-                      <a
-                        href={href}
-                        onClick={onNavigate}
-                        className="heading-style block text-md font-normal text-white transition-colors hover:text-foreground"
-                      >
-                        {label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            </div>
-          </div>
+          {/* Shared with the contact page — see ContactInfo. The sheet under
+              this is `bg-accent text-background`, so the labels come out beige
+              on orange for free and only the interactive text needs a pair
+              stated: white, resolving to the dark foreground on hover. */}
+          <ContactInfo
+            align="items-start lg:items-end"
+            link="text-white hover:text-foreground focus-visible:text-foreground"
+            onNavigate={onNavigate}
+          />
         </div>
 
         <div className="mx-auto flex w-[90vw] flex-col items-start gap-space--3x py-space--2x text-xs text-background lg:flex-row lg:items-end lg:gap-space-2x lg:py-space-base lg:text-sm">

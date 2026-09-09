@@ -186,35 +186,6 @@ export default function HeaderBg() {
         className="absolute top-0 -z-1 h-screen w-full overflow-hidden"
       >
         <div ref={rotator} className="relative h-full w-full">
-          {/* Lines run 150vmax rather than 100% so they still reach past every
-              corner at any rotation — the viewport diagonal maxes out at
-              ~1.42vmax, so 1.5 always covers it.
-
-              vmax here is deliberate, and deliberately *not* what the rings
-              below use. Coverage is a question about the long axis, so this
-              length has to follow it; apparent size is a question about the
-              short axis, which is why every ring is vmin. The price of that
-              split is that the length these come to rest at no longer follows
-              from this number alone — `restScale` above is what closes the
-              gap, and the two are a pair: change 150 here and the two-thirds
-              in that derivation has to move with it. */}
-          {/* shrink-0 on every bar is load-bearing, not housekeeping. Each is
-              a flex item, and flex-shrink defaults to 1, so a `w-[150vmax]`
-              bar in a 100vw row starts with negative free space — and since an
-              empty div's min-content width is 0, `min-width: auto` never
-              clamps the shrink. It collapsed to exactly 100vw, silently.
-
-              The y-line was never affected: its 150vmax is a *height*, which
-              is the cross axis in a row, and the cross axis is not shrunk.
-              That is the whole asymmetry — one arm of the cross was 150vmax
-              and the other was 100vw.
-
-              It hid on desktop because a 100vw bar still reaches both edges
-              there, so nothing looked wrong until `cross-lines` rotates -90deg
-              and stands that arm upright: in a 390x844 portrait viewport it
-              then spanned 390px of an 844px height, i.e. 46%, and stopped mid
-              screen. Landscape 16:9 rotated it into 1920px of a 1080px height
-              and still covered, which is why it survived this long. */}
           <div id="cross-lines" ref={crossLines} className="absolute inset-0">
             <div
               id="y-line"
@@ -240,29 +211,6 @@ export default function HeaderBg() {
               className="h-px w-[150vmax] shrink-0 scale-x-0 bg-black opacity-10"
             ></div>
           </div>
-          {/* vmin, not vh: the rings take their diameter from the viewport's
-              short axis so the set keeps its proportions when that axis flips.
-              On a landscape desktop vmin *is* vh, so these are the same
-              diameters that were here before and nothing about that layout
-              changes. Only portrait moves — there 80vh used to resolve to 173%
-              of a phone's width, shoving the whole wave off both sides. */}
-          {/* The outermost ring is desktop-only. Below `lg` it is not merely
-              redundant, it is unreachable: at 250vmin its radius is 1.25x the
-              short axis, while the farthest corner of a portrait phone sits at
-              roughly 1.19x — the stroke closes outside the viewport entirely
-              and never lands on a pixel at rest.
-
-              It is not dead weight though, which is why this is a hide and not
-              a delete. The ring opens from zero in the intro, so it sweeps
-              through visible diameters on its way out, and `restScale` shrinks
-              the whole rotator at the end of the scroll, which brings it back
-              as the outer edge of the settled mark. Those two moments are what
-              this removes: on a small screen they read as clutter around type
-              that has far less room to breathe.
-
-              The wave is unaffected. `outer-circle` still grows to 250vmin, so
-              it simply becomes the outermost ring the reader actually sees
-              instead of handing off to one behind it. */}
           <DashedCircle
             dots="vertical"
             id="extra-circle"

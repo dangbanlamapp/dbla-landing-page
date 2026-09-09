@@ -7,12 +7,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import Logo from "./Logo";
 import MenuButton from "./MenuButton";
 import MenuPanel from "./MenuPanel";
+import { BAR_ROW, BAR_SHELL, BAR_SURFACE } from "./bar";
 import { PILL } from "./pill";
 
-const BAR_SURFACE = "rounded-md bg-background/15 backdrop-blur-2xl";
 export default function Header() {
   const [open, setOpen] = useState(false);
 
@@ -37,40 +38,32 @@ export default function Header() {
           than by order — the bar has to stay clickable over the open panel. */}
       <MenuPanel open={open} onNavigate={() => setOpen(false)} />
 
-      {/**
-       * The bar is fixed and full-bleed, so it spans a strip across the top of
-       * the page that is mostly empty — and an empty strip that still eats
-       * clicks would sit on top of HeaderBg for the whole scroll. pointer-events
-       * are switched off on the shell and back on for each of the three cells,
-       * which is what keeps the gaps between them transparent to the mouse.
-       *
-       * z-50 puts it above every section (HeaderBg's backdrop pins at -z-1)
-       * and above the menu panel at z-40, while staying under the halftone wash
-       * on body::after at z-index 99, so the texture passes over the bar like
-       * it does everything else. That overlay ignores pointer events itself, so
-       * nothing here is shadowed by it.
-       *
-       * inset-x-0 + mx-auto rather than `left-1/2 -translate-x-1/2`: a transform
-       * on an ancestor turns any descendant's `position: fixed` into an
-       * absolute, and MenuPanel is exactly that kind of descendant.
-       */}
-      <header className="pointer-events-none fixed inset-x-0 top-space--2x lg:top-space--1x z-50">
-        {/* w-[90vw] is the site's gutter — the footer's rows and the panel's
-            own nav use the same measure, so the logo lines up with the menu
-            links below it and with the copyright line far down the page.
+      {/* Shell, row and plate are shared with BackHeader — see bar.ts for why
+          each of the three is written where it is. */}
+      <header className={BAR_SHELL}>
+        {/* The columns are this bar's own, and they are [1fr auto 1fr] rather
+            than `grid-cols-3`: three equal fractions are minmax(auto, 1fr), so
+            a long enough CTA label grows its own column and quietly pushes the
+            middle one off-centre. Pinning the centre cell to `auto` and letting
+            the two sides split what is left keeps Menu dead centre on the
+            viewport no matter what flanks it. BAR_ROW's `flex … justify-between`
+            is what this falls back to below lg, where there is no CTA to centre
+            the toggle against.
 
-            The columns are [1fr auto 1fr] and not `grid-cols-3`: three equal
-            fractions are minmax(auto, 1fr), so a long enough CTA label grows
-            its own column and quietly pushes the middle one off-centre.
-            Pinning the centre cell to `auto` and letting the two sides split
-            what is left keeps Menu dead centre on the viewport no matter what
-            flanks it. */}
+            The plate is dropped while the panel is down: it is opaque, and a
+            translucent blur over a solid sheet reads as a smudge. */}
         <div
-          className={`mx-auto flex w-full grid-cols-[1fr_auto_1fr] items-center justify-between px-space-base py-space--2x lg:grid lg:w-[92vw] lg:px-[1vw] ${
+          className={`${BAR_ROW} grid-cols-[1fr_auto_1fr] lg:grid ${
             open ? "" : BAR_SURFACE
           }`}
         >
-          <Logo className="pointer-events-auto justify-self-start text-foreground" />
+          {/* Same closer the panel's own links get — the logo is reachable
+              over the open panel, and routing to `/` client-side would
+              otherwise leave this Header mounted with `open` still true. */}
+          <Logo
+            onNavigate={() => setOpen(false)}
+            className="pointer-events-auto justify-self-start text-foreground"
+          />
 
           <MenuButton
             open={open}
@@ -82,15 +75,16 @@ export default function Header() {
               and the Menu toggle. It is not dropped for those readers, only
               moved: MenuPanel prints the same CTA at the foot of its nav
               column behind a matching `lg:hidden`, so exactly one copy is
-              ever reachable and the small-screen route to the footer is a tap
-              deeper rather than missing. The two breakpoints are a pair —
-              move one and the CTA either doubles up or vanishes. */}
-          <a
-            href="#footer"
+              ever reachable and the small-screen route to it is a tap deeper
+              rather than missing. The two breakpoints are a pair — move one and
+              the CTA either doubles up or vanishes. So is the href: this and
+              the panel's copy have to point at the same place. */}
+          <Link
+            href="/contact"
             className={`${PILL} pointer-events-auto hidden justify-self-end bg-foreground text-background lg:block`}
           >
             Get in touch
-          </a>
+          </Link>
         </div>
       </header>
     </>
