@@ -45,7 +45,7 @@ export default function Hero() {
       // instead of stranding the hero fixed. Its constructor registers on the
       // enclosing gsap.context(), so useGSAP's cleanup still owns it.
       //
-     
+
       const mm = gsap.matchMedia();
 
       mm.add("(min-width: 64rem)", () => {

@@ -213,10 +213,6 @@ export default function MenuPanel({
               Get in touch
             </Link>
           </div>
-          {/* Shared with the contact page — see ContactInfo. The sheet under
-              this is `bg-accent text-background`, so the labels come out beige
-              on orange for free and only the interactive text needs a pair
-              stated: white, resolving to the dark foreground on hover. */}
           <ContactInfo
             align="items-start lg:items-end"
             link="text-white hover:text-foreground focus-visible:text-foreground"

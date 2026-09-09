@@ -150,7 +150,7 @@ export default function Contact() {
           {/* The top pad also has to clear the heading's 0.3em overhang — at
               the largest step that is ~29px, which space-3x covers. */}
           <div className="flex flex-col items-center justify-between px-space-2x pt-space-3x pb-space-2x text-center lg:items-end lg:pt-[8vh] lg:pr-space-2x lg:pb-[8vh] lg:text-right">
-            <p className="max-w-[46ch] text-base leading-body pt-space-base">
+            <p className="max-w-[46ch] pt-space-base text-base leading-body">
               Réservez un appel découverte de 15 minutes. On parlera de votre
               projet, vos objectifs, et si on est le bon partenaire.
             </p>
