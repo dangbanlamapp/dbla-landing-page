@@ -67,7 +67,7 @@ export default function ContactInfo({
 }) {
   return (
     <div
-      className={`flex justify-end gap-space-base ${align} ${className}`}
+      className={`flex flex-col justify-end gap-space-base ${align} ${className}`}
     >
       <Detail
         label="email"
