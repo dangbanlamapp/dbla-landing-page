@@ -4,14 +4,22 @@ import { useEffect, useRef } from "react";
 import { useLenis } from "lenis/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useRevealed } from "./Preloader";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// How long the document stays frozen after load. The hero entrance is the
-// thing being protected: its headings run a 0.5s delay + 1.5s tween, and the
-// supporting copy lands its last line at ~2.2s, so two seconds covers the part
-// that reads as "the page arriving".
-const LOCK_MS = 2000;
+// How long the document stays frozen, measured from the moment the preloader
+// lifts rather than from mount — the entrance this protects does not start
+// until then either. The hero headings run a 0.7s delay + 1.5s tween and the
+// supporting copy lands at ~2.3s, so this covers the entrance outright.
+//
+// The ceiling is set by HeaderBg, not by the hero: its intro fires its own
+// ScrollTrigger.refresh() on completion, and a clipped <html> is not a scroll
+// container, so it would measure no scrollable overflow at all. That intro
+// carries the same 0.7s delay and finishes at reveal + 3.2s, so there is room
+// above this. Move the hero delay and this should follow it, staying under
+// HeaderBg's finish.
+const LOCK_MS = 2300;
 
 /**
  * Freezes scrolling for the first moments of a page load and guarantees the
@@ -24,6 +32,7 @@ const LOCK_MS = 2000;
  */
 export default function ScrollLock() {
   const lenis = useLenis();
+  const revealed = useRevealed();
 
   // Absolute release time rather than a duration, so a Lenis instance swap
   // (ReactLenis rebuilds the instance whenever an option changes) or
@@ -63,10 +72,6 @@ export default function ScrollLock() {
     // and holding their input hostage is the worse end of the trade.
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    releaseAt.current ??= performance.now() + LOCK_MS;
-    const remaining = releaseAt.current - performance.now();
-    if (remaining <= 0) return;
-
     // Order matters. `stop()` puts `overflow: clip` on <html> (the
     // `.lenis-stopped` rule in lenis.css) — that is what blocks the scrollbar,
     // arrow keys and space bar as well as the wheel. Landing at 0 first means
@@ -74,8 +79,26 @@ export default function ScrollLock() {
     //
     // `force` because a re-run may find the instance already stopped, and
     // `scrollTo` ignores a stopped instance otherwise.
-    lenis.scrollTo(0, { immediate: true, force: true });
-    lenis.stop();
+    const hold = () => {
+      lenis.scrollTo(0, { immediate: true, force: true });
+      lenis.stop();
+    };
+
+    // While the curtain is up the page is held with no timer at all. The
+    // deadline below is deliberately not started here: it counts from the
+    // reveal, because that is when the entrance it protects begins. An
+    // open-ended hold is safe because the preloader always resolves — its
+    // asset wait is itself raced against a timeout.
+    if (!revealed) {
+      hold();
+      return () => lenis.start();
+    }
+
+    releaseAt.current ??= performance.now() + LOCK_MS;
+    const remaining = releaseAt.current - performance.now();
+    if (remaining <= 0) return;
+
+    hold();
 
     const timer = window.setTimeout(() => {
       lenis.start();
@@ -93,7 +116,7 @@ export default function ScrollLock() {
       // Never leave a destroyed-or-replaced instance holding the page clipped.
       lenis.start();
     };
-  }, [lenis]);
+  }, [lenis, revealed]);
 
   return null;
 }

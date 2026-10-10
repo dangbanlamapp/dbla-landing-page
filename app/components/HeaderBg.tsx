@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import DashedCircle from "./DashedCircle";
+import { useRevealed } from "./Preloader";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -40,6 +41,7 @@ const restScale = () => {
 };
 
 export default function HeaderBg() {
+  const revealed = useRevealed();
   const container = useRef<HTMLElement>(null);
   const pinLayer = useRef<HTMLDivElement>(null);
   const rotator = useRef<HTMLDivElement>(null);
@@ -48,6 +50,19 @@ export default function HeaderBg() {
 
   useGSAP(
     () => {
+      // Held until the preloader lifts, for the reason spelled out at the top
+      // of Hero's context: an early return costs one no-op pass and builds the
+      // backdrop exactly once, at the reveal, rather than parking the intro
+      // timeline and measuring the pin while the document is clipped.
+      //
+      // The intro's `onComplete` matters here too — it is what appends the ring
+      // wave to the scroll timeline and refreshes ScrollTrigger, and a clipped
+      // <html> is not a scroll container, so that refresh has to land after
+      // ScrollLock has released. With the delay below the intro runs from
+      // reveal + 0.7 to reveal + 3.2, and the lock lifts at reveal + 2.3. Keep
+      // that order if you retune either number.
+      if (!revealed) return;
+
       // Each ring carries its own target diameter in data-size, so the tween
       // always lands on the unit the markup declares (keeps it responsive).
       const rings = gsap.utils.toArray<HTMLElement>(
@@ -55,7 +70,17 @@ export default function HeaderBg() {
         container.current,
       );
 
-      const intro = gsap.timeline();
+      // Matches Hero's entrance delay, and for the same reason: the reveal
+      // fires as the curtain STARTS opening, so anything running from 0 is
+      // most of the way through by the time the orange has cleared at 1.225.
+      // Without this the ring wave was 74–94% grown before it was ever visible.
+      // Keep the two in step — the backdrop and the type are meant to arrive
+      // as one thing, and Hero's copy has the reasoning on why 0.7.
+      //
+      // On the timeline rather than spread across its children, so the
+      // choreography below — the `i * 0.25` ring stagger, the `"<"` rotations,
+      // the z-line at 0.8 — is untouched and stays readable as one sequence.
+      const intro = gsap.timeline({ delay: 0.7 });
 
       rings.forEach((ring, i) => {
         const size = ring.dataset.size;
@@ -176,7 +201,7 @@ export default function HeaderBg() {
         ScrollTrigger.refresh();
       });
     },
-    { scope: container },
+    { scope: container, dependencies: [revealed] },
   );
 
   return (
