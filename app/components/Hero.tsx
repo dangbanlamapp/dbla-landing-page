@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useRevealed } from "./Preloader";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
@@ -13,9 +14,27 @@ ScrollTrigger.config({ ignoreMobileResize: true });
 
 export default function Hero() {
   const container = useRef<HTMLDivElement>(null);
+  const revealed = useRevealed();
 
   useGSAP(
     () => {
+      // Nothing in this section exists until the preloader lifts.
+      //
+      // An early return rather than tweens built `paused: true`. With a
+      // dependency array and no `revertOnUpdate`, useGSAP defers cleanup to
+      // unmount and *adds* the callback to the same context on every change
+      // instead of reverting it — so this first pass contributes nothing and
+      // the whole section is built exactly once, at the reveal. Parking
+      // entrances instead would mean standing up the SplitText instances, the
+      // matchMedia pin and both triggers up front, then teaching `onSplit` —
+      // which also runs on every resize and font load, long after the reveal —
+      // when to park a tween and when to let it play.
+      //
+      // It also keeps every measurement out of the window where ScrollLock
+      // holds <html> at `overflow: clip`, which reports no scrollable overflow
+      // at all.
+      if (!revealed) return;
+
       // Absolute scroll position where the hero starts leaving — the pin keeps
       // the hero's top at the viewport top, so element-relative starts never
       // advance and a number is the only reliable measure. As a function it is
@@ -106,21 +125,43 @@ export default function Hero() {
               duration: 1.5,
               ease: "power3.out",
               stagger: 0.12,
-              delay: 0.5,
+              // Measured from the reveal, which fires as the curtain STARTS
+              // opening rather than after it has gone, so this is the one
+              // number that places the whole entrance against the preloader.
+              // HeaderBg's intro carries the same value — move them together or
+              // the backdrop and the type stop arriving as one thing.
+              //
+              // The window is narrow at both ends. The clip closes from the
+              // outside in and both headings straddle the centre, so they are
+              // the last thing uncovered — at about 0.83 — and the curtain is
+              // visually finished around 1.0 even though it does not formally
+              // end until 1.225. Later than ~0.85 and the lines sit visibly
+              // empty in their masks first, which is what 1.0 did: the entrance
+              // read as starting after the preloader rather than under it.
+              // Earlier than ~0.5 and it is most of the way through before
+              // anything is uncovered.
+              //
+              // 0.7 puts the lines 24% into their travel at the moment they
+              // become visible and 73% by the formal end, so the movement is
+              // already underway when the orange clears.
+              delay: 0.7,
             });
           },
         });
       });
 
-      // Both headings run in parallel: 1s tween + one 0.12s stagger step, so
-      // the supporting copy waits for the last line to land.
+      // Both headings run in parallel and each holds two lines, so the last one
+      // starts at 0.7 + 0.12 and lands at ~2.32s. This delay puts the copy's
+      // own last step (1.7 + 0.1 + 0.5) on the same beat — it tracks the
+      // heading delay a second behind, so move the two together or the copy
+      // stops landing with the lines.
       gsap.from("[data-fade]", {
         autoAlpha: 0,
         y: 16,
         duration: 0.5,
         ease: "power2.out",
         stagger: 0.1,
-        delay: 1.5,
+        delay: 1.7,
       });
 
       // Exit undoes that entrance — back down and out.
@@ -144,7 +185,7 @@ export default function Hero() {
           [...exits, fadeExit].forEach((exit) => exit?.reverse()),
       });
     },
-    { scope: container },
+    { scope: container, dependencies: [revealed] },
   );
 
   return (
@@ -155,7 +196,7 @@ export default function Hero() {
        * svh, not vh/dvh. On mobile `100vh` is the LARGE viewport — the height
        * the page only gets once the URL bar has scrolled away — so at load the
        * bottom row (paragraph + CTA) sits under the browser chrome, and
-       * ScrollLock's 2s freeze means the reader cannot scroll it into view.
+       * ScrollLock's 2.3s freeze means the reader cannot scroll it into view.
        * dvh would fix that but re-lays out the pinned hero every time the bar
        * collapses; svh always fits and never moves. The pin's `end: "+=100%"`
        * is measured off this element, so it follows whatever svh resolves to.
