@@ -2,16 +2,25 @@ import type { Metadata } from "next";
 import Header from "@/app/components/Header";
 import ProjectsIndex from "@/app/components/ProjectsIndex";
 import { contentKey, getProjects } from "@/sanity/lib/content";
+import { getTranslations } from "next-intl/server";
+import { pageLocale } from "@/i18n/locale";
 
-export const metadata: Metadata = {
-  // Bare, so the root layout's "%s | DBLA" template supplies the suffix.
-  title: "Projects",
-  description:
-    "Selected work from the studio — mobile apps, websites and web apps built for non-technical founders.",
-};
+export async function generateMetadata({
+  params,
+}: PageProps<"/[locale]/projects">): Promise<Metadata> {
+  const locale = await pageLocale(params);
+  const t = await getTranslations({ locale, namespace: "Metadata" });
+  return {
+    // Bare, so the root layout's "%s | DBLA" template supplies the suffix.
+    title: t("projectsTitle"),
+    description: t("projectsDescription"),
+  };
+}
 
-export default async function ProjectsPage() {
-  const projects = await getProjects();
+export default async function ProjectsPage({
+  params,
+}: PageProps<"/[locale]/projects">) {
+  const projects = await getProjects(await pageLocale(params));
 
   /*
     The homepage's Header, menu and all, rather than BackHeader. This is a

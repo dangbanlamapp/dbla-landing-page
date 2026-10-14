@@ -1,0 +1,112 @@
+{
+  "Metadata": {
+    "title": "DBLA | Studio sản phẩm số cho nhà sáng lập không chuyên công nghệ",
+    "description": "Chúng tôi thiết kế và xây dựng website, ứng dụng di động và web app cho các nhà sáng lập không chuyên về công nghệ, từ bản phác thảo đầu tiên đến ngày ra mắt.",
+    "projectsTitle": "Dự án",
+    "projectsDescription": "Những dự án chọn lọc của studio — ứng dụng di động, website và web app xây dựng cho các nhà sáng lập không chuyên về công nghệ.",
+    "contactTitle": "Liên hệ",
+    "contactDescription": "Đặt lịch gọi tư vấn 15 phút với studio."
+  },
+  "Common": {
+    "getInTouch": "Liên hệ ngay",
+    "contactUs": "Liên hệ với chúng tôi",
+    "viewProject": "Xem dự án",
+    "openProject": "Mở dự án {name}",
+    "allProjects": "Tất cả dự án",
+    "backToHome": "Về trang chủ",
+    "siteBy": "Thiết kế bởi",
+    "legal": "Pháp lý",
+    "language": "Ngôn ngữ"
+  },
+  "Nav": {
+    "main": "Điều hướng chính",
+    "home": "Trang chủ",
+    "about": "Giới thiệu",
+    "projects": "Dự án",
+    "contact": "Liên hệ",
+    "menu": "Menu",
+    "close": "Đóng",
+    "openMenu": "Mở menu",
+    "closeMenu": "Đóng menu",
+    "logo": "DBLA — trang chủ"
+  },
+  "ContactInfo": {
+    "email": "email",
+    "phone": "điện thoại",
+    "socials": "mạng xã hội",
+    "social": "Mạng xã hội",
+    "emailAddress": "địa chỉ email",
+    "phoneNumber": "số điện thoại",
+    "copy": "Sao chép {label}",
+    "copied": "đã sao chép"
+  },
+  "Hero": {
+    "titleStart": "Chúng tôi xây dựng<br></br> <accent>sản phẩm số</accent>",
+    "titleEnd": "giúp doanh nghiệp<br></br> <accent>tăng trưởng</accent>",
+    "body": "Chúng tôi là studio sản phẩm, đồng hành cùng các nhà sáng lập không chuyên về công nghệ trong hành trình chuyển đổi số, với trọng tâm là kết quả kinh doanh"
+  },
+  "Intro": {
+    "label": "sứ mệnh",
+    "statement": "Mọi doanh nghiệp đều xứng đáng cạnh tranh trong thế giới số, không chỉ những nơi có sẵn đội ngũ công nghệ.",
+    "gap": "Đó là khoảng trống chúng tôi lấp đầy."
+  },
+  "Services": {
+    "label": "dịch vụ",
+    "title": "Chúng tôi làm gì"
+  },
+  "Motto": {
+    "label": "phương châm",
+    "lead": "Không chỉ là sản phẩm",
+    "title": "chúng tôi tạo ra <accent>kết quả</accent><br></br> thực sự cho doanh nghiệp của bạn."
+  },
+  "Projects": {
+    "title": "dự án<br></br> tiêu biểu",
+    "intro": "Những dự án chọn lọc, từ bản phác thảo đầu tiên đến ngày ra mắt. Chọn một dự án để xem nó được hình thành ra sao.",
+    "overview": "Tổng quan",
+    "imageToCome": "Hình ảnh sắp có",
+    "next": "Dự án tiếp theo — {number}"
+  },
+  "WhyUs": {
+    "label": "vì sao chọn chúng tôi",
+    "title": "đội ngũ bạn có thể<br></br> <accent>tin cậy</accent>",
+    "testimonials": "Cảm nhận khách hàng",
+    "showTestimonial": "Xem cảm nhận {index} trên {total}",
+    "previous": "Cảm nhận trước",
+    "next": "Cảm nhận tiếp theo",
+    "expertiseTitle": "Chuyên môn dày dạn",
+    "expertiseBody": "Đội ngũ phát triển của chúng tôi có hơn 15 năm kinh nghiệm tại những công ty công nghệ uy tín hàng đầu thế giới.",
+    "teamTitle": "Một đội ngũ, trọn gói",
+    "teamBody": "Thiết kế, phát triển, ra mắt, cả marketing — tất cả dưới một mái nhà. Người trao đổi với bạn cũng chính là người xây dựng sản phẩm, nên không có gì bị thất lạc khi bàn giao.",
+    "resultsTitle": "Lấy kết quả làm thước đo",
+    "resultsBody": "Thành công của bạn là thước đo thành công của chúng tôi. Mọi quyết định đều quay về một câu hỏi: điều này có giúp doanh nghiệp của bạn tiến lên không?"
+  },
+  "Team": {
+    "label": "đội ngũ",
+    "title": "những con người<br></br> <accent>đứng sau sản phẩm</accent>",
+    "body": "Một đội ngũ nhỏ, giàu kinh nghiệm, đồng hành cùng sản phẩm của bạn từ bản phác thảo đầu tiên đến ngày ra mắt — và cả sau đó."
+  },
+  "Cta": {
+    "title": "Bước tiến số của bạn bắt đầu từ đây.",
+    "body": "Đặt lịch gọi miễn phí để cùng trao đổi về mục tiêu, thách thức và cách chúng tôi giúp doanh nghiệp của bạn phát triển."
+  },
+  "Contact": {
+    "title": "Cùng<br></br> trò chuyện",
+    "body": "Đặt lịch gọi tư vấn 15 phút. Chúng ta sẽ trao đổi về dự án, mục tiêu của bạn và liệu chúng tôi có phải là đối tác phù hợp.",
+    "name": "Tên của bạn",
+    "company": "Tên công ty",
+    "email": "Email"
+  },
+  "Footer": {
+    "hcmc": "TP. Hồ Chí Minh, Việt Nam",
+    "worldwide": "Làm việc toàn cầu.",
+    "paris": "Paris, Pháp",
+    "home": "trang chủ",
+    "about": "giới thiệu",
+    "services": "dịch vụ",
+    "contact": "liên hệ",
+    "tagline": "biến ý tưởng thành hiện thực"
+  },
+  "NotFound": {
+    "message": "Không tìm thấy trang này."
+  }
+}

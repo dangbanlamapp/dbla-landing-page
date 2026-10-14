@@ -8,6 +8,7 @@ import TransitionLink from "./TransitionLink";
 import Logo from "./Logo";
 import { BAR_ROW, BAR_SHELL, BAR_SURFACE } from "./bar";
 import { PILL } from "./pill";
+import { useTranslations } from "next-intl";
 
 /**
  * The bar for routes that are not the homepage: the mark, and one way back.
@@ -27,11 +28,13 @@ import { PILL } from "./pill";
  */
 export default function BackHeader({
   href = "/",
-  label = "Back to homepage",
+  label,
 }: {
   href?: string;
+  /** Defaults to "Back to homepage" in the current language. */
   label?: string;
 }) {
+  const common = useTranslations("Common");
   return (
     <header className={BAR_SHELL}>
       <div className={`${BAR_ROW} ${BAR_SURFACE}`}>
@@ -55,7 +58,7 @@ export default function BackHeader({
           href={href}
           className={`${PILL} pointer-events-auto bg-foreground text-background`}
         >
-          {label}
+          {label ?? common("backToHome")}
         </TransitionLink>
       </div>
     </header>

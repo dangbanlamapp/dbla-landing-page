@@ -14,6 +14,9 @@ import { defineQuery } from "next-sanity";
  * honour the editor's framing. The dimensions replace what StaticImageData
  * used to supply for free: sheets and slides are shown at their own aspect
  * ratio, and next/image needs a width and height for anything not `fill`.
+ *
+ * Every query takes `$locale` ("en" | "vi"), and every translated field goes
+ * through `loc` — see there.
  */
 
 // Interpolated into the queries below. TypeGen resolves template literals
@@ -28,13 +31,29 @@ const IMAGE = /* groq */ `
   hotspot
 `;
 
+/**
+ * A translated field, resolved for `$locale` and projected under its plain
+ * name. The Studio stores Vietnamese as a `_vi` twin beside the English field
+ * (`blurb` / `blurb_vi`); on a Vietnamese page an empty twin falls back to the
+ * English, so a half-translated document still renders whole rather than with
+ * holes in it. The result keeps the English field's type, which is what lets
+ * content.ts and every component stay exactly as they were.
+ *
+ * Generic and `as const` so it returns a literal type rather than `string`.
+ * sanityFetch picks its result type by matching the query's exact text
+ * against the map TypeGen writes, and one plain `string` in the template
+ * would widen the whole query to `string` and every result to `unknown`.
+ */
+const loc = <F extends string>(field: F) =>
+  /* groq */ `"${field}": select($locale == "vi" => coalesce(${field}_vi, ${field}), ${field})` as const;
+
 export const SITE_SETTINGS_QUERY = defineQuery(`
   *[_id == "siteSettings"][0]{
-    description,
+    ${loc("description")},
     email,
     phone,
-    socialLinks[]{ _key, label, href },
-    legalLinks[]{ _key, label, href }
+    socialLinks[]{ _key, ${loc("label")}, href },
+    legalLinks[]{ _key, ${loc("label")}, href }
   }
 `);
 
@@ -47,14 +66,14 @@ export const PROJECTS_QUERY = defineQuery(`
     _id,
     name,
     "slug": slug.current,
-    type,
-    blurb,
-    cardImage { ${IMAGE}, alt },
+    ${loc("type")},
+    ${loc("blurb")},
+    cardImage { ${IMAGE}, ${loc("alt")} },
     heroImage { ${IMAGE} }
   }
 `);
 
-/** For generateStaticParams. */
+/** For generateStaticParams. Slugs are shared by both languages. */
 export const PROJECT_SLUGS_QUERY = defineQuery(`
   *[_type == "project" && defined(slug.current)]{ "slug": slug.current }
 `);
@@ -66,27 +85,27 @@ export const PROJECT_QUERY = defineQuery(`
     _id,
     name,
     "slug": slug.current,
-    type,
-    blurb,
-    cardImage { ${IMAGE}, alt },
+    ${loc("type")},
+    ${loc("blurb")},
+    cardImage { ${IMAGE}, ${loc("alt")} },
     heroImage { ${IMAGE} },
-    wideImage { ${IMAGE}, alt },
-    headline,
-    intro,
-    facts[]{ _key, label, value },
+    wideImage { ${IMAGE}, ${loc("alt")} },
+    ${loc("headline")},
+    ${loc("intro")},
+    facts[]{ _key, ${loc("label")}, ${loc("value")} },
     sections[]{
       _key,
-      label,
-      lead,
-      body,
-      points[]{ _key, title, body },
-      coda,
+      ${loc("label")},
+      ${loc("lead")},
+      ${loc("body")},
+      points[]{ _key, ${loc("title")}, ${loc("body")} },
+      ${loc("coda")},
       figures[]{
         _key,
-        caption,
+        ${loc("caption")},
         kind,
-        placeholder,
-        image { ${IMAGE}, alt }
+        ${loc("placeholder")},
+        image { ${IMAGE}, ${loc("alt")} }
       }
     }
   }
@@ -95,10 +114,10 @@ export const PROJECT_QUERY = defineQuery(`
 export const SERVICES_QUERY = defineQuery(`
   *[_type == "service"] | order(orderRank) {
     _id,
-    label,
-    title,
-    blurb,
-    items
+    ${loc("label")},
+    ${loc("title")},
+    ${loc("blurb")},
+    ${loc("items")}
   }
 `);
 
@@ -106,10 +125,10 @@ export const TEAM_QUERY = defineQuery(`
   *[_type == "teamMember"] | order(orderRank) {
     _id,
     name,
-    role,
-    intro,
-    expertise,
-    skills[]{ _key, name, level },
+    ${loc("role")},
+    ${loc("intro")},
+    ${loc("expertise")},
+    skills[]{ _key, ${loc("name")}, level },
     avatar
   }
 `);
@@ -117,8 +136,8 @@ export const TEAM_QUERY = defineQuery(`
 export const TESTIMONIALS_QUERY = defineQuery(`
   *[_type == "testimonial"] | order(orderRank) {
     _id,
-    quote,
+    ${loc("quote")},
     name,
-    role
+    ${loc("role")}
   }
 `);

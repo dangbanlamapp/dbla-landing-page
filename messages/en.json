@@ -1,0 +1,112 @@
+{
+  "Metadata": {
+    "title": "DBLA | Product studio for non-technical founders",
+    "description": "We design and build websites, mobile apps and web apps for non-technical founders, from first sketch to launch.",
+    "projectsTitle": "Projects",
+    "projectsDescription": "Selected work from the studio — mobile apps, websites and web apps built for non-technical founders.",
+    "contactTitle": "Contact",
+    "contactDescription": "Book a 15-minute discovery call with the studio."
+  },
+  "Common": {
+    "getInTouch": "Get in touch",
+    "contactUs": "Contact us",
+    "viewProject": "View project",
+    "openProject": "Open {name}",
+    "allProjects": "All projects",
+    "backToHome": "Back to homepage",
+    "siteBy": "Site by",
+    "legal": "Legal",
+    "language": "Language"
+  },
+  "Nav": {
+    "main": "Main",
+    "home": "Home",
+    "about": "About",
+    "projects": "Projects",
+    "contact": "Contact",
+    "menu": "Menu",
+    "close": "Close",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "logo": "DBLA — home"
+  },
+  "ContactInfo": {
+    "email": "email",
+    "phone": "phone",
+    "socials": "socials",
+    "social": "Social",
+    "emailAddress": "email address",
+    "phoneNumber": "phone number",
+    "copy": "Copy {label}",
+    "copied": "copied"
+  },
+  "Hero": {
+    "titleStart": "We build<br></br> <accent>digital products</accent>",
+    "titleEnd": "that grow your<br></br> <accent>business</accent>",
+    "body": "We are a product studio that helps non-technical founders go digital, with a focus on business outcomes"
+  },
+  "Intro": {
+    "label": "our mission",
+    "statement": "Every business deserves to compete in the digital world, not just the ones with a tech team.",
+    "gap": "That's the gap we close."
+  },
+  "Services": {
+    "label": "our services",
+    "title": "What we do"
+  },
+  "Motto": {
+    "label": "our motto",
+    "lead": "More than just products",
+    "title": "we build <accent>results</accent> that<br></br> matter to your business."
+  },
+  "Projects": {
+    "title": "our<br></br> projects",
+    "intro": "Selected work, from first sketch to launch. Pick one to see how it came together.",
+    "overview": "Overview",
+    "imageToCome": "Image to come",
+    "next": "Next project — {number}"
+  },
+  "WhyUs": {
+    "label": "why us",
+    "title": "the team you can<br></br> <accent>count on</accent>",
+    "testimonials": "Testimonials",
+    "showTestimonial": "Show testimonial {index} of {total}",
+    "previous": "Previous testimonial",
+    "next": "Next testimonial",
+    "expertiseTitle": "Senior Expertise",
+    "expertiseBody": "Our developers bring 15+ years building at some of the world's most respected tech companies.",
+    "teamTitle": "One team fullstack",
+    "teamBody": "Design, development, launch, even marketing — all under one roof. The people you talk to are the people who build your product, so nothing gets lost in a handoff.",
+    "resultsTitle": "Driven by results",
+    "resultsBody": "We measure our success by yours. Every decision comes back to one question: does this move your business forward?"
+  },
+  "Team": {
+    "label": "our team",
+    "title": "the people behind<br></br> <accent>the work</accent>",
+    "body": "A small, senior crew that stays with your product from the first sketch to launch day — and long after."
+  },
+  "Cta": {
+    "title": "Your next step into digital starts here.",
+    "body": "Book a free call and let's talk through your goals, your challenges, and how we can help your business thrive."
+  },
+  "Contact": {
+    "title": "Let's<br></br> Talk",
+    "body": "Book a 15-minute discovery call. We'll talk through your project, your goals, and whether we're the right partner.",
+    "name": "Your name",
+    "company": "Your company name",
+    "email": "Email"
+  },
+  "Footer": {
+    "hcmc": "Hochiminh City, Vietnam",
+    "worldwide": "Working Worldwide.",
+    "paris": "Paris, France",
+    "home": "home",
+    "about": "about",
+    "services": "services",
+    "contact": "contact",
+    "tagline": "bring your ideas to life"
+  },
+  "NotFound": {
+    "message": "This page could not be found."
+  }
+}

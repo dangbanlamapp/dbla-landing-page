@@ -5,10 +5,12 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useTranslations } from "next-intl";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
 export default function Intro() {
+  const t = useTranslations("Intro");
   const container = useRef<HTMLElement>(null);
   const content = useRef<HTMLDivElement>(null);
 
@@ -135,14 +137,13 @@ export default function Intro() {
       >
         <div className="flex h-full flex-col items-center justify-end">
           <p data-split="up" className="text-sm text-secondary uppercase">
-            our mission
+            {t("label")}
           </p>
           <p
             data-split="up"
             className="heading-style max-w-[32ch] text-center text-xl lg:text-3xl"
           >
-            Every business deserves to compete in the digital world, not just
-            the ones with a tech team.{" "}
+            {t("statement")}
           </p>
         </div>
         <div className="flex h-full items-start justify-center">
@@ -150,7 +151,7 @@ export default function Intro() {
             data-split="up"
             className="heading-style max-w-[32ch] text-center text-xl text-accent lg:text-3xl"
           >
-            That&apos;s the gap we close.
+            {t("gap")}
           </p>
         </div>
       </div>

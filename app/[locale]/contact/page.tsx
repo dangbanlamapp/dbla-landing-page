@@ -2,16 +2,28 @@ import type { Metadata } from "next";
 import BackHeader from "@/app/components/BackHeader";
 import Contact from "@/app/components/Contact";
 import { getSiteSettings } from "@/sanity/lib/content";
+import { getTranslations } from "next-intl/server";
+import { pageLocale } from "@/i18n/locale";
 
-export const metadata: Metadata = {
-  title: "Contact — DBLA",
-  description: "Book a 15-minute discovery call with the studio.",
-};
+export async function generateMetadata({
+  params,
+}: PageProps<"/[locale]/contact">): Promise<Metadata> {
+  const locale = await pageLocale(params);
+  const t = await getTranslations({ locale, namespace: "Metadata" });
+  return {
+    // Bare, like /projects: the root layout's template adds " | DBLA". This
+    // used to say "Contact — DBLA" and so printed the brand twice.
+    title: t("contactTitle"),
+    description: t("contactDescription"),
+  };
+}
 
-export default async function ContactPage() {
+export default async function ContactPage({
+  params,
+}: PageProps<"/[locale]/contact">) {
   // The same settings the root layout fetched — Next dedupes the request —
   // read here and passed down so ContactInfo can stay a server component.
-  const settings = await getSiteSettings();
+  const settings = await getSiteSettings(await pageLocale(params));
 
   /*
     No Footer here, unlike page.tsx, and that removes a whole mechanism rather

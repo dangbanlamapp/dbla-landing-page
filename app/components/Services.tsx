@@ -8,6 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import DashedCircle from "./DashedCircle";
 import ScopeBar from "./ScopeBar";
 import ServiceBlock, { type Service } from "./ServiceBlock";
+import { useTranslations } from "next-intl";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
@@ -36,6 +37,7 @@ const ACCENT_GROW_PORTRAIT = 3.5;
 // VIEWPORTS), so adding a service in the Studio grows the pin by 100vh and
 // slots its block into the sequence without a position being rewritten.
 export default function Services({ services }: { services: Service[] }) {
+  const t = useTranslations("Services");
   const container = useRef<HTMLElement>(null);
   const accentCircle = useRef<HTMLDivElement>(null);
   const foregroundCircle = useRef<HTMLDivElement>(null);
@@ -598,13 +600,13 @@ export default function Services({ services }: { services: Service[] }) {
           className="flex h-1/2 flex-col items-center justify-end pb-space-2x"
         >
           <p data-fade className="text-xs text-white/75 uppercase sm:text-sm">
-            our services
+            {t("label")}
           </p>
           <h2
             data-split="up"
             className="heading-style text-xl text-white sm:text-2xl lg:text-4xl"
           >
-            What we do
+            {t("title")}
           </h2>
         </div>
       </div>

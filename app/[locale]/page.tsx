@@ -16,13 +16,15 @@ import {
   getTeam,
   getTestimonials,
 } from "@/sanity/lib/content";
+import { pageLocale } from "@/i18n/locale";
 
-export default async function Home() {
+export default async function Home({ params }: PageProps<"/[locale]">) {
+  const locale = await pageLocale(params);
   const [projects, services, team, testimonials] = await Promise.all([
-    getProjects(),
-    getServices(),
-    getTeam(),
-    getTestimonials(),
+    getProjects(locale),
+    getServices(locale),
+    getTeam(locale),
+    getTestimonials(locale),
   ]);
 
   return (

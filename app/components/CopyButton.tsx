@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 const RESET_MS = 2000;
 
@@ -71,6 +72,7 @@ export default function CopyButton({
   className?: string;
   children?: React.ReactNode;
 }) {
+  const t = useTranslations("ContactInfo");
   const [copied, setCopied] = useState(false);
 
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -93,8 +95,8 @@ export default function CopyButton({
     <button
       type="button"
       onClick={onClick}
-      aria-label={`Copy ${label}`}
-      title={`Copy ${label}`}
+      aria-label={t("copy", { label })}
+      title={t("copy", { label })}
       // No colour of its own. It is printed on the menu's orange sheet and on
       // the contact panel's orange in two different pairs, and appending one
       // through `className` could not reliably beat a baked-in `text-white`:
@@ -107,7 +109,7 @@ export default function CopyButton({
         {copied ? CheckIcon : CopyIcon}
 
         <span role="status" className="ml-space--3x empty:ml-0">
-          {copied ? "copied" : ""}
+          {copied ? t("copied") : ""}
         </span>
       </span>
 

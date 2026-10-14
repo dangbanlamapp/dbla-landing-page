@@ -6,6 +6,7 @@
 
 import CopyButton from "./CopyButton";
 import type { SiteSettings } from "./site-settings";
+import { useTranslations } from "next-intl";
 
 /**
  * The email / phone / socials column, shared by MenuPanel and the contact page.
@@ -71,28 +72,29 @@ export default function ContactInfo({
   /** Only the menu needs one — it has to close itself on the way out. */
   onNavigate?: () => void;
 }) {
+  const t = useTranslations("ContactInfo");
   return (
     <div
       className={`flex flex-col justify-end gap-space-base ${align} ${className}`}
     >
       <Detail
-        label="email"
+        label={t("email")}
         value={settings.email}
-        copyLabel="email address"
+        copyLabel={t("emailAddress")}
         align={align}
         link={link}
       />
       <Detail
-        label="phone"
+        label={t("phone")}
         value={settings.phone}
-        copyLabel="phone number"
+        copyLabel={t("phoneNumber")}
         align={align}
         link={link}
       />
 
       <div className={`flex flex-col ${align}`}>
-        <p>socials</p>
-        <nav aria-label="Social">
+        <p>{t("socials")}</p>
+        <nav aria-label={t("social")}>
           <ul className={`flex flex-col ${align}`}>
             {settings.socialLinks.map(({ label, href }) => (
               <li key={label}>

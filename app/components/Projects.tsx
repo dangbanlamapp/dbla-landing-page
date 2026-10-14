@@ -13,6 +13,8 @@ import DashedCircle from "./DashedCircle";
 import ProgressRing from "./ProgressRing";
 import { PILL } from "./pill";
 import { projectHref, type Project } from "./project-data";
+import { useTranslations } from "next-intl";
+import { RICH } from "./rich";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
@@ -176,6 +178,8 @@ const COUNTER_TRANSFORM: EffectTiming = {
 const COUNTER_OPACITY: EffectTiming = { duration: 250, easing: "ease-out" };
 
 export default function Projects({ projects }: { projects: Project[] }) {
+  const t = useTranslations("Projects");
+  const common = useTranslations("Common");
   const container = useRef<HTMLElement>(null);
 
   // How many project entrances have completed — 0 through projects.length, so
@@ -697,7 +701,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
               data-split="up"
               className="heading-style text-center text-2xl leading-heading lg:text-right lg:text-4xl"
             >
-              our <br /> projects
+              {t.rich("title", RICH)}
             </h2>
           </div>
           <div className="text-center lg:flex-1 lg:p-space-base lg:text-left">
@@ -777,7 +781,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
               <TransitionLink
                 key={project.slug}
                 href={projectHref(project)}
-                aria-label={`Open ${project.name}`}
+                aria-label={common("openProject", { name: project.name })}
                 tabIndex={isLive(i) ? undefined : -1}
                 data-project-image
                 className={`quadrant-reveal group absolute inset-0 overflow-hidden rounded-full ${
@@ -810,7 +814,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
                   aria-hidden
                   className={`${PILL} pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-accent text-background opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100`}
                 >
-                  View project
+                  {common("viewProject")}
                 </span>
               </TransitionLink>
             ))}

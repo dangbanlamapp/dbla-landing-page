@@ -5,6 +5,8 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useTranslations } from "next-intl";
+import { RICH } from "./rich";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
@@ -63,6 +65,7 @@ export default function WhyUs({
 }: {
   testimonials: Testimonial[];
 }) {
+  const t = useTranslations("WhyUs");
   const container = useRef<HTMLElement>(null);
   const copy = useRef<HTMLDivElement>(null);
   const list = useRef<HTMLDivElement>(null);
@@ -420,14 +423,13 @@ export default function WhyUs({
               data-split="up"
               className="text-xs text-foreground/75 uppercase lg:pr-space-4x lg:text-sm"
             >
-              why us
+              {t("label")}
             </p>
             <h2
               data-split="up"
               className="heading-style text-2xl leading-heading lg:text-right lg:text-4xl"
             >
-              the team you can <br />{" "}
-              <span className="text-accent"> count on</span>
+              {t.rich("title", RICH)}
             </h2>
           </div>
           {/*
@@ -440,7 +442,7 @@ export default function WhyUs({
           */}
           <div
             role="group"
-            aria-label="Testimonials"
+            aria-label={t("testimonials")}
             className="flex w-full max-w-[36ch] flex-col items-start text-base lg:items-end lg:text-lg"
             onMouseEnter={hold}
             onMouseLeave={release}
@@ -486,7 +488,10 @@ export default function WhyUs({
                   key={testimonial.name}
                   type="button"
                   onClick={() => setIndex(i)}
-                  aria-label={`Show testimonial ${i + 1} of ${testimonials.length}`}
+                  aria-label={t("showTestimonial", {
+                    index: i + 1,
+                    total: testimonials.length,
+                  })}
                   aria-current={i === index}
                   className="group flex-1 cursor-pointer py-space--3x focus-visible:outline-none"
                 >
@@ -512,7 +517,7 @@ export default function WhyUs({
               <button
                 type="button"
                 onClick={() => go(-1)}
-                aria-label="Previous testimonial"
+                aria-label={t("previous")}
                 className={navButton}
               >
                 <NavArrow className="rotate-180" />
@@ -520,7 +525,7 @@ export default function WhyUs({
               <button
                 type="button"
                 onClick={() => go(1)}
-                aria-label="Next testimonial"
+                aria-label={t("next")}
                 className={navButton}
               >
                 <NavArrow />
@@ -540,14 +545,13 @@ export default function WhyUs({
               data-split="down"
               className="heading-style pb-space--1x text-xl font-medium text-accent lg:text-2xl"
             >
-              Senior Expertise
+              {t("expertiseTitle")}
             </h3>
             <p
               data-fade
               className="max-w-[48ch] text-sm leading-body lg:text-base"
             >
-              Our developers bring 15+ years building at some of the
-              world&apos;s most respected tech companies.
+              {t("expertiseBody")}
             </p>
           </div>
           <div className="flex flex-col">
@@ -558,15 +562,13 @@ export default function WhyUs({
               data-split="down"
               className="heading-style pb-space--1x text-xl font-medium text-accent lg:text-2xl"
             >
-              One team fullstack
+              {t("teamTitle")}
             </h3>
             <p
               data-fade
               className="max-w-[48ch] text-sm leading-body lg:text-base"
             >
-              Design, development, launch, even marketing — all under one roof.
-              The people you talk to are the people who build your product, so
-              nothing gets lost in a handoff.
+              {t("teamBody")}
             </p>
           </div>
           <div className="flex flex-col">
@@ -577,14 +579,13 @@ export default function WhyUs({
               data-split="down"
               className="heading-style pb-space--1x text-xl font-medium text-accent lg:text-2xl"
             >
-              Driven by results
+              {t("resultsTitle")}
             </h3>
             <p
               data-fade
               className="max-w-[48ch] text-sm leading-body lg:text-base"
             >
-              We measure our success by yours. Every decision comes back to one
-              question: does this move your business forward?
+              {t("resultsBody")}
             </p>
           </div>
         </div>

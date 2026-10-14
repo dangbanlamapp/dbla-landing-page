@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useLocale } from "next-intl";
+import { getPathname } from "@/i18n/navigation";
 import { usePageTransition } from "./PageTransition";
 
 type Props = Omit<React.ComponentProps<typeof Link>, "href"> & {
@@ -21,6 +23,13 @@ type Props = Omit<React.ComponentProps<typeof Link>, "href"> & {
  * how the menu closes itself) exactly as it was.
  *
  * Outside PageTransition's provider it is just a Link.
+ *
+ * `href` is written without a language — "/contact", "/projects/rutine24" —
+ * and comes out in the current one: unchanged on an English page, "/vi/contact"
+ * on a Vietnamese one. Every internal link on the site goes through here, so
+ * this is the one place a Vietnamese reader is kept in Vietnamese. The
+ * localized href is the one PageTransition gets too, so its same-page check
+ * compares like with like against `location.pathname`.
  */
 export default function TransitionLink({
   href,
@@ -30,15 +39,16 @@ export default function TransitionLink({
   ...props
 }: Props) {
   const navigate = usePageTransition();
+  const localized = getPathname({ href, locale: useLocale() });
 
   return (
     <Link
-      href={href}
+      href={localized}
       replace={replace}
       scroll={scroll}
       onNavigate={(e) => {
         onNavigate?.(e);
-        if (navigate?.(href, { replace, scroll })) e.preventDefault();
+        if (navigate?.(localized, { replace, scroll })) e.preventDefault();
       }}
       {...props}
     />

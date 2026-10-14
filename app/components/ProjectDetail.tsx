@@ -18,6 +18,7 @@ import {
   projectNumber,
 } from "./project-data";
 import type { ProjectStory, StoryFigure } from "./project-stories";
+import { useTranslations } from "next-intl";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
@@ -147,6 +148,7 @@ function StoryFigures({ figures }: { figures: StoryFigure[] }) {
 }
 
 function FigureFrame({ figure, half }: { figure: StoryFigure; half: boolean }) {
+  const t = useTranslations("Projects");
   const { kind = "photo" } = figure;
   const whole = kind === "sheet" || kind === "slide";
 
@@ -164,7 +166,7 @@ function FigureFrame({ figure, half }: { figure: StoryFigure; half: boolean }) {
       >
         <div className="max-w-[44ch]">
           <p className="heading-style text-xs text-accent lg:text-sm">
-            Image to come
+            {t("imageToCome")}
           </p>
           <p className="mt-space--2x text-sm leading-body text-secondary lg:text-base">
             {figure.placeholder}
@@ -248,6 +250,8 @@ export default function ProjectDetail({
   index: number;
   story?: ProjectStory;
 }) {
+  const t = useTranslations("Projects");
+  const common = useTranslations("Common");
   const container = useRef<HTMLElement>(null);
   const revealed = useRevealed();
 
@@ -580,7 +584,7 @@ export default function ProjectDetail({
           />
         </div>
 
-        <StorySplit id="project-overview" label="Overview">
+        <StorySplit id="project-overview" label={t("overview")}>
           <p
             data-split="up"
             className="heading-style max-w-[32ch] text-lg leading-body lg:text-xl"
@@ -684,12 +688,12 @@ export default function ProjectDetail({
           data-split="up"
           className="heading-style relative text-sm text-secondary opacity-75 lg:text-base"
         >
-          Next project — {projectNumber(projects.indexOf(next))}
+          {t("next", { number: projectNumber(projects.indexOf(next)) })}
         </p>
 
         <TransitionLink
           href={projectHref(next)}
-          aria-label={`Open ${next.name}`}
+          aria-label={common("openProject", { name: next.name })}
           className="group relative aspect-square h-[var(--frame-d)] rounded-full outline-offset-8 outline-accent focus-visible:outline-2"
         >
           <div className="absolute inset-0 rounded-full bg-accent" />
@@ -715,7 +719,7 @@ export default function ProjectDetail({
             aria-hidden
             className={`${PILL} pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-accent text-background opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100`}
           >
-            View project
+            {common("viewProject")}
           </span>
         </TransitionLink>
 
@@ -730,7 +734,7 @@ export default function ProjectDetail({
           href="/projects"
           className={`${PILL} relative mt-space-base bg-foreground text-background`}
         >
-          All projects
+          {common("allProjects")}
         </TransitionLink>
       </section>
     </article>
