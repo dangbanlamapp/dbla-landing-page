@@ -11,8 +11,21 @@ const grotesk = Familjen_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "DBLA",
-  description: "A product team",
+  // `default` is the home page; the template lets a sub-route such as /contact
+  // set a bare `title: "Contact"` and still get the brand suffix.
+  title: {
+    default: "DBLA | Product studio for non-technical founders",
+    template: "%s | DBLA",
+  },
+  description:
+    "We design and build websites, mobile apps and web apps for non-technical founders, from first sketch to launch.",
+  openGraph: {
+    title: "DBLA | Product studio for non-technical founders",
+    description:
+      "We design and build websites, mobile apps and web apps for non-technical founders, from first sketch to launch.",
+    siteName: "DBLA",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
