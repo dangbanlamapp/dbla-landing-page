@@ -3,7 +3,7 @@
 // compiles into the client bundle with it either way. Add the directive (and
 // the useGSAP/scope shape the other sections use) only once it animates itself.
 
-import Link from "next/link";
+import TransitionLink from "./TransitionLink";
 
 /**
  * Purely the mark and its link — Header owns where it sits, and now its
@@ -37,7 +37,7 @@ export default function Logo({
   onNavigate?: () => void;
 }) {
   return (
-    <Link
+    <TransitionLink
       href="/"
       onClick={onNavigate}
       aria-label="DBLA — home"
@@ -70,6 +70,6 @@ export default function Logo({
           fill="currentColor"
         />
       </svg>
-    </Link>
+    </TransitionLink>
   );
 }

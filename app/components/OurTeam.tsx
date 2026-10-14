@@ -9,15 +9,23 @@ import Avatar, { type AvatarProps } from "./Avatar";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
-// Placeholder roster — swap in the real people. Each `avatar` is spread
-// straight onto <Avatar>, so every option it documents (eyes, eyesHover,
-// mouth, mouthHover, hair, palette, colors, x, y, tilt, blinkEvery, lookEvery)
-// can be set per person here. Anything left out falls back to Avatar's
-// default. The blink/look timings differ on purpose so the row never moves in
-// unison.
+// The roster is edited in the Studio (Team) and fetched by the homepage, in
+// the order it is dragged into there. Each `avatar` is spread straight onto
+// <Avatar>, so every option it documents can be set per person; anything left
+// out falls back to Avatar's default. The blink/look timings differ on purpose
+// so the row never moves in unison.
 // `level` is a 0–100 proficiency: it is both the percentage printed beside the
 // skill and the width its meter fills to.
 type Skill = { name: string; level: number };
+
+export type TeamMember = {
+  name: string;
+  role: string;
+  intro: string;
+  expertise: string[];
+  skills: Skill[];
+  avatar: AvatarProps;
+};
 
 // Wrap any part of an `intro` in **double asterisks** to render it in the
 // accent colour — e.g. "**Ten years** turning fuzzy briefs…". Splitting on a
@@ -35,120 +43,7 @@ function Highlighted({ text }: { text: string }) {
   );
 }
 
-const TEAM: {
-  name: string;
-  role: string;
-  intro: string;
-  expertise: string[];
-  skills: Skill[];
-  avatar: AvatarProps;
-}[] = [
-  {
-    name: "An Le",
-    role: "Lead Developper",
-    intro:
-      "**Ten years** turning fuzzy briefs into shipped products, and keeping the build honest from kickoff to launch.",
-    expertise: ["Product strategy", "Brand", "Partnerships"],
-    skills: [
-      { name: "Product vision", level: 95 },
-      { name: "Client workshops", level: 80 },
-      { name: "Go-to-market", level: 65 },
-    ],
-    avatar: {
-      palette: "dark",
-      hair: "cap",
-      eyes: "dot",
-      eyesHover: "happy",
-      mouth: "grin",
-      mouthHover: "smile",
-      x: 0,
-      y: 8,
-      tilt: -10,
-      blinkEvery: 2.7,
-      lookEvery: 1.6,
-    },
-  },
-  {
-    name: "Linh Vy",
-    role: "Engineering Lead",
-    intro:
-      "**Eleven years** of front-end and architecture work, obsessed with interfaces that feel fast and stay that way.",
-    expertise: ["Front-end", "Architecture", "Performance"],
-    skills: [
-      { name: "React / Next.js", level: 90 },
-      { name: "Animation (GSAP)", level: 70 },
-      { name: "Cloud & CI", level: 55 },
-    ],
-    avatar: {
-      palette: "orange",
-      hair: "long",
-      eyes: "oval",
-      eyesHover: "happy",
-
-      mouth: "smile",
-      mouthHover: "grin",
-      x: -5,
-      y: 9,
-      tilt: 6,
-      blinkEvery: 2.2,
-      lookEvery: 1.3,
-    },
-  },
-  {
-    name: "Phil",
-    role: "Full Stack Engineer",
-    intro:
-      "**Fifteen years** across the stack, comfortable wherever the product needs a hand, from the database to the pixels.",
-    expertise: ["UI / UX", "Brand systems", "Motion"],
-    skills: [
-      { name: "Interface design", level: 85 },
-      { name: "Design systems", level: 70 },
-      { name: "Motion design", level: 50 },
-    ],
-    avatar: {
-      palette: "inverse",
-      hair: "fringe",
-      eyes: "line",
-      eyesHover: "dot",
-
-      mouth: "smile",
-      mouthHover: "open",
-      x: 3,
-      y: 11,
-      tilt: -11,
-      blinkEvery: 1.3,
-      lookEvery: 1.6,
-    },
-  },
-
-  {
-    name: "Kao",
-    role: "Product Designer",
-    intro:
-      "**Five years** shaping product experiences that look sharp and earn their place in the user's day.",
-    expertise: ["SEO", "Paid media", "Analytics"],
-    skills: [
-      { name: "Search & content", level: 90 },
-      { name: "Paid acquisition", level: 75 },
-      { name: "Conversion tests", level: 60 },
-    ],
-    avatar: {
-      palette: "grey",
-      hair: "headphones",
-      eyes: "dot",
-      eyesHover: "oval",
-      mouth: "smile",
-      mouthHover: "flat",
-      x: -2,
-      y: 8,
-      tilt: -9,
-      blinkEvery: 2.5,
-      lookEvery: 1.2,
-    },
-  },
-];
-
-export default function OurTeam() {
+export default function OurTeam({ team }: { team: TeamMember[] }) {
   const container = useRef<HTMLElement>(null);
   const copy = useRef<HTMLDivElement>(null);
   const grid = useRef<HTMLDivElement>(null);
@@ -165,9 +60,9 @@ export default function OurTeam() {
       // the label and the heading together — the block that holds them — so
       // they read as a single entrance however the text reflows.
       //
-      // fromTo rather than from for the reason spelled out in WhyUs: a scrub
-      // plus invalidateOnRefresh would otherwise re-read a half-travelled line
-      // as its resting position on a mid-scroll refresh.
+      // fromTo rather than from for the reason spelled out in WhyUs, and no
+      // invalidateOnRefresh for the reason spelled out there too: with a
+      // stagger it left "the work" sitting visible before the entrance.
       gsap.utils
         .toArray<HTMLElement>("[data-split]", copy.current)
         .forEach((block) => {
@@ -192,7 +87,6 @@ export default function OurTeam() {
                     start: "top bottom",
                     end: "center center",
                     scrub: true,
-                    invalidateOnRefresh: true,
                   },
                 },
               ),
@@ -334,7 +228,7 @@ export default function OurTeam() {
           ref={grid}
           className="grid grid-cols-1 gap-space-base px-space-base sm:grid-cols-2 lg:grid-cols-4"
         >
-          {TEAM.map((member, i) => {
+          {team.map((member, i) => {
             const isOpen = open === i;
             return (
               <article

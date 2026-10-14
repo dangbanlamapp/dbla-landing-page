@@ -8,7 +8,8 @@ import { useGSAP } from "@gsap/react";
 import DashedCircle from "./DashedCircle";
 import LocalTime from "./LocalTime";
 // Shared with MenuPanel, which prints the same legal row inside the open menu.
-import { LEGAL_LINKS, YEAR } from "./legal";
+import { YEAR } from "./legal";
+import { useSiteSettings } from "./SiteSettingsProvider";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -174,6 +175,7 @@ const WORDMARK =
 const REVEAL_SHIFT = 15;
 
 export default function Footer() {
+  const { legalLinks } = useSiteSettings();
   const container = useRef<HTMLElement>(null);
   const runway = useRef<HTMLDivElement>(null);
 
@@ -389,7 +391,7 @@ export default function Footer() {
           </p>
           <nav aria-label="Legal" className="flex-1">
             <ul className="flex flex-col items-end gap-space--3x lg:flex-row lg:justify-end lg:gap-space-2x">
-              {LEGAL_LINKS.map(({ label, href }) => (
+              {legalLinks.map(({ label, href }) => (
                 <li key={label}>
                   <a href={href} className="hover:underline">
                     {label}

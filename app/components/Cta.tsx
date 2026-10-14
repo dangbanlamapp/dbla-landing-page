@@ -1,14 +1,15 @@
 "use client";
 
 import { useRef } from "react";
-import Link from "next/link";
+import TransitionLink from "./TransitionLink";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SplitText } from "gsap/SplitText";
 import { useGSAP } from "@gsap/react";
 import DashedCircle from "./DashedCircle";
 import ScopeBar from "./ScopeBar";
 
-gsap.registerPlugin(useGSAP, ScrollTrigger);
+gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
 /**
  * Both wedges share an apex at the dead centre of the square below, which is
@@ -176,6 +177,51 @@ export default function Cta() {
         );
       });
 
+      // Heading entrance: the same scrubbed line-mask recipe as OurTeam, on the
+      // same data-split contract (the markup says which way the lines travel).
+      // Built after the pin on purpose, so its start/end are measured against
+      // the section's pinned position rather than before the spacer exists.
+      // Triggered off the heading itself, exactly like OurTeam: it starts when
+      // the heading's top enters the viewport, not when the section's does —
+      // the heading sits about half a screen into the section, so a section
+      // trigger had the lines already mid-travel by the time they were on
+      // screen. The heading is well above centre once pinned, so "center
+      // center" is reached before the pin takes hold and the lines are home
+      // as the fan starts to open.
+      //
+      // fromTo rather than from, so both ends are written out. And no
+      // invalidateOnRefresh: with a stagger it left every line after the first
+      // sitting visible before the entrance (see the note in WhyUs).
+      gsap.utils
+        .toArray<HTMLElement>("[data-split]", container.current)
+        .forEach((block) => {
+          const yPercent = block.dataset.split === "down" ? -150 : 150;
+
+          SplitText.create(block, {
+            type: "lines",
+            mask: "lines",
+            // Keeps the mask off the caps at leading-heading (0.75).
+            linesClass: "pb-[0.1em]",
+            autoSplit: true,
+            onSplit: (self) =>
+              gsap.fromTo(
+                self.lines,
+                { yPercent },
+                {
+                  yPercent: 0,
+                  ease: "power3.out",
+                  stagger: 0.12,
+                  scrollTrigger: {
+                    trigger: block,
+                    start: "top bottom",
+                    end: "center center",
+                    scrub: true,
+                  },
+                },
+              ),
+          });
+        });
+
       // Turned on the rings' shared parent rather than on each ring: those are
       // mid-height-tween, and stacking a transform on the same element would
       // put a compositor animation and a layout animation on one box. The
@@ -261,7 +307,10 @@ export default function Cta() {
           className="relative flex h-full flex-col gap-space-2x"
         >
           <div className="flex h-1/2 flex-col items-center justify-end pb-space-4x">
-            <h2 className="heading-style max-w-[13ch] text-center text-4xl xl:text-6xl leading-heading">
+            <h2
+              data-split="up"
+              className="heading-style max-w-[13ch] text-center text-4xl leading-heading 3xl:text-5xl"
+            >
               Your next step into digital starts here.
             </h2>
           </div>
@@ -270,12 +319,12 @@ export default function Cta() {
               Book a free call and let's talk through your goals, your
               challenges, and how we can help your business thrive.
             </p>
-            <Link
+            <TransitionLink
               className="rounded-md bg-accent px-space-2x py-space--2x text-md font-bold tracking-tighter uppercase"
               href="/contact"
             >
               Contact us
-            </Link>
+            </TransitionLink>
           </div>
         </div>
       </section>

@@ -1,0 +1,33 @@
+- generic [active] [ref=f1e1]:
+  - button "Open Next.js Dev Tools" [ref=f1e91] [cursor=pointer]
+  - alert [ref=f1e95]: Ru:tine24 | DBLA
+  - banner:
+    - generic:
+      - link "DBLA — home" [ref=f1e96] [cursor=pointer]:
+        - /url: /
+        - img "DBLA" [ref=f1e97]
+      - link "All projects" [ref=f1e101] [cursor=pointer]:
+        - /url: /projects
+  - main [ref=f1e102]:
+    - article [ref=f1e103]:
+      - generic [ref=f1e104]:
+        - img "Ru:tine24 app screens" [ref=f1e114]
+        - heading "Ru:tine24" [level=1] [ref=f1e119]:
+          - generic [aria-hidden] [ref=f1e121]: Ru:tine24
+      - generic [ref=f1e124]:
+        - heading "Overview" [level=2] [ref=f1e125]:
+          - generic [aria-hidden] [ref=f1e127]: Overview
+        - paragraph [ref=f1e128]:
+          - generic [aria-hidden] [ref=f1e130]: A mobile app that bring experiences
+          - generic [aria-hidden] [ref=f1e132]: to coffee shop chain
+      - generic [ref=f1e133]:
+        - paragraph [ref=f1e139]:
+          - generic [aria-hidden] [ref=f1e141]: Next project — 02
+        - link "Open Eggu" [ref=f1e142] [cursor=pointer]:
+          - /url: /projects/eggu
+          - img "The Eggu app running on a phone" [ref=f1e146]
+          - generic [aria-hidden]: View project
+        - heading "Eggu" [level=2] [ref=f1e147]:
+          - generic [aria-hidden] [ref=f1e149]: Eggu
+        - link "All projects" [ref=f1e150] [cursor=pointer]:
+          - /url: /projects

@@ -2,7 +2,9 @@
 
 import { ReactLenis } from "lenis/react";
 import { useEffect, useState } from "react";
+import PageTransition from "./PageTransition";
 import ScrollLock from "./ScrollLock";
+import ScrollReset from "./ScrollReset";
 
 // Global smooth-scroll instance. `root` binds Lenis to the document scroller,
 // so it renders no wrapper markup of its own and page layout is untouched.
@@ -39,7 +41,13 @@ export default function SmoothScroll({
           renders nothing of its own. Holds the page still while the entrance
           animation plays and pins a fresh load to the top. */}
       <ScrollLock />
-      {children}
+      {/* Route changes land at the top. Must stay ahead of {children}: its
+          layout effect has to run before the new page builds its
+          ScrollTriggers — see the component. */}
+      <ScrollReset />
+      {/* Route-change wipe. Wraps the page because it re-provides the reveal
+          signal to it; ScrollLock above keeps reading the preloader's own. */}
+      <PageTransition>{children}</PageTransition>
     </ReactLenis>
   );
 }

@@ -1,0 +1,33 @@
+- generic [active] [ref=f3e1]:
+  - button "Open Next.js Dev Tools" [ref=f3e425] [cursor=pointer]
+  - alert [ref=f3e429]: TGF | DBLA
+  - banner:
+    - generic:
+      - link "DBLA — home" [ref=f3e430] [cursor=pointer]:
+        - /url: /
+        - img "DBLA" [ref=f3e431]
+      - link "All projects" [ref=f3e435] [cursor=pointer]:
+        - /url: /projects
+  - main [ref=f3e436]:
+    - article [ref=f3e437]:
+      - generic [ref=f3e438]:
+        - img "The TGF site on a laptop" [ref=f3e448]
+        - heading "TGF" [level=1] [ref=f3e453]:
+          - generic [aria-hidden] [ref=f3e455]: TGF
+      - generic [ref=f3e458]:
+        - heading "Overview" [level=2] [ref=f3e459]:
+          - generic [aria-hidden] [ref=f3e461]: Overview
+        - paragraph [ref=f3e462]:
+          - generic [aria-hidden] [ref=f3e464]: PLACEHOLDER — what TGF is and who
+          - generic [aria-hidden] [ref=f3e466]: it was built for
+      - generic [ref=f3e467]:
+        - paragraph [ref=f3e473]:
+          - generic [aria-hidden] [ref=f3e475]: Next project — 04
+        - link "Open Adminless" [ref=f3e476] [cursor=pointer]:
+          - /url: /projects/adminless
+          - img "The Adminless dashboard on a laptop" [ref=f3e480]
+          - generic [aria-hidden]: View project
+        - heading "Adminless" [level=2] [ref=f3e481]:
+          - generic [aria-hidden] [ref=f3e483]: Adminless
+        - link "All projects" [ref=f3e484] [cursor=pointer]:
+          - /url: /projects

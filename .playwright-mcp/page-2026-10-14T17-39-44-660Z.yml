@@ -1,0 +1,145 @@
+- generic [ref=f4e1]:
+  - generic [ref=f4e15]:
+    - generic [ref=f4e16]:
+      - navigation "Main" [ref=f4e150]:
+        - list [ref=f4e19]:
+          - listitem [ref=f4e20]:
+            - link "Home" [ref=f4e151] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=f4e22]:
+            - link "About" [ref=f4e152] [cursor=pointer]:
+              - /url: "#"
+          - listitem [ref=f4e24]:
+            - link "Projects" [ref=f4e153] [cursor=pointer]:
+              - /url: /projects
+          - listitem [ref=f4e26]:
+            - link "Contact" [ref=f4e154] [cursor=pointer]:
+              - /url: /contact
+      - generic [ref=f4e28]:
+        - generic [ref=f4e29]:
+          - paragraph [ref=f4e30]: email
+          - button "Copy email address" [ref=f4e155] [cursor=pointer]:
+            - generic [ref=f4e32]:
+              - status
+            - generic [ref=f4e36]: contact@dbla.com
+        - generic [ref=f4e37]:
+          - paragraph [ref=f4e38]: phone
+          - button "Copy phone number" [ref=f4e156] [cursor=pointer]:
+            - generic [ref=f4e40]:
+              - status
+            - generic [ref=f4e44]: (+94) 123 456 789
+        - generic [ref=f4e45]:
+          - paragraph [ref=f4e46]: socials
+          - navigation "Social" [ref=f4e157]:
+            - list [ref=f4e48]:
+              - listitem [ref=f4e49]:
+                - link "linkedIn" [ref=f4e158] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f4e51]:
+                - link "instagram" [ref=f4e159] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f4e53]:
+                - link "tiktok" [ref=f4e160] [cursor=pointer]:
+                  - /url: "#"
+    - generic [ref=f4e55]:
+      - generic [ref=f4e56]: © 2026 DBLA
+      - paragraph [ref=f4e57]:
+        - text: Site by
+        - link "Kaobui" [ref=f4e161] [cursor=pointer]:
+          - /url: https://www.kaobui.com
+      - navigation "Legal" [ref=f4e162]:
+        - list [ref=f4e60]:
+          - listitem [ref=f4e61]:
+            - link "Terms of Service" [ref=f4e163] [cursor=pointer]:
+              - /url: "#"
+          - listitem [ref=f4e63]:
+            - link "Privacy Policy" [ref=f4e164] [cursor=pointer]:
+              - /url: "#"
+          - listitem [ref=f4e65]:
+            - link "Cookie Settings" [ref=f4e165] [cursor=pointer]:
+              - /url: "#"
+  - banner:
+    - generic:
+      - link "DBLA — home" [ref=f4e67] [cursor=pointer]:
+        - /url: /
+        - img "DBLA" [ref=f4e68]
+      - button "Close menu" [expanded] [active] [ref=f4e166] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f4e73]:
+          - generic [aria-hidden] [ref=f4e168]: M
+          - generic [aria-hidden] [ref=f4e170]: e
+          - generic [aria-hidden] [ref=f4e172]: "n"
+          - generic [aria-hidden] [ref=f4e174]: u
+        - generic [aria-hidden] [ref=f4e74]:
+          - generic [aria-hidden] [ref=f4e176]: C
+          - generic [aria-hidden] [ref=f4e178]: l
+          - generic [aria-hidden] [ref=f4e180]: o
+          - generic [aria-hidden] [ref=f4e182]: s
+          - generic [aria-hidden] [ref=f4e184]: e
+      - link "Get in touch" [ref=f4e75] [cursor=pointer]:
+        - /url: /contact
+  - main [ref=f4e76]:
+    - generic [ref=f4e77]:
+      - generic [ref=f4e88]:
+        - paragraph [ref=f4e89]: (04)
+        - heading "our projects" [level=1] [ref=f4e90]:
+          - generic [aria-hidden] [ref=f4e186]: our
+          - generic [aria-hidden] [ref=f4e188]: projects
+        - paragraph [ref=f4e91]: Selected work, from first sketch to launch. Pick one to see how it came together.
+      - list [ref=f4e92]:
+        - listitem [ref=f4e93]:
+          - generic [ref=f4e94]:
+            - generic [ref=f4e95]: "01"
+            - generic [ref=f4e96]: mobile app
+          - link "Open Ru:tine24" [ref=f4e97] [cursor=pointer]:
+            - /url: /projects/rutine24
+            - img "Ru:tine24 app screens" [ref=f4e101]
+            - generic [aria-hidden]: View project
+          - generic [ref=f4e102]:
+            - heading "Ru:tine24" [level=2] [ref=f4e103]:
+              - generic [aria-hidden] [ref=f4e190]: Ru:tine24
+            - paragraph [ref=f4e104]:
+              - generic [aria-hidden] [ref=f4e192]: A mobile app that bring experiences to coffee shop
+              - generic [aria-hidden] [ref=f4e194]: chain
+        - listitem [ref=f4e105]:
+          - generic [ref=f4e106]:
+            - generic [ref=f4e107]: "02"
+            - generic [ref=f4e108]: mobile app
+          - link "Open Eggu" [ref=f4e109] [cursor=pointer]:
+            - /url: /projects/eggu
+            - img "The Eggu app running on a phone" [ref=f4e113]
+            - generic [aria-hidden]: View project
+          - generic [ref=f4e114]:
+            - heading "Eggu" [level=2] [ref=f4e115]:
+              - generic [aria-hidden] [ref=f4e196]: Eggu
+            - paragraph [ref=f4e116]:
+              - generic [aria-hidden] [ref=f4e198]: PLACEHOLDER — what Eggu is and who it was built
+              - generic [aria-hidden] [ref=f4e200]: for
+        - listitem [ref=f4e117]:
+          - generic [ref=f4e118]:
+            - generic [ref=f4e119]: "03"
+            - generic [ref=f4e120]: website
+          - link "Open TGF" [ref=f4e121] [cursor=pointer]:
+            - /url: /projects/tgf
+            - img "The TGF site on a laptop" [ref=f4e125]
+            - generic [aria-hidden]: View project
+          - generic [ref=f4e126]:
+            - heading "TGF" [level=2] [ref=f4e127]:
+              - generic [aria-hidden] [ref=f4e202]: TGF
+            - paragraph [ref=f4e128]:
+              - generic [aria-hidden] [ref=f4e204]: PLACEHOLDER — what TGF is and who it was built for
+        - listitem [ref=f4e129]:
+          - generic [ref=f4e130]:
+            - generic [ref=f4e131]: "04"
+            - generic [ref=f4e132]: web app
+          - link "Open Adminless" [ref=f4e133] [cursor=pointer]:
+            - /url: /projects/adminless
+            - img "The Adminless dashboard on a laptop" [ref=f4e137]
+            - generic [aria-hidden]: View project
+          - generic [ref=f4e138]:
+            - heading "Adminless" [level=2] [ref=f4e139]:
+              - generic [aria-hidden] [ref=f4e206]: Adminless
+            - paragraph [ref=f4e140]:
+              - generic [aria-hidden] [ref=f4e208]: PLACEHOLDER — what Adminless is and who it was
+              - generic [aria-hidden] [ref=f4e210]: built for
+  - button "Open Next.js Dev Tools" [ref=f4e146] [cursor=pointer]
+  - alert [ref=f4e211]

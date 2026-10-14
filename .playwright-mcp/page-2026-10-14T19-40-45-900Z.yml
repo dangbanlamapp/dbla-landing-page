@@ -1,0 +1,168 @@
+- generic [active] [ref=e1]:
+  - paragraph [ref=e8]:
+    - img [ref=e10]:
+      - generic [ref=e12]:
+        - generic [ref=e13]: "0"
+        - generic [ref=e14]: "0"
+  - banner:
+    - generic:
+      - link "DBLA — home" [ref=e15] [cursor=pointer]:
+        - /url: /
+        - img "DBLA" [ref=e16]
+      - link "All projects" [ref=e20] [cursor=pointer]:
+        - /url: /projects
+  - main [ref=e21]:
+    - article [ref=e22]:
+      - generic [ref=e23]:
+        - generic [ref=e29]:
+          - generic [ref=e30]: 02 / 04
+          - generic [ref=e31]: mobile app
+        - img "The Eggu app running on a phone" [ref=e36]
+        - heading "Eggu" [level=1] [ref=e41]
+        - paragraph [ref=e42]: A personal finance app that makes money management an everyday habit
+      - generic [ref=e43]:
+        - generic [ref=e45]:
+          - heading "Overview" [level=2] [ref=e47]
+          - generic [ref=e48]:
+            - paragraph [ref=e49]: Making money management simpler
+            - paragraph [ref=e50]: Eggu is a personal finance app, launched in early 2025, that helps people track expenses, understand their spending habits and manage their money more effectively.
+            - paragraph [ref=e51]: The goal was an experience simple and intuitive enough to make everyday money management easier — and to encourage healthier financial habits along the way.
+            - generic [ref=e52]:
+              - generic [ref=e53]:
+                - term [ref=e54]: Category
+                - definition [ref=e55]: Personal finance
+              - generic [ref=e56]:
+                - term [ref=e57]: Scope
+                - definition [ref=e58]: UI/UX design, product strategy
+              - generic [ref=e59]:
+                - term [ref=e60]: Platform
+                - definition [ref=e61]: Mobile app
+              - generic [ref=e62]:
+                - term [ref=e63]: Timeline
+                - definition [ref=e64]: 2024–2025, launched early 2025
+        - generic [ref=e65]:
+          - heading "The challenge" [level=2] [ref=e67]
+          - generic [ref=e68]:
+            - paragraph [ref=e69]: How might we make money management simple enough to become an everyday habit?
+            - paragraph [ref=e70]: Managing money can feel overwhelming. Manual expense tracking is time-consuming, and complex finance apps make it hard to see where the money actually goes.
+        - generic [ref=e71]:
+          - heading "The process" [level=2] [ref=e73]
+          - generic [ref=e74]:
+            - paragraph [ref=e75]: From research to a refined flow, in five steps
+            - list [ref=e76]:
+              - listitem [ref=e77]:
+                - generic [ref=e78]: "01"
+                - generic [ref=e79]:
+                  - heading "Research & discovery" [level=3] [ref=e80]
+                  - paragraph [ref=e81]: We explored user needs, pain points and competing finance apps to find where money tracking could be simpler.
+              - listitem [ref=e82]:
+                - generic [ref=e83]: "02"
+                - generic [ref=e84]:
+                  - heading "Product strategy" [level=3] [ref=e85]
+                  - paragraph [ref=e86]: "We defined the core user journey and prioritised the essentials: transaction tracking, a financial overview and spending insights."
+              - listitem [ref=e87]:
+                - generic [ref=e88]: "03"
+                - generic [ref=e89]:
+                  - heading "Wireframing & user flows" [level=3] [ref=e90]
+                  - paragraph [ref=e91]: We mapped the key interactions and simplified recording an expense, reviewing transactions and understanding spending.
+              - listitem [ref=e92]:
+                - generic [ref=e93]: "04"
+                - generic [ref=e94]:
+                  - heading "UI design & prototyping" [level=3] [ref=e95]
+                  - paragraph [ref=e96]: A clear visual hierarchy, reusable components and an approachable interface that balances simplicity with financial clarity.
+              - listitem [ref=e97]:
+                - generic [ref=e98]: "05"
+                - generic [ref=e99]:
+                  - heading "Testing & iteration" [level=3] [ref=e100]
+                  - paragraph [ref=e101]: We evaluated the core flows, found the friction points and refined the experience from usability feedback.
+        - figure "Wireframes and user flows" [ref=e103]:
+          - generic [ref=e105]:
+            - paragraph [ref=e106]: Image to come
+            - paragraph [ref=e107]: User flows and wireframes — the add-expense flow mapped end to end, beside the low-fi screens it became. One wide board.
+        - generic [ref=e109]:
+          - heading "Key decisions" [level=2] [ref=e111]
+          - generic [ref=e112]:
+            - paragraph [ref=e113]: Four principles behind every screen
+            - list [ref=e114]:
+              - listitem [ref=e115]:
+                - generic [ref=e116]: "01"
+                - generic [ref=e117]:
+                  - heading "Reduce friction" [level=3] [ref=e118]
+                  - paragraph [ref=e119]: Adding and reviewing transactions should be quick and straightforward.
+              - listitem [ref=e120]:
+                - generic [ref=e121]: "02"
+                - generic [ref=e122]:
+                  - heading "Prioritise clarity" [level=3] [ref=e123]
+                  - paragraph [ref=e124]: The essential financial information is readable at a glance.
+              - listitem [ref=e125]:
+                - generic [ref=e126]: "03"
+                - generic [ref=e127]:
+                  - heading "Make insights useful" [level=3] [ref=e128]
+                  - paragraph [ref=e129]: Help people understand their spending patterns, rather than simply showing them numbers.
+              - listitem [ref=e130]:
+                - generic [ref=e131]: "04"
+                - generic [ref=e132]:
+                  - heading "Build consistency" [level=3] [ref=e133]
+                  - paragraph [ref=e134]: Reusable components and predictable interactions across the whole app.
+        - generic [ref=e135]:
+          - figure "Recording a transaction in a few taps" [ref=e136]:
+            - generic [ref=e138]:
+              - paragraph [ref=e139]: Image to come
+              - paragraph [ref=e140]: "Mockup: the add-transaction screen mid-entry — amount keypad and category picker — to show how few taps a record takes."
+          - figure "Insights that explain, not just count" [ref=e142]:
+            - generic [ref=e144]:
+              - paragraph [ref=e145]: Image to come
+              - paragraph [ref=e146]: "Mockup: the spending insights screen — breakdown by category for the month, with a pattern called out in plain words."
+        - generic [ref=e148]:
+          - heading "Product & business impact" [level=2] [ref=e150]
+          - generic [ref=e151]:
+            - paragraph [ref=e152]: Beyond usability, Eggu has to deliver recurring value
+            - paragraph [ref=e153]: Long-term growth depends on people coming back. We'd measure that with three product metrics.
+            - list [ref=e154]:
+              - listitem [ref=e155]:
+                - generic [ref=e156]: "01"
+                - generic [ref=e157]:
+                  - heading "Activation" [level=3] [ref=e158]
+                  - paragraph [ref=e159]: Are new users recording their first transaction?
+              - listitem [ref=e160]:
+                - generic [ref=e161]: "02"
+                - generic [ref=e162]:
+                  - heading "Retention" [level=3] [ref=e163]
+                  - paragraph [ref=e164]: Do users return to track their money consistently?
+              - listitem [ref=e165]:
+                - generic [ref=e166]: "03"
+                - generic [ref=e167]:
+                  - heading "Conversion" [level=3] [ref=e168]
+                  - paragraph [ref=e169]: Are users willing to pay for advanced insights or budgeting features?
+            - generic [ref=e170]:
+              - paragraph [ref=e171]: A freemium model could keep essential tracking free while offering premium features such as advanced reports, budgeting tools and personalised insights.
+              - paragraph [ref=e172]: These are proposed success metrics and monetisation opportunities, not verified product results.
+        - generic [ref=e173]:
+          - heading "Next steps" [level=2] [ref=e175]
+          - generic [ref=e176]:
+            - paragraph [ref=e177]: Let real use decide what comes next
+            - paragraph [ref=e178]: The next stage focuses on analysing user behaviour, improving onboarding, validating usability and testing premium opportunities against real user needs.
+        - figure "The component library" [ref=e180]:
+          - generic [ref=e182]:
+            - paragraph [ref=e183]: Image to come
+            - paragraph [ref=e184]: Component library sheet — buttons, inputs, transaction rows, category icons, colour and type — the reusable system behind “Build consistency”.
+        - generic [ref=e186]:
+          - heading "Conclusion" [level=2] [ref=e188]
+          - generic [ref=e189]:
+            - paragraph [ref=e190]: More than tracking expenses
+            - paragraph [ref=e191]: Designing Eggu is about making financial information easier to understand, everyday actions easier to complete and better money habits easier to keep.
+            - paragraph [ref=e192]: The goal is an experience that delivers meaningful value to the people using it, while supporting sustainable product growth.
+        - figure "Eggu, early 2025" [ref=e194]:
+          - generic [ref=e196]:
+            - paragraph [ref=e197]: Image to come
+            - paragraph [ref=e198]: "Closing lifestyle shot, full width: two or three key screens (budget overview, insights, a transaction list) together, in the yellow-to-green brand gradient of the hero."
+      - generic [ref=e200]:
+        - paragraph [ref=e206]: Next project — 03
+        - link "Open TGF" [ref=e207] [cursor=pointer]:
+          - /url: /projects/tgf
+          - img "The TGF site on a laptop" [ref=e211]
+          - generic [aria-hidden]: View project
+        - heading "TGF" [level=2] [ref=e212]
+        - link "All projects" [ref=e213] [cursor=pointer]:
+          - /url: /projects
+  - button "Open Next.js Dev Tools" [ref=e219] [cursor=pointer]

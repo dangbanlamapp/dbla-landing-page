@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import Link from "next/link";
+import TransitionLink from "./TransitionLink";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { SplitText } from "gsap/SplitText";
@@ -239,13 +239,13 @@ export default function Hero() {
           We are a product studio that helps non-technical founders go digital,
           with a focus on business outcomes
         </p>
-        <Link
+        <TransitionLink
           data-fade
           className="rounded-md bg-accent px-space-2x py-space--2x text-base font-bold tracking-tighter uppercase sm:text-md"
           href="/contact"
         >
           Contact us
-        </Link>
+        </TransitionLink>
       </div>
     </div>
   );

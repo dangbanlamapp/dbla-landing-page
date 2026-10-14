@@ -5,7 +5,7 @@
 // is why `onNavigate` is optional rather than a required closer.
 
 import CopyButton from "./CopyButton";
-import { EMAIL, PHONE, SOCIAL_LINKS } from "./contact-details";
+import type { SiteSettings } from "./site-settings";
 
 /**
  * The email / phone / socials column, shared by MenuPanel and the contact page.
@@ -18,6 +18,10 @@ import { EMAIL, PHONE, SOCIAL_LINKS } from "./contact-details";
  * `align` is a prop for a smaller reason: both callers want the column flushed
  * right at lg, and differ only in what it does below that — the menu stacks its
  * text left, the contact panel centres it.
+ *
+ * The details themselves come in as `settings` rather than from a hook, so
+ * this stays renderable on the server: the contact page passes what it
+ * fetched, MenuPanel passes what SiteSettingsProvider holds.
  *
  * The copy affordance's own direction is NOT a prop, because it is not a free
  * choice: `flex-row-reverse lg:flex-row` puts the icon on the outside of
@@ -52,11 +56,13 @@ function Detail({
 }
 
 export default function ContactInfo({
+  settings,
   align = "items-start lg:items-end",
   link = "",
   className = "",
   onNavigate,
 }: {
+  settings: Pick<SiteSettings, "email" | "phone" | "socialLinks">;
   /** Cross-axis alignment, applied to the column and to every group in it. */
   align?: string;
   /** Colour and hover pair for the interactive text. */
@@ -71,14 +77,14 @@ export default function ContactInfo({
     >
       <Detail
         label="email"
-        value={EMAIL}
+        value={settings.email}
         copyLabel="email address"
         align={align}
         link={link}
       />
       <Detail
         label="phone"
-        value={PHONE}
+        value={settings.phone}
         copyLabel="phone number"
         align={align}
         link={link}
@@ -88,7 +94,7 @@ export default function ContactInfo({
         <p>socials</p>
         <nav aria-label="Social">
           <ul className={`flex flex-col ${align}`}>
-            {SOCIAL_LINKS.map(({ label, href }) => (
+            {settings.socialLinks.map(({ label, href }) => (
               <li key={label}>
                 <a
                   href={href}

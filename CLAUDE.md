@@ -29,6 +29,20 @@ app/
 public/               halftone-bg.jpg, noise-bg.jpg + default Next svgs
 ```
 
+## Content (Sanity)
+
+Projects + case studies, services, team, testimonials and site settings (email, phone, social and legal links, meta description) all live in Sanity (project `ob6q59v5`, dataset `production`, public). Section headings and other animated copy stay in code. The Studio is a **separate repo** at `../studio-dbla-website` (`npm run dev` there → localhost:3333); schemas live in its `schemaTypes/`.
+
+- `sanity/` here holds the client, `sanityFetch` / `<SanityLive />` (`defineLive`, classic mode — `cacheComponents` is off), `urlFor`, and **every GROQ query** in `sanity/lib/queries.ts`. `<SanityLive />` is mounted once in the root layout.
+- **Data flow:** routes (server) call the getters in `sanity/lib/content.ts`, which map query results onto the components' own types (`Project`, `ProjectStory`, `Service`, `TeamMember`, `Testimonial`, `SiteSettings`) and pass them down as props. Components never import Sanity. Images become `StaticImageData`-shaped objects (CDN URL + cropped width/height), so `<Image src={…}>` and `src.width` work as with static imports.
+- The root layout fetches site settings (→ `SiteSettingsProvider`, read by Footer and MenuPanel via `useSiteSettings()`) and the project cards (→ Preloader `mockups`). The contact page passes settings to `ContactInfo` as props so it stays a server component.
+- **Count-dependent timing is computed from props**, not module constants — e.g. `schedule(count)` in Projects. Each content-driven section is rendered with `key={contentKey(data)}` so a live publish remounts it instead of React patching text SplitText has already split. Keep both patterns when adding a section.
+- Project images are no longer in `public/` — upload to the Studio instead.
+- **Freshness has two paths.** `<SanityLive />` revalidates from any open browser; a signed Sanity webhook → [app/api/revalidate/route.ts](app/api/revalidate/route.ts) expires the shared `SANITY_TAG` on every publish, so edits land even when nobody is on the site. **Every `sanityFetch` must pass `tags: [SANITY_TAG]`** or the webhook cannot reach it — go through the getters in `content.ts`. Needs `SANITY_REVALIDATE_SECRET` in `.env.local` and on the host.
+- `sanity.types.ts` is **generated** — run `npm run typegen` in the Studio repo after changing a schema or a query. Never edit it by hand; it is in `.prettierignore`.
+- Lists (projects, services, team, testimonials) are drag-ordered in the Studio; always `| order(orderRank)`.
+- Strings fetched in draft mode carry invisible stega characters — `stegaClean()` any value used in logic (e.g. a figure's `kind`), and pass `stega: false` in `generateMetadata` / `generateStaticParams`.
+
 `app/page.tsx` renders `HeaderBg` → `Hero` → `Intro` in that order; the backdrop is first so its pinned layer sits behind everything at `-z-1`.
 
 ## Design tokens — the important part
@@ -87,5 +101,14 @@ Current options: `lerp: 0.05` (heavier than the 0.1 default), `anchors: { offset
 - `ScrollTrigger.refresh()` on release: a clipped `<html>` is not a scroll container and reports no scrollable overflow, and ScrollTrigger auto-refreshes on window `load`, which can easily land inside the lock. The re-measure is a no-op when nothing refreshed. If you push `LOCK_MS` past ~2.5s, note `HeaderBg`'s intro `onComplete` fires its own `ScrollTrigger.refresh()` at that point and would then run while clipped.
 - Reduced-motion readers are **not** locked — the freeze only protects an entrance they are not being shown at full strength anyway.
 - **Scroll to top on reload**: a mount effect sets `history.scrollRestoration = "manual"` and calls `window.scrollTo(0, 0)`. The App Router never touches that property, so the default is the browser handing you back your old offset. The mode is stored on the session history entry and a reload reuses that entry, so from the second load onward the browser never restores at all; the `scrollTo` only has work to do on the first load of a tab. **Do not "improve" this into a parse-time script**: a bare inline `<script>` triggers React's "scripts inside React components are never executed when rendering on the client" warning, and `next/script`'s `beforeInteractive` does not inline the code — it pushes it onto `self.__next_s` for the Next runtime to drain after its bundle loads, i.e. _later_ than the effect. Consequence of manual mode: back/forward stop restoring a position too, and a reload on a `#anchor` URL lands at the top rather than the anchor.
+
+### Route transition + shared scroll hold
+
+[PageTransition.tsx](app/components/PageTransition.tsx) wraps `{children}` in SmoothScroll and imitates the menu opening: a black disc scales up from the centre with an accent disc `MENU_LEAD` behind it (`COVER`), the route changes behind them, then a hole opens through the accent with one through the black chasing it (`UNCOVER`) — the menu-close order. ~1.6s click-to-clear including the route commit. The curve and lead come from [menu-motion.ts](app/components/menu-motion.ts), shared with MenuPanel so the two stay in step. Scroll is held for the whole run.
+
+- **Opt-in via [TransitionLink](app/components/TransitionLink.tsx).** Use it for links between pages of the site; plain `Link` / `<a>` (external, `#anchor`, mailto) never animate. It cancels next/link's navigation from `onNavigate`, which Link only fires for unmodified left-clicks on local URLs, and hands the href to PageTransition through context. `href` must be a string. Same-pathname links, back/forward and reduced-motion readers get the plain instant behaviour.
+- Each disc is a `scale` tween (compositor); each hole is a radial-gradient `mask-image` driven by that layer's own `--hole` CSS var (unitless 0→1, multiplied out in CSS), since no transform can cut a hole. **Both are sized to exactly the viewport diagonal (`hypot(100vw, 100vh)`), on purpose** — an oversized disc crosses the corners early, the slow end of the ease plays off-screen, and the black/accent stagger disappears. Its initial scale is an inline `transform`, not Tailwind's `scale-0` — v4 compiles that to the CSS `scale` property, which would multiply with GSAP's transform.
+- **Entrances wait for the reveal.** It re-provides `RevealContext` (exported from Preloader): the incoming page sees `revealed === false` until the hole starts opening, so anything already gated on `useRevealed()` just works. The outgoing page never sees it flip.
+- **Never call `lenis.stop()` / `start()` directly** — use `holdScroll(lenis)` from [scroll-hold.ts](app/components/scroll-hold.ts). Holds are ref-counted per instance; ScrollLock, MenuPanel and PageTransition overlap (a menu link closes the menu on the same click that starts the wipe). The release returns `true` only when it actually resumed scrolling; call `ScrollTrigger.refresh()` only then.
 
 The existing components carry dense explanatory comments about _why_ each choice was made — keep that density when editing them.

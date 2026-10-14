@@ -10,14 +10,8 @@ import {
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import NumberFlow from "@number-flow/react";
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 import DashedRing from "./DashedRing";
-import rutineMockup from "@/public/rutine-mockup.jpg";
-import egguApp from "@/public/eggu-app.jpg";
-import tgfMockup from "@/public/tgf-mockup.jpg";
-import adminlessMockup from "@/public/adminless-mockup.jpg";
-
-const MOCKUPS = [rutineMockup, egguApp, tgfMockup, adminlessMockup];
 
 gsap.registerPlugin(useGSAP);
 
@@ -77,13 +71,26 @@ const CURTAIN = {
   gone: "circle(0% at 50% 50%)",
 };
 
-const RevealContext = createContext(true);
+// Exported so PageTransition can re-provide it: an incoming page holds its
+// entrance behind the route-change panel exactly as it would behind this one.
+export const RevealContext = createContext(true);
 
 export const useRevealed = () => useContext(RevealContext);
 
 let hasPlayed = false;
 
-export default function Preloader({ children }: { children: React.ReactNode }) {
+/**
+ * `mockups` are the projects' card images, in project order — fetched by the
+ * root layout, the one place that renders this, so the curtain flips through
+ * the same pictures the homepage stack is about to show.
+ */
+export default function Preloader({
+  mockups,
+  children,
+}: {
+  mockups: StaticImageData[];
+  children: React.ReactNode;
+}) {
   const overlay = useRef<HTMLDivElement>(null);
   const curtain = useRef<HTMLDivElement>(null);
   const counter = useRef<HTMLParagraphElement>(null);
@@ -258,7 +265,7 @@ export default function Preloader({ children }: { children: React.ReactNode }) {
                 style={{ height: FRAME }}
                 className="relative aspect-square overflow-hidden rounded-full"
               >
-                {MOCKUPS.map((mockup) => (
+                {mockups.map((mockup) => (
                   <div
                     key={mockup.src}
                     data-preload-photo

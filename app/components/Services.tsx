@@ -32,41 +32,10 @@ const LG_BREAKPOINT = 1024;
 const ACCENT_GROW = 1.5;
 const ACCENT_GROW_PORTRAIT = 3.5;
 
-// Content drives the pin length: one service is one viewport of scrolling, so
-// adding an entry here grows the pin by 100vh and slots its block into the
-// sequence without a single position needing to be rewritten below.
-const SERVICES: Service[] = [
-  {
-    label: "website",
-    title: "Web app",
-    blurb:
-      "We build beautiful and performant website, a founding block of any succesful business",
-    items: ["CMS Website", "landing page", "WEB ANIMATION"],
-  },
-  {
-    label: "mobile",
-    title: "Mobile app",
-    blurb:
-      "Native-feeling apps that put your product in the pocket of every customer, on every device they own",
-    items: ["iOS & ANDROID", "cross-platform", "APP STORE LAUNCH"],
-  },
-  {
-    label: "design",
-    title: "Product design",
-    blurb:
-      "Interfaces designed around what your users are trying to do, not around what is easy to build",
-    items: ["UI/UX DESIGN", "design systems", "PROTOTYPING"],
-  },
-  {
-    label: "growth",
-    title: "Growth",
-    blurb:
-      "The measurement and automation work that turns a launched product into a compounding one",
-    items: ["SEO & ANALYTICS", "automation", "A/B TESTING"],
-  },
-];
-
-export default function Services() {
+// Content drives the pin length: one service is one viewport of scrolling (see
+// VIEWPORTS), so adding a service in the Studio grows the pin by 100vh and
+// slots its block into the sequence without a position being rewritten.
+export default function Services({ services }: { services: Service[] }) {
   const container = useRef<HTMLElement>(null);
   const accentCircle = useRef<HTMLDivElement>(null);
   const foregroundCircle = useRef<HTMLDivElement>(null);
@@ -98,7 +67,7 @@ export default function Services() {
       // A viewport for the heading to arrive in, then one per service. Derived
       // rather than a literal so content and pin length cannot drift apart.
       const HEADING_DUR = 1;
-      const VIEWPORTS = TEXT_AT + HEADING_DUR + SERVICES.length;
+      const VIEWPORTS = TEXT_AT + HEADING_DUR + services.length;
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -704,7 +673,7 @@ export default function Services() {
         only one is fully visible at a time; DOM order is scroll order, which is
         what the [data-service] query above relies on.
       */}
-      {SERVICES.map((service) => (
+      {services.map((service) => (
         <ServiceBlock key={service.title} {...service} />
       ))}
 
@@ -712,7 +681,7 @@ export default function Services() {
         ref={ringsContainer}
         className="absolute inset-0 h-full w-full scale-0"
       >
-        {SERVICES.map((service, i) => (
+        {services.map((service, i) => (
           <DashedCircle
             key={service.title}
             id={`ring-${i + 1}`}

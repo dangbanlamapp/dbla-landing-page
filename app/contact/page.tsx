@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
 import BackHeader from "@/app/components/BackHeader";
 import Contact from "@/app/components/Contact";
+import { getSiteSettings } from "@/sanity/lib/content";
 
 export const metadata: Metadata = {
   title: "Contact — DBLA",
   description: "Book a 15-minute discovery call with the studio.",
 };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  // The same settings the root layout fetched — Next dedupes the request —
+  // read here and passed down so ContactInfo can stay a server component.
+  const settings = await getSiteSettings();
+
   /*
     No Footer here, unlike page.tsx, and that removes a whole mechanism rather
     than one component: the footer is `fixed` at -z-1 and is revealed by main
@@ -29,7 +34,7 @@ export default function ContactPage() {
     <>
       <BackHeader />
       <main>
-        <Contact />
+        <Contact settings={settings} />
       </main>
     </>
   );

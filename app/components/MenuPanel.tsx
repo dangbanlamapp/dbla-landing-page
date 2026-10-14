@@ -1,23 +1,21 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Link from "next/link";
+import TransitionLink from "./TransitionLink";
 import { useLenis } from "lenis/react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { CustomEase } from "gsap/CustomEase";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { LEGAL_LINKS, YEAR } from "./legal";
+import { YEAR } from "./legal";
+import { useSiteSettings } from "./SiteSettingsProvider";
 import { PILL } from "./pill";
 import ContactInfo from "./ContactInfo";
+import { MENU_EASE as EASE, MENU_LEAD as LEAD } from "./menu-motion";
+import { holdScroll } from "./scroll-hold";
 
-gsap.registerPlugin(useGSAP, CustomEase, ScrollTrigger);
-
-const EASE = CustomEase.create("menu", "M0,0 C0.76,0 0.24,1 1,1");
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 const CURVE_CONTROL = 200;
-
-const LEAD = 0.08;
 
 /** Both ends of the tween are this same shape with a different control y. */
 const path = (control: number) => `M0 0 L100 0 Q50 ${control} 0 0`;
@@ -54,10 +52,12 @@ function Sheet({
   );
 }
 
+// Home is "/" rather than "#" now that the menu also renders on /projects: a
+// bare hash only means "the top of the homepage" while you are on it.
 const NAV_LINKS = [
-  { label: "Home", href: "#" },
+  { label: "Home", href: "/" },
   { label: "About", href: "#" },
-  { label: "Services", href: "#" },
+  { label: "Projects", href: "/projects" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -72,6 +72,8 @@ export default function MenuPanel({
   open: boolean;
   onNavigate: () => void;
 }) {
+  const settings = useSiteSettings();
+
   // The outer box positions; it is never transformed. Each sheet inside owns
   // its own yPercent, which is what lets them travel a beat apart.
   const container = useRef<HTMLDivElement>(null);
@@ -153,12 +155,14 @@ export default function MenuPanel({
   useEffect(() => {
     if (!lenis || !open) return;
 
-    lenis.stop();
+    // A shared hold, not a bare stop/start: a nav link closes the menu on the
+    // same click that starts the route-change wipe, and a plain `start()` here
+    // would free the page mid-wipe. Refresh only if this was the last hold —
+    // otherwise whoever still holds it refreshes on their own release.
+    const release = holdScroll(lenis);
 
     return () => {
-      lenis.start();
-
-      ScrollTrigger.refresh();
+      if (release()) ScrollTrigger.refresh();
     };
   }, [lenis, open]);
 
@@ -186,9 +190,9 @@ export default function MenuPanel({
             <nav aria-label="Main">
               <ul className="flex flex-col">
                 {NAV_LINKS.map(({ label, href }) => {
-                  // Same element and styles either way — Link only when the
+                  // Same element and styles either way — TransitionLink only when the
                   // href leaves the page, so the route change is client-side.
-                  const Tag = isRoute(href) ? Link : "a";
+                  const Tag = isRoute(href) ? TransitionLink : "a";
 
                   return (
                     <li key={label}>
@@ -205,15 +209,16 @@ export default function MenuPanel({
               </ul>
             </nav>
 
-            <Link
+            <TransitionLink
               href="/contact"
               onClick={onNavigate}
               className={`${PILL} bg-foreground text-background lg:hidden`}
             >
               Get in touch
-            </Link>
+            </TransitionLink>
           </div>
           <ContactInfo
+            settings={settings}
             align="items-start lg:items-end"
             link="text-white hover:text-foreground focus-visible:text-foreground"
             onNavigate={onNavigate}
@@ -235,7 +240,7 @@ export default function MenuPanel({
           </p>
           <nav aria-label="Legal" className="lg:flex-1">
             <ul className="flex flex-row gap-space--3x lg:justify-end lg:gap-space-2x">
-              {LEGAL_LINKS.map(({ label, href }) => (
+              {settings.legalLinks.map(({ label, href }) => (
                 <li key={label}>
                   <a
                     href={href}
