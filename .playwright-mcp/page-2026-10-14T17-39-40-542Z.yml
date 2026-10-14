@@ -1,0 +1,134 @@
+- generic [active] [ref=f4e1]:
+  - paragraph [ref=f4e8]:
+    - img [ref=f4e10]:
+      - generic [ref=f4e12]:
+        - generic [ref=f4e13]: "0"
+        - generic [ref=f4e14]: "0"
+  - generic [ref=f4e15]:
+    - generic [ref=f4e16]:
+      - navigation [ref=f4e18]:
+        - list [ref=f4e19]:
+          - listitem [ref=f4e20]:
+            - link [ref=f4e21] [cursor=pointer]:
+              - /url: /
+              - text: Home
+          - listitem [ref=f4e22]:
+            - link [ref=f4e23] [cursor=pointer]:
+              - /url: "#"
+              - text: About
+          - listitem [ref=f4e24]:
+            - link [ref=f4e25] [cursor=pointer]:
+              - /url: /projects
+              - text: Projects
+          - listitem [ref=f4e26]:
+            - link [ref=f4e27] [cursor=pointer]:
+              - /url: /contact
+              - text: Contact
+      - generic [ref=f4e28]:
+        - generic [ref=f4e29]:
+          - paragraph [ref=f4e30]: email
+          - button [ref=f4e31] [cursor=pointer]:
+            - generic [ref=f4e36]: contact@dbla.com
+        - generic [ref=f4e37]:
+          - paragraph [ref=f4e38]: phone
+          - button [ref=f4e39] [cursor=pointer]:
+            - generic [ref=f4e44]: (+94) 123 456 789
+        - generic [ref=f4e45]:
+          - paragraph [ref=f4e46]: socials
+          - navigation [ref=f4e47]:
+            - list [ref=f4e48]:
+              - listitem [ref=f4e49]:
+                - link [ref=f4e50] [cursor=pointer]:
+                  - /url: "#"
+                  - text: linkedIn
+              - listitem [ref=f4e51]:
+                - link [ref=f4e52] [cursor=pointer]:
+                  - /url: "#"
+                  - text: instagram
+              - listitem [ref=f4e53]:
+                - link [ref=f4e54] [cursor=pointer]:
+                  - /url: "#"
+                  - text: tiktok
+    - generic [ref=f4e55]:
+      - generic [ref=f4e56]: © 2026 DBLA
+      - paragraph [ref=f4e57]:
+        - text: Site by
+        - link [ref=f4e58] [cursor=pointer]:
+          - /url: https://www.kaobui.com
+          - text: Kaobui
+      - navigation [ref=f4e59]:
+        - list [ref=f4e60]:
+          - listitem [ref=f4e61]:
+            - link [ref=f4e62] [cursor=pointer]:
+              - /url: "#"
+              - text: Terms of Service
+          - listitem [ref=f4e63]:
+            - link [ref=f4e64] [cursor=pointer]:
+              - /url: "#"
+              - text: Privacy Policy
+          - listitem [ref=f4e65]:
+            - link [ref=f4e66] [cursor=pointer]:
+              - /url: "#"
+              - text: Cookie Settings
+  - banner:
+    - generic:
+      - link "DBLA — home" [ref=f4e67] [cursor=pointer]:
+        - /url: /
+        - img "DBLA" [ref=f4e68]
+      - button "Open menu" [ref=f4e72] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f4e73]: Menu
+        - generic [aria-hidden] [ref=f4e74]: Close
+      - link "Get in touch" [ref=f4e75] [cursor=pointer]:
+        - /url: /contact
+  - main [ref=f4e76]:
+    - generic [ref=f4e77]:
+      - generic [ref=f4e88]:
+        - paragraph [ref=f4e89]: (04)
+        - heading "our projects" [level=1] [ref=f4e90]
+        - paragraph [ref=f4e91]: Selected work, from first sketch to launch. Pick one to see how it came together.
+      - list [ref=f4e92]:
+        - listitem [ref=f4e93]:
+          - generic [ref=f4e94]:
+            - generic [ref=f4e95]: "01"
+            - generic [ref=f4e96]: mobile app
+          - link "Open Ru:tine24" [ref=f4e97] [cursor=pointer]:
+            - /url: /projects/rutine24
+            - img "Ru:tine24 app screens" [ref=f4e101]
+            - generic [aria-hidden]: View project
+          - generic [ref=f4e102]:
+            - heading "Ru:tine24" [level=2] [ref=f4e103]
+            - paragraph [ref=f4e104]: A mobile app that bring experiences to coffee shop chain
+        - listitem [ref=f4e105]:
+          - generic [ref=f4e106]:
+            - generic [ref=f4e107]: "02"
+            - generic [ref=f4e108]: mobile app
+          - link "Open Eggu" [ref=f4e109] [cursor=pointer]:
+            - /url: /projects/eggu
+            - img "The Eggu app running on a phone" [ref=f4e113]
+            - generic [aria-hidden]: View project
+          - generic [ref=f4e114]:
+            - heading "Eggu" [level=2] [ref=f4e115]
+            - paragraph [ref=f4e116]: PLACEHOLDER — what Eggu is and who it was built for
+        - listitem [ref=f4e117]:
+          - generic [ref=f4e118]:
+            - generic [ref=f4e119]: "03"
+            - generic [ref=f4e120]: website
+          - link "Open TGF" [ref=f4e121] [cursor=pointer]:
+            - /url: /projects/tgf
+            - img "The TGF site on a laptop" [ref=f4e125]
+            - generic [aria-hidden]: View project
+          - generic [ref=f4e126]:
+            - heading "TGF" [level=2] [ref=f4e127]
+            - paragraph [ref=f4e128]: PLACEHOLDER — what TGF is and who it was built for
+        - listitem [ref=f4e129]:
+          - generic [ref=f4e130]:
+            - generic [ref=f4e131]: "04"
+            - generic [ref=f4e132]: web app
+          - link "Open Adminless" [ref=f4e133] [cursor=pointer]:
+            - /url: /projects/adminless
+            - img "The Adminless dashboard on a laptop" [ref=f4e137]
+            - generic [aria-hidden]: View project
+          - generic [ref=f4e138]:
+            - heading "Adminless" [level=2] [ref=f4e139]
+            - paragraph [ref=f4e140]: PLACEHOLDER — what Adminless is and who it was built for
+  - button "Open Next.js Dev Tools" [ref=f4e146] [cursor=pointer]

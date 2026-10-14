@@ -4,7 +4,7 @@
 // there is no state, no handler and nothing to hydrate: this bar is static
 // markup, and Logo says the same of itself.
 
-import Link from "next/link";
+import TransitionLink from "./TransitionLink";
 import Logo from "./Logo";
 import { BAR_ROW, BAR_SHELL, BAR_SURFACE } from "./bar";
 import { PILL } from "./pill";
@@ -20,18 +20,29 @@ import { PILL } from "./pill";
  *
  * The surface is unconditional here for the same reason. Header drops its plate
  * while the panel is down; nothing can be down behind this one.
+ *
+ * `href` / `label` default to the homepage, which is what /contact and the
+ * /projects index want. A project page passes /projects instead: "back" from
+ * one case study means the list it was opened from, not the top of the site.
  */
-export default function BackHeader() {
+export default function BackHeader({
+  href = "/",
+  label = "Back to homepage",
+}: {
+  href?: string;
+  label?: string;
+}) {
   return (
     <header className={BAR_SHELL}>
       <div className={`${BAR_ROW} ${BAR_SURFACE}`}>
         <Logo className="pointer-events-auto text-foreground" />
 
         {/*
-          A `Link`, not the `<a href="#footer">` Header prints in this corner:
-          that one is a same-page anchor, this is a route change, and next/link
-          is what keeps it a client-side navigation rather than a full document
-          load back to the homepage.
+          A `TransitionLink`, not the `<a href="#footer">` Header prints in this
+          corner: that one is a same-page anchor, this is a route change, and
+          next/link underneath is what keeps it a client-side navigation
+          (played behind the route-change transition) rather than a full
+          document load back to the homepage.
 
           Same pill as that CTA, down to the colour pair, so the two bars read as
           one component with one cell swapped — which is exactly what they are.
@@ -40,12 +51,12 @@ export default function BackHeader() {
           there is no panel here to hold the fallback. This is the only way back,
           so it shows at every width.
         */}
-        <Link
-          href="/"
+        <TransitionLink
+          href={href}
           className={`${PILL} pointer-events-auto bg-foreground text-background`}
         >
-          Back to homepage
-        </Link>
+          {label}
+        </TransitionLink>
       </div>
     </header>
   );

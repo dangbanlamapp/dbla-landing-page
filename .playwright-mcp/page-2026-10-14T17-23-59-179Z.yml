@@ -1,0 +1,249 @@
+- generic [active] [ref=f3e1]:
+  - paragraph [ref=f3e8]:
+    - img [ref=f3e10]:
+      - generic [ref=f3e12]:
+        - generic [ref=f3e13]: "0"
+        - generic [ref=f3e14]: "0"
+  - generic [ref=f3e15]:
+    - generic [ref=f3e16]:
+      - navigation [ref=f3e18]:
+        - list [ref=f3e19]:
+          - listitem [ref=f3e20]:
+            - link [ref=f3e21] [cursor=pointer]:
+              - /url: "#"
+              - text: Home
+          - listitem [ref=f3e22]:
+            - link [ref=f3e23] [cursor=pointer]:
+              - /url: "#"
+              - text: About
+          - listitem [ref=f3e24]:
+            - link [ref=f3e25] [cursor=pointer]:
+              - /url: "#"
+              - text: Services
+          - listitem [ref=f3e26]:
+            - link [ref=f3e27] [cursor=pointer]:
+              - /url: /projects
+              - text: Projects
+          - listitem [ref=f3e28]:
+            - link [ref=f3e29] [cursor=pointer]:
+              - /url: /contact
+              - text: Contact
+      - generic [ref=f3e30]:
+        - generic [ref=f3e31]:
+          - paragraph [ref=f3e32]: email
+          - button [ref=f3e33] [cursor=pointer]:
+            - generic [ref=f3e38]: contact@dbla.com
+        - generic [ref=f3e39]:
+          - paragraph [ref=f3e40]: phone
+          - button [ref=f3e41] [cursor=pointer]:
+            - generic [ref=f3e46]: (+94) 123 456 789
+        - generic [ref=f3e47]:
+          - paragraph [ref=f3e48]: socials
+          - navigation [ref=f3e49]:
+            - list [ref=f3e50]:
+              - listitem [ref=f3e51]:
+                - link [ref=f3e52] [cursor=pointer]:
+                  - /url: "#"
+                  - text: linkedIn
+              - listitem [ref=f3e53]:
+                - link [ref=f3e54] [cursor=pointer]:
+                  - /url: "#"
+                  - text: instagram
+              - listitem [ref=f3e55]:
+                - link [ref=f3e56] [cursor=pointer]:
+                  - /url: "#"
+                  - text: tiktok
+    - generic [ref=f3e57]:
+      - generic [ref=f3e58]: © 2026 DBLA
+      - paragraph [ref=f3e59]:
+        - text: Site by
+        - link [ref=f3e60] [cursor=pointer]:
+          - /url: https://www.kaobui.com
+          - text: Kaobui
+      - navigation [ref=f3e61]:
+        - list [ref=f3e62]:
+          - listitem [ref=f3e63]:
+            - link [ref=f3e64] [cursor=pointer]:
+              - /url: "#"
+              - text: Terms of Service
+          - listitem [ref=f3e65]:
+            - link [ref=f3e66] [cursor=pointer]:
+              - /url: "#"
+              - text: Privacy Policy
+          - listitem [ref=f3e67]:
+            - link [ref=f3e68] [cursor=pointer]:
+              - /url: "#"
+              - text: Cookie Settings
+  - banner:
+    - generic:
+      - link "DBLA — home" [ref=f3e69] [cursor=pointer]:
+        - /url: /
+        - img "DBLA" [ref=f3e70]
+      - button "Open menu" [ref=f3e74] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f3e75]: Menu
+        - generic [aria-hidden] [ref=f3e76]: Close
+      - link "Get in touch" [ref=f3e77] [cursor=pointer]:
+        - /url: /contact
+  - main [ref=f3e78]:
+    - generic [ref=f3e111]:
+      - heading "We build DIGITAL PRODUCTs" [level=1] [ref=f3e113]
+      - generic [ref=f3e114]:
+        - heading "THAT GROW your business" [level=1] [ref=f3e115]
+        - paragraph [ref=f3e116]: We are a product studio that helps non-technical founders go digital, with a focus on business outcomes
+        - link "Contact us" [ref=f3e117] [cursor=pointer]:
+          - /url: /contact
+    - generic [ref=f3e119]:
+      - generic [ref=f3e120]:
+        - paragraph [ref=f3e121]: our mission
+        - paragraph [ref=f3e122]: Every business deserves to compete in the digital world, not just the ones with a tech team.
+      - paragraph [ref=f3e124]: That's the gap we close.
+    - generic [ref=f3e128]:
+      - paragraph [ref=f3e129]: our services
+      - heading "What we do" [level=2] [ref=f3e130]
+    - generic [ref=f3e143]:
+      - generic [ref=f3e144]:
+        - heading "our projects" [level=2] [ref=f3e146]
+        - paragraph [ref=f3e148]:
+          - img "00" [ref=f3e150]:
+            - generic [ref=f3e152]:
+              - generic [ref=f3e153]: "0"
+              - generic [ref=f3e154]: "0"
+      - generic [ref=f3e156]:
+        - link "Open Ru:tine24":
+          - /url: /projects/rutine24
+          - generic:
+            - img "Ru:tine24 app screens"
+          - generic [aria-hidden]: View project
+        - link "Open Eggu":
+          - /url: /projects/eggu
+          - generic:
+            - img "The Eggu app running on a phone"
+          - generic [aria-hidden]: View project
+        - link "Open TGF":
+          - /url: /projects/tgf
+          - generic:
+            - img "The TGF site on a laptop"
+          - generic [aria-hidden]: View project
+        - link "Open Adminless":
+          - /url: /projects/adminless
+          - generic:
+            - img "The Adminless dashboard on a laptop"
+          - generic [aria-hidden]: View project
+    - generic [ref=f3e160]:
+      - generic [ref=f3e161]:
+        - generic [ref=f3e162]:
+          - paragraph [ref=f3e163]: why us
+          - heading "the team you can count on" [level=2] [ref=f3e164]
+        - group "Testimonials" [ref=f3e165]:
+          - generic [ref=f3e166]:
+            - paragraph [ref=f3e167]: Our developers have 15+ years building at some of the world's most respected tech companies. You get the caliber of talent.
+            - paragraph [ref=f3e168]: Kao Bui
+            - paragraph [ref=f3e169]: CEO of Company
+          - generic [ref=f3e170]:
+            - button "Show testimonial 1 of 3" [ref=f3e171] [cursor=pointer]
+            - button "Show testimonial 2 of 3" [ref=f3e173] [cursor=pointer]
+            - button "Show testimonial 3 of 3" [ref=f3e175] [cursor=pointer]
+          - generic [ref=f3e177]:
+            - button "Previous testimonial" [ref=f3e178] [cursor=pointer]
+            - button "Next testimonial" [ref=f3e181] [cursor=pointer]
+      - generic [ref=f3e184]:
+        - generic [ref=f3e185]:
+          - paragraph [ref=f3e186]: "01"
+          - heading "Senior Expertise" [level=3] [ref=f3e187]
+          - paragraph [ref=f3e188]: Our developers bring 15+ years building at some of the world's most respected tech companies.
+        - generic [ref=f3e189]:
+          - paragraph [ref=f3e190]: "02"
+          - heading "One team fullstack" [level=3] [ref=f3e191]
+          - paragraph [ref=f3e192]: Design, development, launch, even marketing — all under one roof. The people you talk to are the people who build your product, so nothing gets lost in a handoff.
+        - generic [ref=f3e193]:
+          - paragraph [ref=f3e194]: "03"
+          - heading "Driven by results" [level=3] [ref=f3e195]
+          - paragraph [ref=f3e196]: "We measure our success by yours. Every decision comes back to one question: does this move your business forward?"
+    - generic [ref=f3e201]:
+      - generic [ref=f3e202]:
+        - generic [ref=f3e203]:
+          - paragraph [ref=f3e204]: our team
+          - heading "the people behind the work" [level=2] [ref=f3e205]
+        - paragraph [ref=f3e206]: A small, senior crew that stays with your product from the first sketch to launch day — and long after.
+      - generic [ref=f3e207]:
+        - article [ref=f3e208]:
+          - generic [ref=f3e209]:
+            - generic [ref=f3e210]:
+              - generic [ref=f3e211]: "01"
+              - generic [ref=f3e237]:
+                - heading "An Le" [level=3] [ref=f3e238]
+                - paragraph [ref=f3e239]: Lead Developper
+            - button "Explore" [ref=f3e241]
+        - article [ref=f3e242]:
+          - generic [ref=f3e243]:
+            - generic [ref=f3e244]:
+              - generic [ref=f3e245]: "02"
+              - generic [ref=f3e269]:
+                - heading "Linh Vy" [level=3] [ref=f3e270]
+                - paragraph [ref=f3e271]: Engineering Lead
+            - button "Explore" [ref=f3e273]
+        - article [ref=f3e274]:
+          - generic [ref=f3e275]:
+            - generic [ref=f3e276]:
+              - generic [ref=f3e277]: "03"
+              - generic [ref=f3e300]:
+                - heading "Phil" [level=3] [ref=f3e301]
+                - paragraph [ref=f3e302]: Full Stack Engineer
+            - button "Explore" [ref=f3e304]
+        - article [ref=f3e305]:
+          - generic [ref=f3e306]:
+            - generic [ref=f3e307]:
+              - generic [ref=f3e308]: "04"
+              - generic [ref=f3e334]:
+                - heading "Kao" [level=3] [ref=f3e335]
+                - paragraph [ref=f3e336]: Product Designer
+            - button "Explore" [ref=f3e338]
+    - generic [ref=f3e361]:
+      - heading "Your next step into digital starts here." [level=2] [ref=f3e363]
+      - generic [ref=f3e364]:
+        - paragraph [ref=f3e365]: Book a free call and let's talk through your goals, your challenges, and how we can help your business thrive.
+        - link "Contact us" [ref=f3e366] [cursor=pointer]:
+          - /url: /contact
+  - generic [ref=f3e368]:
+    - img "DBLA" [ref=f3e371]
+    - img "DBLA" [ref=f3e386]
+    - generic [ref=f3e388]:
+      - generic [ref=f3e389]: © 2026 DBLA
+      - paragraph [ref=f3e390]:
+        - text: Site by
+        - link "Kaobui" [ref=f3e391] [cursor=pointer]:
+          - /url: www.kaobui.com
+      - navigation "Legal" [ref=f3e392]:
+        - list [ref=f3e393]:
+          - listitem [ref=f3e394]:
+            - link "Terms of Service" [ref=f3e395] [cursor=pointer]:
+              - /url: "#"
+          - listitem [ref=f3e396]:
+            - link "Privacy Policy" [ref=f3e397] [cursor=pointer]:
+              - /url: "#"
+          - listitem [ref=f3e398]:
+            - link "Cookie Settings" [ref=f3e399] [cursor=pointer]:
+              - /url: "#"
+    - generic [ref=f3e400]:
+      - generic [ref=f3e401]:
+        - paragraph [ref=f3e402]: Hochiminh City, Vietnam --:--:--
+        - paragraph [ref=f3e403]: Working Worldwide.
+        - paragraph [ref=f3e404]: Paris, France --:--:--
+      - generic [ref=f3e405]:
+        - navigation [ref=f3e406]:
+          - list [ref=f3e407]:
+            - listitem [ref=f3e408]: home
+            - listitem [ref=f3e409]: about
+            - listitem [ref=f3e410]: services
+            - listitem [ref=f3e411]: contact
+        - generic [ref=f3e412]:
+          - paragraph [ref=f3e413]: bring your ideas to life
+          - link "get in touch" [ref=f3e414] [cursor=pointer]:
+            - /url: ""
+          - link "contact@dbla.com" [ref=f3e415] [cursor=pointer]:
+            - /url: ""
+        - list [ref=f3e416]:
+          - listitem [ref=f3e417]: instagram
+          - listitem [ref=f3e418]: tiktok
+          - listitem [ref=f3e419]: linkedIn
+  - button "Open Next.js Dev Tools" [ref=f3e425] [cursor=pointer]

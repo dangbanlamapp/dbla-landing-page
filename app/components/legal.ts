@@ -1,15 +1,8 @@
 /**
- * The legal strip's data, shared by Footer and MenuPanel — the same row is
- * printed in both, and a list of routes that exists twice is a list that goes
- * out of date once.
+ * The copyright year on the legal strip, shared by Footer and MenuPanel. The
+ * links beside it are content and live in Sanity's Site settings; the year is
+ * not, so it stays here.
  *
- * A plain module rather than exports from Footer.tsx, because MenuPanel is a
- * client component: importing a constant out of Footer would drag that whole
- * server component — circle masks, wordmark path and all — into the client
- * bundle for the sake of four strings.
- */
-
-/**
  * Hard-coded rather than `new Date().getFullYear()`. On a fully static page a
  * computed year is evaluated once at build time and then frozen into the HTML
  * — it would be right today, go stale silently on the next 1 January, and only
@@ -20,10 +13,3 @@
  * fails visibly.
  */
 export const YEAR = 2026;
-
-/** href is a placeholder — these routes do not exist yet. */
-export const LEGAL_LINKS = [
-  { label: "Terms of Service", href: "#" },
-  { label: "Privacy Policy", href: "#" },
-  { label: "Cookie Settings", href: "#" },
-];

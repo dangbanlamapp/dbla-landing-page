@@ -1,0 +1,211 @@
+- generic [active] [ref=e1]:
+  - paragraph [ref=e8]:
+    - img [ref=e10]:
+      - generic [ref=e12]:
+        - generic [ref=e13]: "0"
+        - generic [ref=e14]: "0"
+  - banner:
+    - generic:
+      - link "DBLA — home" [ref=e15] [cursor=pointer]:
+        - /url: /
+        - img "DBLA" [ref=e16]
+      - link "All projects" [ref=e20] [cursor=pointer]:
+        - /url: /projects
+  - main [ref=e21]:
+    - article [ref=e22]:
+      - generic [ref=e23]:
+        - generic [ref=e29]:
+          - generic [ref=e30]: 01 / 04
+          - generic [ref=e31]: mobile app
+        - img "Ru:tine24 app screens" [ref=e36]
+        - heading "Ru:tine24" [level=1] [ref=e41]
+        - paragraph [ref=e42]: A focus, community and loyalty app for a Vietnamese working-café brand
+      - generic [ref=e43]:
+        - generic [ref=e45]:
+          - heading "Overview" [level=2] [ref=e47]
+          - generic [ref=e48]:
+            - paragraph [ref=e49]: Making a room full of strangers feel like a team
+            - paragraph [ref=e50]: A focus, community and loyalty app for RU:TINE, a Vietnamese working-café brand. We led it from strategy to handoff, shipped it in mid-2026, then used what launch taught us to reshape it into a multi-brand platform.
+            - generic [ref=e51]:
+              - generic [ref=e52]:
+                - term [ref=e53]: Client
+                - definition [ref=e54]: RU:TINE CO.LLAB, Vietnam
+              - generic [ref=e55]:
+                - term [ref=e56]: Scope
+                - definition [ref=e57]: UX strategy, information architecture, UX writing, design system, development
+              - generic [ref=e58]:
+                - term [ref=e59]: Platform
+                - definition [ref=e60]: iOS and Android, React Native
+              - generic [ref=e61]:
+                - term [ref=e62]: Audience
+                - definition [ref=e63]: Vietnamese Gen Z students and young professionals
+              - generic [ref=e64]:
+                - term [ref=e65]: Timeline
+                - definition [ref=e66]: Strategy April 2026 → launch mid-2026 → 2.0 proposal autumn 2026
+        - generic [ref=e67]:
+          - heading "The challenge" [level=2] [ref=e69]
+          - generic [ref=e70]:
+            - paragraph [ref=e71]: RU:TINE sells community. Its customers come to work with headphones on.
+            - paragraph [ref=e72]: The founder wanted an app that made that community visible and gave people a reason to come back tomorrow. Two obvious answers would have failed.
+            - list [ref=e73]:
+              - listitem [ref=e74]:
+                - generic [ref=e75]: "01"
+                - generic [ref=e76]:
+                  - heading "The transactional trap" [level=3] [ref=e77]
+                  - paragraph [ref=e78]: A points app people open only to claim a discount. RU:TINE's own competitive analysis had already flagged this as the default failure of café loyalty apps.
+              - listitem [ref=e79]:
+                - generic [ref=e80]: "02"
+                - generic [ref=e81]:
+                  - heading "The forced-connection trap" [level=3] [ref=e82]
+                  - paragraph [ref=e83]: Networking features that assume people want to socialise in-app. In a room of people in flow, a feature that interrupts is not community. It is friction.
+        - generic [ref=e84]:
+          - heading "The insight" [level=2] [ref=e86]
+          - generic [ref=e87]:
+            - paragraph [ref=e88]: We weren't building an app that connects people. We were building one that makes people feel connected.
+            - paragraph [ref=e89]: "Community in a working café is one specific feeling: I am not alone in my grind. That reframed the brief."
+            - paragraph [ref=e90]: "Strava was the reference. Running stays a solo activity, but Strava makes individual effort visible and shared, and a community forms around it. Nobody is forced to interact. The app applies the same idea to focused work: the session stays personal, and where it lands and who sees it creates the belonging."
+        - generic [ref=e91]:
+          - heading "The strategy" [level=2] [ref=e93]
+          - generic [ref=e94]:
+            - paragraph [ref=e95]: Three opt-in layers, on a loyalty base
+            - paragraph [ref=e96]: Someone who only ever uses the timer still gets full value. Someone who goes deeper finds belonging, then a sense of identity.
+            - list [ref=e97]:
+              - listitem [ref=e98]:
+                - generic [ref=e99]: "01"
+                - generic [ref=e100]:
+                  - heading "Focus — the individual loop" [level=3] [ref=e101]
+                  - paragraph [ref=e102]: The timer starts on arrival, a photo opens each session and a recap card closes it. It works with no social use at all.
+              - listitem [ref=e103]:
+                - generic [ref=e104]: "02"
+                - generic [ref=e105]:
+                  - heading "Community — ambient belonging" [level=3] [ref=e106]
+                  - paragraph [ref=e107]: A live feed, visible in-store only, that shows who is here now, plus events run by RU:TINE. Nobody has to post.
+              - listitem [ref=e108]:
+                - generic [ref=e109]: "03"
+                - generic [ref=e110]:
+                  - heading "Identity — the personal mirror" [level=3] [ref=e111]
+                  - paragraph [ref=e112]: A work persona drawn from habits, a card and stamp collection, and visit cards with mutual adds that hand off to Zalo and Instagram.
+            - paragraph [ref=e113]: "Loyalty points sit underneath all three, earned by purchases and by focus time. Starting a session and taking the photo is the only consent gesture: nobody is visible to strangers by default, and profiles only open up inside events people chose to join."
+        - generic [ref=e114]:
+          - heading "Five decisions" [level=2] [ref=e116]
+          - generic [ref=e117]:
+            - paragraph [ref=e118]: Five decisions that shaped the product
+            - paragraph [ref=e119]: Each of these went against a familiar pattern. The reasoning mattered as much as the screen.
+            - list [ref=e120]:
+              - listitem [ref=e121]:
+                - generic [ref=e122]: "01"
+                - generic [ref=e123]:
+                  - heading "A presence feed, not a content feed" [level=3] [ref=e124]
+                  - paragraph [ref=e125]: A café has a finite number of daily visitors, and a sparse feed feels lonelier than no feed. So the live feed shows who is here right now, not what people posted, and only to people checked in to the café.
+              - listitem [ref=e126]:
+                - generic [ref=e127]: "02"
+                - generic [ref=e128]:
+                  - heading "The photo as a ritual, not a gate" [level=3] [ref=e129]
+                  - paragraph [ref=e130]: Every session starts with a photo. It marks a fresh start and becomes the texture of the recap card. It is the product's signature moment, so we protected it as a ritual and let the collection carry identity.
+              - listitem [ref=e131]:
+                - generic [ref=e132]: "03"
+                - generic [ref=e133]:
+                  - heading "Presence FOMO, not feed FOMO" [level=3] [ref=e134]
+                  - paragraph [ref=e135]: "Every feature had to pass one test: does it reward arriving at the café, or opening the app more? The first serves the business. The second breaks the deep-work promise. This test later drove Phase 2 prioritisation."
+              - listitem [ref=e136]:
+                - generic [ref=e137]: "04"
+                - generic [ref=e138]:
+                  - heading "No in-app messaging, no one-way follows" [level=3] [ref=e139]
+                  - paragraph [ref=e140]: Vietnamese Gen Z already lives on Zalo and Instagram. The app makes the first gesture, a visit card exchanged by QR at an event, then hands the relationship off. Friends are mutual adds, so there is no follower count to perform for.
+              - listitem [ref=e141]:
+                - generic [ref=e142]: "05"
+                - generic [ref=e143]:
+                  - heading "Loyalty that rewards focus, not only spending" [level=3] [ref=e144]
+                  - paragraph [ref=e145]: Points come from purchases and, at a lower rate, from focus time. Rewarding presence fits the brand. It also turns point-chasers into feature users, and feature users into point earners.
+        - generic [ref=e146]:
+          - heading "Shipping it" [level=2] [ref=e148]
+          - generic [ref=e149]:
+            - paragraph [ref=e150]: Planned like a startup, not an agency job
+            - paragraph [ref=e151]: "Phase 1 was a closed launch that deliberately left loyalty out, to answer one clean question: do the features bring people back on their own? Loyalty, via POS integration, came next as a separate track."
+            - paragraph [ref=e152]: Alongside the app we built the system that made the design shippable.
+            - list [ref=e153]:
+              - listitem [ref=e154]:
+                - generic [ref=e155]: "01"
+                - generic [ref=e156]:
+                  - heading "Design tokens" [level=3] [ref=e157]
+                  - paragraph [ref=e158]: In W3C format, exported from Figma to code through a Node.js pipeline and GitHub Actions.
+              - listitem [ref=e159]:
+                - generic [ref=e160]: "02"
+                - generic [ref=e161]:
+                  - heading "A re-skinnable theme" [level=3] [ref=e162]
+                  - paragraph [ref=e163]: Deep navy and warm ivory, burnt orange for action, amber for rewards, teal for community. Each colour carries a job.
+              - listitem [ref=e164]:
+                - generic [ref=e165]: "03"
+                - generic [ref=e166]:
+                  - heading "Type" [level=3] [ref=e167]
+                  - paragraph [ref=e168]: DM Serif Display for moments worth keeping, DM Sans for interface, DM Mono for time and numbers.
+              - listitem [ref=e169]:
+                - generic [ref=e170]: "04"
+                - generic [ref=e171]:
+                  - heading "UX writing" [level=3] [ref=e172]
+                  - paragraph [ref=e173]: In English and Vietnamese, with a native Gen Z review before anything shipped.
+            - paragraph [ref=e174]: When a feature was committed to the client without design input — guest-created events — we didn't argue that users didn't need it. We reframed it as sequencing and cost, anchored in principles the client had already signed off, and it moved to a later phase.
+        - generic [ref=e175]:
+          - heading "What launch taught us" [level=2] [ref=e177]
+          - generic [ref=e178]:
+            - paragraph [ref=e179]: The principles held up. The incentive did not.
+            - paragraph [ref=e180]: "The app launched in mid-2026. The honest result: the focus timer and photo sharing were used far less than we designed for. They were optional features competing for attention, with nothing that made people start. The community layer, the part the founder cared about most, was the part that landed least."
+            - paragraph [ref=e181]: "A session-completion reward asks for effort before giving anything back. To make the feedback loop measurable, we set the North Star as weekly return rate on completed café sessions, tracked across four groups: focus, presence, identity and product health."
+        - generic [ref=e182]:
+          - heading "2.0" [level=2] [ref=e184]
+          - generic [ref=e185]:
+            - paragraph [ref=e186]: From one café app to a platform for three brands
+            - paragraph [ref=e187]: "Then the client acquired two more coworking café chains and wanted all three in one app. For the new chains the app is mandatory: customers top up a wallet, scan in, and pay for their time."
+            - paragraph [ref=e188]: "That changed the design problem. Mandatory payment guarantees usage, but a captive user is not an attached one. Our proposal:"
+            - list [ref=e189]:
+              - listitem [ref=e190]:
+                - generic [ref=e191]: "01"
+                - generic [ref=e192]:
+                  - heading "An invisible platform" [level=3] [ref=e193]
+                  - paragraph [ref=e194]: One account, one wallet, one collection. The app wears the brand of whichever café you check into, built on the same token system with a set per brand.
+              - listitem [ref=e195]:
+                - generic [ref=e196]: "02"
+                - generic [ref=e197]:
+                  - heading "Move the reward to check-in" [level=3] [ref=e198]
+                  - paragraph [ref=e199]: Scan in, get something instantly. No effort before the first reward.
+              - listitem [ref=e200]:
+                - generic [ref=e201]: "03"
+                - generic [ref=e202]:
+                  - heading "A collection that develops as you work" [level=3] [ref=e203]
+                  - paragraph [ref=e204]: You add a concrete goal, “finish my thesis”, and it starts as a faint ghost. Focus sessions bring it into focus. Every focus session brings your dreams into focus.
+              - listitem [ref=e205]:
+                - generic [ref=e206]: "04"
+                - generic [ref=e207]:
+                  - heading "Social as distribution, not a chore" [level=3] [ref=e208]
+                  - paragraph [ref=e209]: What people post is an artifact from their collection, so the feed always has something worth looking at.
+              - listitem [ref=e210]:
+                - generic [ref=e211]: "05"
+                - generic [ref=e212]:
+                  - heading "A metric that can't be inflated" [level=3] [ref=e213]
+                  - paragraph [ref=e214]: Not daily actives, which payment props up, but the share of checked-in users who touch their collection.
+        - generic [ref=e215]:
+          - heading "What we'd do differently" [level=2] [ref=e217]
+          - generic [ref=e218]:
+            - paragraph [ref=e219]: Keep the principles. Change the mechanism.
+            - list [ref=e220]:
+              - listitem [ref=e221]:
+                - generic [ref=e222]: "01"
+                - generic [ref=e223]:
+                  - heading "Test the incentive before the interface" [level=3] [ref=e224]
+                  - paragraph [ref=e225]: We spent design effort making the recap card beautiful before proving people would finish sessions to earn it.
+              - listitem [ref=e226]:
+                - generic [ref=e227]: "02"
+                - generic [ref=e228]:
+                  - heading "Design for the zero-effort first moment" [level=3] [ref=e229]
+                  - paragraph [ref=e230]: The best features ask nothing on day one. Check-in rewards do that. Session rewards don't.
+            - paragraph [ref=e231]: “Reward arriving, not scrolling” survived launch intact. It is now the spine of 2.0.
+      - generic [ref=e232]:
+        - paragraph [ref=e238]: Next project — 02
+        - link "Open Eggu" [ref=e239] [cursor=pointer]:
+          - /url: /projects/eggu
+          - img "The Eggu app running on a phone" [ref=e243]
+          - generic [aria-hidden]: View project
+        - heading "Eggu" [level=2] [ref=e244]
+        - link "All projects" [ref=e245] [cursor=pointer]:
+          - /url: /projects
+  - button "Open Next.js Dev Tools" [ref=e251] [cursor=pointer]

@@ -1,6 +1,7 @@
 import ContactInfo from "./ContactInfo";
 import DashedCircle from "./DashedCircle";
 import { PILL } from "./pill";
+import type { SiteSettings } from "./site-settings";
 
 /**
  * Shared shape of the three fields. Underline-only: no box, no fill — the
@@ -41,7 +42,7 @@ const FIELDS = [
   { id: "email", label: "Email", type: "email", autoComplete: "email" },
 ];
 
-export default function Contact() {
+export default function Contact({ settings }: { settings: SiteSettings }) {
   return (
     <section
       id="contact"
@@ -164,6 +165,7 @@ export default function Contact() {
                 exists: this column centres its text below lg, where the menu
                 stacks it left. Both flush right at lg. */}
             <ContactInfo
+              settings={settings}
               align="items-center lg:items-end"
               link="text-foreground hover:text-background focus-visible:text-background"
               className="mt-space-2x text-base lg:mt-space-3x"

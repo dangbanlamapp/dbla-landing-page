@@ -5,6 +5,7 @@ import { useLenis } from "lenis/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRevealed } from "./Preloader";
+import { holdScroll } from "./scroll-hold";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -79,9 +80,13 @@ export default function ScrollLock() {
     //
     // `force` because a re-run may find the instance already stopped, and
     // `scrollTo` ignores a stopped instance otherwise.
+    //
+    // Through the shared hold rather than a bare stop/start, so a route-change
+    // wipe that starts inside the lock is not cut short by our release, nor
+    // ours by theirs.
     const hold = () => {
       lenis.scrollTo(0, { immediate: true, force: true });
-      lenis.stop();
+      return holdScroll(lenis);
     };
 
     // While the curtain is up the page is held with no timer at all. The
@@ -89,32 +94,29 @@ export default function ScrollLock() {
     // reveal, because that is when the entrance it protects begins. An
     // open-ended hold is safe because the preloader always resolves — its
     // asset wait is itself raced against a timeout.
-    if (!revealed) {
-      hold();
-      return () => lenis.start();
-    }
+    if (!revealed) return hold();
 
     releaseAt.current ??= performance.now() + LOCK_MS;
     const remaining = releaseAt.current - performance.now();
     if (remaining <= 0) return;
 
-    hold();
+    const release = hold();
 
     const timer = window.setTimeout(() => {
-      lenis.start();
-
       // A clipped <html> is not a scroll container, so it reports no scrollable
       // overflow. ScrollTrigger refreshes itself on the window "load" event,
       // which can easily land inside the lock on a page with background
       // imagery — anything it measured then saw a maxScroll of 0. Re-measure
       // now that the document scrolls again; it is a no-op if nothing refreshed.
-      ScrollTrigger.refresh();
+      // Skipped if another hold still clips the page — its release refreshes.
+      if (release()) ScrollTrigger.refresh();
     }, remaining);
 
     return () => {
       window.clearTimeout(timer);
       // Never leave a destroyed-or-replaced instance holding the page clipped.
-      lenis.start();
+      // Idempotent, so a cleanup after the timer already released is harmless.
+      release();
     };
   }, [lenis, revealed]);
 

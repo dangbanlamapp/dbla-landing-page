@@ -6,14 +6,13 @@ import { useGSAP } from "@gsap/react";
 import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import NumberFlow from "@number-flow/react";
-import Image, { type StaticImageData } from "next/image";
-import egguApp from "@/public/eggu-app.jpg";
-import rutineMockup from "@/public/rutine-mockup.jpg";
-import tgfMockup from "@/public/tgf-mockup.jpg";
-import adminlessMockup from "@/public/adminless-mockup.jpg";
-import ProjectBlock, { type ProjectCopy } from "./ProjectBlock";
+import Image from "next/image";
+import TransitionLink from "./TransitionLink";
+import ProjectBlock from "./ProjectBlock";
 import DashedCircle from "./DashedCircle";
 import ProgressRing from "./ProgressRing";
+import { PILL } from "./pill";
+import { projectHref, type Project } from "./project-data";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
@@ -23,64 +22,6 @@ gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 // the new viewport: the trigger's end is a function and invalidateOnRefresh is
 // what makes ScrollTrigger call it again.
 const PIN_VIEWPORTS = 5;
-
-// Content drives the schedule. The projects split the pin evenly between them
-// (see SLICE below), so adding a fifth entry here re-divides the same 300vh
-// rather than needing a single position rewritten — the same contract SERVICES
-// has with the Services pin.
-//
-// DOM order is stacking order, and stacking order is scroll order: each image
-// grows on top of the one before it, so the array reads top-down as the
-// sequence a reader scrolls through.
-type Project = ProjectCopy & {
-  src: StaticImageData;
-  alt: string;
-};
-
-const PROJECTS: Project[] = [
-  {
-    name: "Ru:tine24",
-    type: "mobile app",
-    blurb: "A mobile app that bring experiences to coffee shop chain",
-    src: rutineMockup,
-    alt: "Ru:tine24 app screens",
-  },
-  {
-    name: "Eggu",
-    type: "mobile app",
-    blurb: "PLACEHOLDER — what Eggu is and who it was built for",
-    src: egguApp,
-    alt: "The Eggu app running on a phone",
-  },
-  {
-    name: "TGF",
-    type: "website",
-    blurb: "PLACEHOLDER — what TGF is and who it was built for",
-    src: tgfMockup,
-    alt: "The TGF site on a laptop",
-  },
-  {
-    name: "Adminless",
-    type: "web app",
-    blurb: "PLACEHOLDER — what Adminless is and who it was built for",
-    src: adminlessMockup,
-    alt: "The Adminless dashboard on a laptop",
-  },
-];
-
-// The pin is cut into one slice per project PLUS a closing one, and that "+ 1"
-// is the whole reason this is a division rather than four hand-placed numbers:
-// every position downstream is a multiple of SLICE, so buying the section an
-// exit costs one character here and re-times the entire sequence to fit.
-//
-// At 3 viewports across 4 projects and a teardown that is 0.6 each.
-const SLICE = PIN_VIEWPORTS / (PROJECTS.length + 1);
-
-// An image's slice is split in two: it is revealed over the first half, then
-// drifts over the second. REVEAL_HALF is that midpoint, and both halves read
-// from it, so the reveal and the drift cannot be retimed independently and
-// leave a gap or an overlap between them.
-const REVEAL_HALF = SLICE / 2;
 
 // How far each of the four wedges travels. One quarter turn, and the number the
 // whole reveal is built around — four wedges of exactly 90deg, opening at once
@@ -102,28 +43,62 @@ const QUADRANT = 90;
 // alive rather than a second entrance.
 const ZOOM_SCALE = 1.2;
 
-// The copy's share of a slice, in and out. The remainder is hold — at 0.35 and
-// 0.25 the block stands still for the middle 40% of its project, which is what
-// keeps the column from reading as permanently in motion across four
-// back-to-back slices. Fractions of SLICE rather than absolute times, so the
-// rhythm survives a change to PIN_VIEWPORTS or to the number of projects.
-const TEXT_ENTER = SLICE * 0.35;
-const TEXT_EXIT = SLICE * 0.25;
-
 // Per-line offset, applied to entrance and exit alike. Small next to TEXT_ENTER
 // on purpose: three lines should land as one gesture, not as a queue.
 const TEXT_STAGGER = 0.06;
 
-// Where the projects end and the closing slice begins: the last image has
-// finished drifting, the ring has closed, and nothing is left to introduce.
-// Everything about the teardown hangs off this one position.
-const TEARDOWN_AT = PROJECTS.length * SLICE;
+// Content drives the schedule. The projects split the pin evenly between them
+// (see SLICE below), so adding a project in the Studio re-divides the same pin
+// rather than needing a single position rewritten — the same contract the
+// services have with the Services pin.
+//
+// DOM order is stacking order, and stacking order is scroll order: each image
+// grows on top of the one before it, so the `projects` prop reads top-down as
+// the sequence a reader scrolls through. The list comes from Sanity, in the
+// order it is dragged into in the Studio, shared with the /projects routes.
+//
+// That is why everything below is a function of the count rather than a
+// module constant: the count is only known once the list arrives as a prop.
+// The names stay upper-case because inside the timeline they are still
+// constants — fixed for the life of one mount, which is the life of one list
+// (see the content key on <Projects> in app/page.tsx).
+function schedule(count: number) {
+  // The pin is cut into one slice per project PLUS a closing one, and that
+  // "+ 1" is the whole reason this is a division rather than hand-placed
+  // numbers: every position downstream is a multiple of SLICE, so buying the
+  // section an exit costs one character here and re-times the entire sequence
+  // to fit.
+  //
+  // At 5 viewports across 4 projects and a teardown that is 1 each.
+  const SLICE = PIN_VIEWPORTS / (count + 1);
 
-// When the section furniture leaves. Block i exits at i * SLICE + (SLICE -
-// TEXT_EXIT), so for the last i that is exactly this — the heading and the
-// counter ride out on the last project's beat and land precisely as the
-// teardown begins, leaving the closing slice to the circles alone.
-const OUTRO_AT = TEARDOWN_AT - TEXT_EXIT;
+  // An image's slice is split in two: it is revealed over the first half,
+  // then drifts over the second. REVEAL_HALF is that midpoint, and both halves
+  // read from it, so the reveal and the drift cannot be retimed independently
+  // and leave a gap or an overlap between them.
+  const REVEAL_HALF = SLICE / 2;
+
+  // The copy's share of a slice, in and out. The remainder is hold — at 0.35
+  // and 0.25 the block stands still for the middle 40% of its project, which
+  // is what keeps the column from reading as permanently in motion across
+  // back-to-back slices. Fractions of SLICE rather than absolute times, so the
+  // rhythm survives a change to PIN_VIEWPORTS or to the number of projects.
+  const TEXT_ENTER = SLICE * 0.35;
+  const TEXT_EXIT = SLICE * 0.25;
+
+  // Where the projects end and the closing slice begins: the last image has
+  // finished drifting, the ring has closed, and nothing is left to introduce.
+  // Everything about the teardown hangs off this one position.
+  const TEARDOWN_AT = count * SLICE;
+
+  // When the section furniture leaves. Block i exits at i * SLICE + (SLICE -
+  // TEXT_EXIT), so for the last i that is exactly this — the heading and the
+  // counter ride out on the last project's beat and land precisely as the
+  // teardown begins, leaving the closing slice to the circles alone.
+  const OUTRO_AT = TEARDOWN_AT - TEXT_EXIT;
+
+  return { SLICE, REVEAL_HALF, TEXT_ENTER, TEXT_EXIT, TEARDOWN_AT, OUTRO_AT };
+}
 
 // What the frame collapses to over the closing slice. Not zero: the circle is
 // the thing the whole section is built around, so it draws back rather than
@@ -149,7 +124,7 @@ const ROW_FIT = 0.9;
  * How far the frame draws back during the teardown — FRAME_EXIT_SCALE, unless
  * the row of circles it produces would not fit across the viewport.
  *
- * The row is PROJECTS.length * ROW_STEP diameters wide, so whether it fits is
+ * The row is count * ROW_STEP diameters wide, so whether it fits is
  * driven entirely by the diameter against the window width. At 0.5 and the
  * desktop 75vh frame that is 165vh of row: comfortable at 16:9, flush at 3:2,
  * over the edge at 4:3. Rather than pick a scale small enough for the worst
@@ -167,11 +142,11 @@ const ROW_FIT = 0.9;
  * resize, the same contract the pin's `end` has — the same reason neither is a
  * fixed number.
  */
-const rowScale = (_index: number, frame: HTMLElement) =>
+const rowScale = (count: number) => (_index: number, frame: HTMLElement) =>
   Math.min(
     FRAME_EXIT_SCALE,
     (window.innerWidth * ROW_FIT) /
-      (frame.offsetWidth * PROJECTS.length * (ROW_STEP / 100)),
+      (frame.offsetWidth * count * (ROW_STEP / 100)),
   );
 
 // How far into a project's slice the counter ticks over to it, as a fraction of
@@ -200,10 +175,10 @@ const COUNTER_TRANSFORM: EffectTiming = {
 };
 const COUNTER_OPACITY: EffectTiming = { duration: 250, easing: "ease-out" };
 
-export default function Projects() {
+export default function Projects({ projects }: { projects: Project[] }) {
   const container = useRef<HTMLElement>(null);
 
-  // How many project entrances have completed — 0 through PROJECTS.length, so
+  // How many project entrances have completed — 0 through projects.length, so
   // "00" is a real state and not a placeholder. This is the one thing in the
   // section that has to cross from the timeline back into React, because
   // NumberFlow animates off a prop change rather than off a scrub position.
@@ -212,8 +187,37 @@ export default function Projects() {
   // The last value actually written to state. See the guard in onUpdate.
   const shown = useRef(0);
 
+  // Whether the teardown has begun, i.e. the stack is being dealt out into the
+  // row. Second piece of timeline state React needs, for the same reason as
+  // `landed`: it decides which layers take clicks (see `isLive`), and that is
+  // markup, not a tween. Same ref guard, so it is written once per crossing.
+  const [dealt, setDealt] = useState(false);
+  const dealtShown = useRef(false);
+
+  /**
+   * Which image layers accept a click. All four sit in the same box at once,
+   * and a CSS mask does not take part in hit-testing — so without this every
+   * click on the circle would land on the TOP layer, Adminless, whichever
+   * project the reader is actually looking at.
+   *
+   * While stacked, only the project the counter names is live: the counter
+   * ticks to an image as it starts arriving, so the circle opens whatever is
+   * being drawn on top. Once the teardown starts the four separate into a row
+   * with no overlap, and every one of them is live.
+   */
+  const isLive = (i: number) => dealt || i === landed - 1;
+
   useGSAP(
     () => {
+      const {
+        SLICE,
+        REVEAL_HALF,
+        TEXT_ENTER,
+        TEXT_EXIT,
+        TEARDOWN_AT,
+        OUTRO_AT,
+      } = schedule(projects.length);
+
       // ── The pin ────────────────────────────────────────────────────────────
       // One trigger both pins the section and scrubs this timeline, following
       // Services: a single set of start/end measurements to refresh, and
@@ -249,7 +253,7 @@ export default function Projects() {
 
       // ── The progress ring ──────────────────────────────────────────────────
       // It spans the project slices from position 0, so the drawn fraction IS
-      // the fraction of the PROJECTS scrolled — the ring measures the sequence
+      // the fraction of the projects scrolled — the ring measures the sequence
       // it sits beside, not the pin. It closes exactly on TEARDOWN_AT, which is
       // what lets the closing slice scale it away without ever shrinking an
       // unfinished dial.
@@ -272,7 +276,7 @@ export default function Projects() {
       // gains layers. A finished wipe is a fully opaque circle, which is what
       // lets the next one cover it as completely as a scale-up used to.
       //
-      // Read in DOM order, which the markup keys to PROJECTS order, so index i
+      // Read in DOM order, which the markup keys to the list's order, so index i
       // is both the stacking level and the slice number. That is what keeps
       // "the next one starts where the last one ended" out of the code: it
       // falls out of i * SLICE.
@@ -345,7 +349,7 @@ export default function Projects() {
       // is only confirming something the reader watched happen.
       //
       // Built from SLICE, so the count stays welded to the stack it is counting
-      // and the two re-divide together when PIN_VIEWPORTS or PROJECTS changes.
+      // and the two re-divide together when PIN_VIEWPORTS or the list changes.
       //
       // Derived from tl.time() on every update rather than incremented by a
       // callback per step. A scrubbed timeline can cross half the pin in a
@@ -353,7 +357,7 @@ export default function Projects() {
       // counting events would drop steps or double-count; this is a pure
       // function of timeline position, like everything else in the section —
       // whatever frame you land on, the number is right for it.
-      const clampIndex = gsap.utils.clamp(0, PROJECTS.length);
+      const clampIndex = gsap.utils.clamp(0, projects.length);
 
       tl.eventCallback("onUpdate", () => {
         const next = clampIndex(Math.floor(tl.time() / SLICE - STEP_AT) + 1);
@@ -366,6 +370,12 @@ export default function Projects() {
         if (next !== shown.current) {
           shown.current = next;
           setLanded(next);
+        }
+
+        const nextDealt = tl.time() >= TEARDOWN_AT;
+        if (nextDealt !== dealtShown.current) {
+          dealtShown.current = nextDealt;
+          setDealt(nextDealt);
         }
       });
 
@@ -419,7 +429,7 @@ export default function Projects() {
         .to(
           "[data-project-frame]",
           {
-            scale: rowScale,
+            scale: rowScale(projects.length),
             duration: SLICE,
             ease: "power3.inOut",
           },
@@ -449,7 +459,7 @@ export default function Projects() {
         .to(
           "[data-project-image]",
           {
-            xPercent: (i: number) => (i - (PROJECTS.length - 1) / 2) * ROW_STEP,
+            xPercent: (i: number) => (i - (projects.length - 1) / 2) * ROW_STEP,
             duration: SLICE,
             ease: "power4.inOut",
           },
@@ -745,7 +755,7 @@ export default function Projects() {
               data-frame-fill
               className="absolute inset-0 rounded-full bg-accent"
             />
-            {PROJECTS.map((project) => (
+            {projects.map((project, i) => (
               // Each layer carries the circular clip, because each one has to
               // survive being translated out of the frame's box during the
               // teardown and still read as a circle on its own. It is also what
@@ -757,25 +767,52 @@ export default function Projects() {
               // matches the tween's start value, so nothing flashes fully
               // revealed before GSAP runs and the pre-pin frame is correct
               // without JS.
-              <div
-                key={project.name}
+              //
+              // The layer IS the link to the project's page, so the click
+              // target is exactly the circle the reader sees, and in the row
+              // each circle opens its own project. Layers that are not live
+              // (see isLive) drop out of hit-testing AND out of the tab order,
+              // so neither a click nor a Tab lands on a picture that is buried
+              // under another one.
+              <TransitionLink
+                key={project.slug}
+                href={projectHref(project)}
+                aria-label={`Open ${project.name}`}
+                tabIndex={isLive(i) ? undefined : -1}
                 data-project-image
-                className="quadrant-reveal absolute inset-0 overflow-hidden rounded-full"
+                className={`quadrant-reveal group absolute inset-0 overflow-hidden rounded-full ${
+                  isLive(i) ? "" : "pointer-events-none"
+                }`}
               >
-                <Image
-                  src={project.src}
-                  alt={project.alt}
-                  fill
-                  sizes="(min-width: 64rem) 75vh, 80vw"
-                  // The drift's target, and the reason it is tagged on the
-                  // picture rather than tweened through the layer: the mask
-                  // lives on the layer, so scaling the layer would scale the
-                  // revealed circle too. This scales inside a mask that holds
-                  // still.
-                  data-project-photo
-                  className="object-cover"
-                />
-              </div>
+                {/* Hover zoom on a wrapper, never on the photo: GSAP owns the
+                    photo's scale for the drift, and a CSS transition on the
+                    same transform would snap to wherever the scrub last wrote
+                    it. Small, because it compounds with ZOOM_SCALE. */}
+                <div className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-105 group-focus-visible:scale-105">
+                  <Image
+                    src={project.src}
+                    alt={project.alt}
+                    fill
+                    sizes="(min-width: 64rem) 75vh, 80vw"
+                    // The drift's target, and the reason it is tagged on the
+                    // picture rather than tweened through the layer: the mask
+                    // lives on the layer, so scaling the layer would scale the
+                    // revealed circle too. This scales inside a mask that holds
+                    // still.
+                    data-project-photo
+                    className="object-cover"
+                  />
+                </div>
+                {/* The same affordance as the /projects index. Inside the
+                    layer, so it is masked by the wipe and rides the teardown
+                    with its own circle. */}
+                <span
+                  aria-hidden
+                  className={`${PILL} pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-accent text-background opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100`}
+                >
+                  View project
+                </span>
+              </TransitionLink>
             ))}
           </div>
           {/*
@@ -784,10 +821,15 @@ export default function Projects() {
             Services. Scaling the centering layer rather than the ring inside it
             means one transform takes the circle and its dots together.
           */}
+          {/* pointer-events-none: its centering layer is `absolute inset-0`
+              and paints after the frame, so it would otherwise sit over the
+              circle and swallow every click meant for the image links.
+              ProgressRing already opts out on its own. */}
           <DashedCircle
             id="projects-rings"
             dots="horizontal"
             size="var(--dash-d)"
+            className="pointer-events-none"
           />
           {/*
             16/15 is exactly the 80vh/75vh the desktop used to spell out, so the
@@ -805,9 +847,15 @@ export default function Projects() {
           occupies this column in full and only one is visible at a time. The
           column is relative purely to be their containing block; DOM order is
           scroll order, which the [data-project-block] query relies on.
+
+          pointer-events-none because being `relative` and later in the DOM
+          puts this column above the image layers in hit-testing, and the
+          teardown deals the last circle out into exactly the space it covers —
+          it was eating every click on that one. Nothing in here is
+          interactive, so nothing is lost.
         */}
-        <div className="relative flex-1">
-          {PROJECTS.map((project) => (
+        <div className="pointer-events-none relative flex-1">
+          {projects.map((project) => (
             <ProjectBlock
               key={project.name}
               type={project.type}
@@ -819,8 +867,12 @@ export default function Projects() {
       </div>
       {/* Centre crosshair: both rules are sized in vmax so they overshoot the
           viewport on either axis and stay full-bleed through any resize —
-          the section's overflow-hidden does the trimming. */}
-      <div id="cross-lines" className="absolute inset-0">
+          the section's overflow-hidden does the trimming.
+
+          pointer-events-none because it is the last thing in the section and
+          covers all of it — without it, it is the crosshair that catches the
+          click on a project image, not the image. */}
+      <div id="cross-lines" className="pointer-events-none absolute inset-0">
         <div
           id="y-line"
           className="absolute inset-0 flex items-center justify-center"

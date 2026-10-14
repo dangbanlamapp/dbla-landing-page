@@ -1,0 +1,33 @@
+- generic [active] [ref=f1e1]:
+  - button "Open Next.js Dev Tools" [ref=f1e91] [cursor=pointer]
+  - alert [ref=f1e95]: EGGU
+  - banner:
+    - generic:
+      - link "DBLA — home" [ref=f1e151] [cursor=pointer]:
+        - /url: /
+        - img "DBLA" [ref=f1e152]
+      - link "All projects" [ref=f1e156] [cursor=pointer]:
+        - /url: /projects
+  - main [ref=f1e157]:
+    - article [ref=f1e158]:
+      - generic [ref=f1e159]:
+        - img "The Eggu app running on a phone" [ref=f1e169]
+        - heading "Eggu" [level=1] [ref=f1e174]:
+          - generic [aria-hidden] [ref=f1e176]: Eggu
+      - generic [ref=f1e179]:
+        - heading "Overview" [level=2] [ref=f1e180]:
+          - generic [aria-hidden] [ref=f1e182]: Overview
+        - paragraph [ref=f1e183]:
+          - generic [aria-hidden] [ref=f1e185]: PLACEHOLDER — what Eggu is and who
+          - generic [aria-hidden] [ref=f1e187]: it was built for
+      - generic [ref=f1e188]:
+        - paragraph [ref=f1e194]:
+          - generic [aria-hidden] [ref=f1e196]: Next project — 03
+        - link "Open TGF" [ref=f1e197] [cursor=pointer]:
+          - /url: /projects/tgf
+          - img "The TGF site on a laptop" [ref=f1e201]
+          - generic [aria-hidden]: View project
+        - heading "TGF" [level=2] [ref=f1e202]:
+          - generic [aria-hidden] [ref=f1e204]: TGF
+        - link "All projects" [ref=f1e205] [cursor=pointer]:
+          - /url: /projects

@@ -50,7 +50,7 @@ export default function Intro() {
           );
 
           // Same contract as Hero: data-split declares which way the lines
-          // travel.
+          // travel. Scrubbed on both layouts, same recipe as OurTeam / Cta.
           const blocks = gsap.utils.toArray<HTMLElement>(
             "[data-split]",
             container.current,
@@ -62,27 +62,63 @@ export default function Intro() {
             SplitText.create(block, {
               type: "lines",
               mask: "lines",
-
+              // Keeps the mask off the caps at leading-heading (0.75).
+              linesClass: "pb-[0.1em]",
               autoSplit: true,
+              // fromTo rather than from, so both ends are written out and
+              // nothing is ever read back off a half-travelled line.
+              //
+              // Deliberately NO invalidateOnRefresh. With a stagger, every
+              // ScrollTrigger.refresh() (ScrollLock and HeaderBg both fire
+              // one after load) invalidates the tween and re-renders it at
+              // progress 0 — and only the first line's slot starts at 0, so
+              // every later line kept its resting yPercent: 0 and sat fully
+              // visible until the scrub reached it, then dropped behind the
+              // mask and rose again. The yPercent values never depend on
+              // layout, so there is nothing for invalidation to re-measure;
+              // the scroll positions are refreshed regardless.
               onSplit: (self) =>
-                gsap.from(self.lines, {
-                  yPercent,
-                  duration: 1.5,
-                  ease: "power3.out",
-                  stagger: 0.12,
-                  scrollTrigger: desktop
-                    ? {
-                        trigger: block,
-                        start: "top 75%",
-                        toggleActions: "play none none reverse",
-                      }
-                    : {
-                        trigger: block,
-                        start: "top 90%",
-                        end: "top 50%",
-                        scrub: true,
-                      },
-                }),
+                gsap.fromTo(
+                  self.lines,
+                  { yPercent },
+                  {
+                    yPercent: 0,
+                    // Linear, not power3.out. On a scrub the ease maps scroll
+                    // to travel, and a strong ease-out front-loads it: with
+                    // power3.out the lines covered half their distance in the
+                    // first ~50px past the start, so they popped into place
+                    // rather than rising. Linear keeps every pixel of scroll
+                    // worth the same movement; Lenis already softens the edges.
+                    ease: "none",
+                    stagger: 0.12,
+                    // Desktop: the section pins at top top, so the block's own
+                    // position stops moving there — drive the entrance off the
+                    // section's approach instead. Mobile is unpinned, so the
+                    // block itself is a fine trigger.
+                    //
+                    // Hero is pinned and Intro slides up over it from scroll
+                    // 0, with Hero's exit firing at 0.2vh. At "top 60%"
+                    // (~0.4vh of scroll) the hero title has left, and the
+                    // first Intro line sits just below where the hero's lower
+                    // heading was, so the two never share the screen. The
+                    // range runs on into the pin (end is relative to start,
+                    // so it survives the pin spacer) and lands at ~1.1vh,
+                    // well before the exit below begins at 1.5vh.
+                    scrollTrigger: desktop
+                      ? {
+                          trigger: container.current,
+                          start: "top 60%",
+                          end: () => "+=" + window.innerHeight * 0.7,
+                          scrub: true,
+                        }
+                      : {
+                          trigger: block,
+                          start: "top 90%",
+                          end: "top 50%",
+                          scrub: true,
+                        },
+                  },
+                ),
             });
           });
         },

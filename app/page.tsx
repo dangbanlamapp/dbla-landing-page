@@ -9,8 +9,22 @@ import OurTeam from "@/app/components/OurTeam";
 import Projects from "@/app/components/Projects";
 import Services from "@/app/components/Services";
 import WhyUs from "@/app/components/WhyUs";
+import {
+  contentKey,
+  getProjects,
+  getServices,
+  getTeam,
+  getTestimonials,
+} from "@/sanity/lib/content";
 
-export default function Home() {
+export default async function Home() {
+  const [projects, services, team, testimonials] = await Promise.all([
+    getProjects(),
+    getServices(),
+    getTeam(),
+    getTestimonials(),
+  ]);
+
   return (
     <>
       <Header />
@@ -40,11 +54,24 @@ export default function Home() {
         <HeaderBg />
         <Hero />
         <Intro />
-        <Services />
+        {/*
+          The four content-driven sections are each keyed on their content
+          (see contentKey) so a live publish remounts them rather than
+          patching text SplitText has already split. Each is skipped when its
+          list is empty: every one of them divides its pin, its carousel or
+          its grid by that count.
+        */}
+        {services.length > 0 && (
+          <Services key={contentKey(services)} services={services} />
+        )}
         <OurMotto />
-        <Projects />
-        <WhyUs />
-        <OurTeam />
+        {projects.length > 0 && (
+          <Projects key={contentKey(projects)} projects={projects} />
+        )}
+        {testimonials.length > 0 && (
+          <WhyUs key={contentKey(testimonials)} testimonials={testimonials} />
+        )}
+        {team.length > 0 && <OurTeam key={contentKey(team)} team={team} />}
         <Cta />
       </main>
       <Footer />

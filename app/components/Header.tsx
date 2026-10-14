@@ -7,7 +7,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import TransitionLink from "./TransitionLink";
 import Logo from "./Logo";
 import MenuButton from "./MenuButton";
 import MenuPanel from "./MenuPanel";
@@ -79,12 +79,12 @@ export default function Header() {
               rather than missing. The two breakpoints are a pair — move one and
               the CTA either doubles up or vanishes. So is the href: this and
               the panel's copy have to point at the same place. */}
-          <Link
+          <TransitionLink
             href="/contact"
             className={`${PILL} pointer-events-auto hidden justify-self-end bg-foreground text-background lg:block`}
           >
             Get in touch
-          </Link>
+          </TransitionLink>
         </div>
       </header>
     </>

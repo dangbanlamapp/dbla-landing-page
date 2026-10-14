@@ -11,26 +11,9 @@ gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 const navButton =
   "flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-foreground/20 transition-colors hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:outline-none";
 
-const TESTIMONIALS = [
-  {
-    quote:
-      "Our developers have 15+ years building at some of the world's most respected tech companies. You get the caliber of talent.",
-    name: "Kao Bui",
-    role: "CEO of Company",
-  },
-  {
-    quote:
-      "They shipped in eight weeks what our last agency quoted six months for. The same people who scoped it were the ones writing the code.",
-    name: "Marta Oyelaran",
-    role: "Founder, Fieldnote",
-  },
-  {
-    quote:
-      "Design, build and launch came from one team, so nothing was lost in a handoff. Our conversion rate is up 40% since the rebuild.",
-    name: "Daniel Reyes",
-    role: "Head of Product, Kestrel",
-  },
-];
+/** One quote in the carousel. The list is edited in the Studio (Testimonials)
+ *  and arrives as a prop, in slide order. */
+export type Testimonial = { quote: string; name: string; role: string };
 
 const SLIDE_SECONDS = 4;
 
@@ -75,7 +58,11 @@ function NavArrow({ className }: { className?: string }) {
   );
 }
 
-export default function WhyUs() {
+export default function WhyUs({
+  testimonials,
+}: {
+  testimonials: Testimonial[];
+}) {
   const container = useRef<HTMLElement>(null);
   const copy = useRef<HTMLDivElement>(null);
   const list = useRef<HTMLDivElement>(null);
@@ -84,7 +71,7 @@ export default function WhyUs() {
   // ways it can change — the timer running out, the arrows, and a bar being
   // clicked — so none of them needs to know about the others.
   const [index, setIndex] = useState(0);
-  const slide = TESTIMONIALS[index];
+  const slide = testimonials[index];
 
   // The block that swaps, so the entrance tween has something to target that is
   // not the whole column (which the parallax below already owns).
@@ -140,11 +127,11 @@ export default function WhyUs() {
     if (!offscreen.current) progress.current?.resume();
   };
 
-  // The wrap. `+ TESTIMONIALS.length` before the modulo because JS `%` keeps
+  // The wrap. `+ testimonials.length` before the modulo because JS `%` keeps
   // the sign of its left operand — a bare `-1 % 3` is `-1`, so stepping back
   // from the first slide would land on nothing rather than on the last.
   const go = (step: number) =>
-    setIndex((i) => (i + step + TESTIMONIALS.length) % TESTIMONIALS.length);
+    setIndex((i) => (i + step + testimonials.length) % testimonials.length);
 
   useGSAP(
     () => {
@@ -181,6 +168,14 @@ export default function WhyUs() {
             // and a refresh re-reads a bare `from`'s end value off the element,
             // so a refresh landing mid-scrub would record a half-travelled line
             // as home. Both ends written out cannot drift.
+            //
+            // No invalidateOnRefresh, unlike the parallax below — and it is
+            // actively harmful here. With a stagger, each refresh invalidates
+            // the tween and re-renders progress 0, where only the first line's
+            // slot has begun; every later line kept its resting yPercent: 0,
+            // sat fully visible ahead of the entrance, then dropped behind its
+            // mask when the scrub reached it. These yPercents never depend on
+            // layout, so there is nothing to re-measure; start/end still are.
             gsap.fromTo(
               self.lines,
               { yPercent },
@@ -193,7 +188,6 @@ export default function WhyUs() {
                   start: "top bottom",
                   end: "center center",
                   scrub: true,
-                  invalidateOnRefresh: true,
                 },
               },
             ),
@@ -400,7 +394,7 @@ export default function WhyUs() {
         // Functional update: this fires from GSAP's ticker, outside React's
         // render, so it reads the index it is handed rather than the one this
         // closure captured.
-        onComplete: () => setIndex((i) => (i + 1) % TESTIMONIALS.length),
+        onComplete: () => setIndex((i) => (i + 1) % testimonials.length),
       });
 
       // Both flags survive the re-run; the tween they were paused on does not.
@@ -487,12 +481,12 @@ export default function WhyUs() {
               state — scaling the track would take its background with it.
             */}
             <div className="flex w-1/2 items-center gap-space--2x pb-space-2x">
-              {TESTIMONIALS.map((testimonial, i) => (
+              {testimonials.map((testimonial, i) => (
                 <button
                   key={testimonial.name}
                   type="button"
                   onClick={() => setIndex(i)}
-                  aria-label={`Show testimonial ${i + 1} of ${TESTIMONIALS.length}`}
+                  aria-label={`Show testimonial ${i + 1} of ${testimonials.length}`}
                   aria-current={i === index}
                   className="group flex-1 cursor-pointer py-space--3x focus-visible:outline-none"
                 >
