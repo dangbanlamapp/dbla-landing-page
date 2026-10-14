@@ -6,6 +6,8 @@ import { useGSAP } from "@gsap/react";
 import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Avatar, { type AvatarProps } from "./Avatar";
+import { useTranslations } from "next-intl";
+import { RICH } from "./rich";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
@@ -44,6 +46,7 @@ function Highlighted({ text }: { text: string }) {
 }
 
 export default function OurTeam({ team }: { team: TeamMember[] }) {
+  const t = useTranslations("Team");
   const container = useRef<HTMLElement>(null);
   const copy = useRef<HTMLDivElement>(null);
   const grid = useRef<HTMLDivElement>(null);
@@ -205,22 +208,20 @@ export default function OurTeam({ team }: { team: TeamMember[] }) {
               data-split="up"
               className="text-xs text-foreground/75 uppercase lg:text-sm"
             >
-              our team
+              {t("label")}
             </p>
             <h2
               data-split="up"
               className="heading-style text-2xl leading-heading lg:text-4xl"
             >
-              the people behind <br />{" "}
-              <span className="text-accent">the work</span>
+              {t.rich("title", RICH)}
             </h2>
           </div>
           <p
             data-fade
             className="max-w-[48ch] text-sm leading-body lg:text-base"
           >
-            A small, senior crew that stays with your product from the first
-            sketch to launch day — and long after.
+            {t("body")}
           </p>
         </div>
 

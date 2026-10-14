@@ -22,12 +22,28 @@ Scripts: `npm run dev` / `build` / `start` / `lint` (`eslint`, flat config) / `f
 
 ```
 app/
-  layout.tsx          root layout — fonts + <html>/<body>, nothing else
-  page.tsx            the only route; composes the sections
+  [locale]/           every page lives under the locale segment
+    layout.tsx        root layout — fonts, <html lang>, providers
+    page.tsx          homepage; composes the sections
+    projects/, contact/, not-found.tsx, [...rest]/ (catch-all → 404)
+  api/revalidate/     Sanity webhook (outside [locale])
   globals.css         design tokens + @theme inline + base/component layers
   components/         all UI lives here (no src/ dir, no route groups yet)
+i18n/                 next-intl routing, navigation helpers, request config, pageLocale()
+messages/             en.json / vi.json — UI strings that live in code
+proxy.ts              next-intl locale routing (Next 16's renamed middleware)
 public/               halftone-bg.jpg, noise-bg.jpg + default Next svgs
 ```
+
+## Languages (English + Vietnamese)
+
+`next-intl`, `localePrefix: "as-needed"`, `localeDetection: false` — see [i18n/routing.ts](i18n/routing.ts) for why. English keeps the bare URLs (`/projects`), Vietnamese is under `/vi`.
+
+- **Every layout, page and `generateMetadata` starts with `const locale = await pageLocale(params)`** ([i18n/locale.ts](i18n/locale.ts)): it 404s an unknown locale and calls `setRequestLocale`, without which the page drops out of static rendering.
+- **Every getter in `content.ts` takes the locale.** In Sanity, Vietnamese is a `_vi` twin beside each translated field (`blurb` / `blurb_vi`, added in the Studio with `translatable()`); queries resolve it with `loc()` in [queries.ts](sanity/lib/queries.ts), falling back to English. Slugs, images, order and numbers are shared.
+- **UI copy that lives in code goes in `messages/en.json` + `messages/vi.json`** (same keys, one namespace per section), read with `useTranslations` — or `getTranslations({ locale, namespace })` in `generateMetadata`. Keys are type-checked against en.json via [global.d.ts](global.d.ts). Headings with a line break or accent phrase use `t.rich(key, RICH)` from [rich.tsx](app/components/rich.tsx), with `<br></br>` / `<accent>…</accent>` in the message (ICU has no self-closing tags).
+- **Write internal hrefs without a locale** (`"/contact"`): [TransitionLink](app/components/TransitionLink.tsx) localizes them. A plain `<a>` to an internal page would drop a Vietnamese reader back into English.
+- [LanguageSwitch](app/components/LanguageSwitch.tsx) (in MenuPanel and Footer) is a plain `<a>` — a full load on purpose, since a new locale remounts the root layout anyway (the preloader plays again).
 
 ## Content (Sanity)
 

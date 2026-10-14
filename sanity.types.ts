@@ -18,15 +18,21 @@ export declare const internalGroqTypeReferenceTo: unique symbol;
 export type StorySection = {
   _type: "storySection";
   label: string;
+  label_vi?: string;
   lead: string;
+  lead_vi?: string;
   body?: Array<string>;
+  body_vi?: Array<string>;
   points?: Array<{
     title: string;
+    title_vi?: string;
     body: string;
+    body_vi?: string;
     _type: "storyPoint";
     _key: string;
   }>;
   coda?: Array<string>;
+  coda_vi?: Array<string>;
   figures?: Array<{
     _key: string;
   } & StoryFigure>;
@@ -47,16 +53,20 @@ export type StoryFigure = {
     hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
     alt: string;
+    alt_vi?: string;
     _type: "image";
   };
   placeholder?: string;
+  placeholder_vi?: string;
   caption?: string;
+  caption_vi?: string;
   kind: "photo" | "sheet" | "slide";
 };
 
 export type Link = {
   _type: "link";
   label: string;
+  label_vi?: string;
   href?: string;
 };
 
@@ -68,8 +78,10 @@ export type Testimonial = {
   _rev: string;
   orderRank?: string;
   quote: string;
+  quote_vi?: string;
   name: string;
   role: string;
+  role_vi?: string;
 };
 
 export type TeamMember = {
@@ -81,10 +93,14 @@ export type TeamMember = {
   orderRank?: string;
   name: string;
   role: string;
+  role_vi?: string;
   intro: string;
+  intro_vi?: string;
   expertise?: Array<string>;
+  expertise_vi?: Array<string>;
   skills?: Array<{
     name: string;
+    name_vi?: string;
     level: number;
     _type: "skill";
     _key: string;
@@ -112,9 +128,13 @@ export type Service = {
   _rev: string;
   orderRank?: string;
   title: string;
+  title_vi?: string;
   label: string;
+  label_vi?: string;
   blurb: string;
+  blurb_vi?: string;
   items: Array<string>;
+  items_vi?: Array<string>;
 };
 
 export type Project = {
@@ -127,13 +147,16 @@ export type Project = {
   name: string;
   slug: Slug;
   type: string;
+  type_vi?: string;
   blurb: string;
+  blurb_vi?: string;
   cardImage: {
     asset?: SanityImageAssetReference;
     media?: unknown;
     hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
     alt: string;
+    alt_vi?: string;
     _type: "image";
   };
   heroImage?: {
@@ -149,13 +172,18 @@ export type Project = {
     hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
     alt: string;
+    alt_vi?: string;
     _type: "image";
   };
   headline?: string;
+  headline_vi?: string;
   intro?: Array<string>;
+  intro_vi?: Array<string>;
   facts?: Array<{
     label: string;
+    label_vi?: string;
     value: string;
+    value_vi?: string;
     _type: "fact";
     _key: string;
   }>;
@@ -193,6 +221,7 @@ export type SiteSettings = {
   _updatedAt: string;
   _rev: string;
   description?: string;
+  description_vi?: string;
   email: string;
   phone?: string;
   socialLinks?: Array<{
@@ -304,7 +333,7 @@ export type AllSanitySchemaTypes = StorySection | SanityImageAssetReference | St
 
 // Source: ../dbla-nextjs/sanity/lib/queries.ts
 // Variable: SITE_SETTINGS_QUERY
-// Query: *[_id == "siteSettings"][0]{    description,    email,    phone,    socialLinks[]{ _key, label, href },    legalLinks[]{ _key, label, href }  }
+// Query: *[_id == "siteSettings"][0]{    "description": select($locale == "vi" => coalesce(description_vi, description), description),    email,    phone,    socialLinks[]{ _key, "label": select($locale == "vi" => coalesce(label_vi, label), label), href },    legalLinks[]{ _key, "label": select($locale == "vi" => coalesce(label_vi, label), label), href }  }
 export type SITE_SETTINGS_QUERY_RESULT = {
   description: null;
   email: null;
@@ -335,7 +364,7 @@ export type SITE_SETTINGS_QUERY_RESULT = {
 
 // Source: ../dbla-nextjs/sanity/lib/queries.ts
 // Variable: PROJECTS_QUERY
-// Query: *[_type == "project" && defined(slug.current)] | order(orderRank) {    _id,    name,    "slug": slug.current,    type,    blurb,    cardImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot, alt },    heroImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot }  }
+// Query: *[_type == "project" && defined(slug.current)] | order(orderRank) {    _id,    name,    "slug": slug.current,    "type": select($locale == "vi" => coalesce(type_vi, type), type),    "blurb": select($locale == "vi" => coalesce(blurb_vi, blurb), blurb),    cardImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot, "alt": select($locale == "vi" => coalesce(alt_vi, alt), alt) },    heroImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot }  }
 export type PROJECTS_QUERY_RESULT = Array<{
   _id: string;
   name: string;
@@ -386,7 +415,7 @@ export type PROJECT_SLUGS_QUERY_RESULT = Array<{
 
 // Source: ../dbla-nextjs/sanity/lib/queries.ts
 // Variable: PROJECT_QUERY
-// Query: *[_type == "project" && slug.current == $slug][0]{    _id,    name,    "slug": slug.current,    type,    blurb,    cardImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot, alt },    heroImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot },    wideImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot, alt },    headline,    intro,    facts[]{ _key, label, value },    sections[]{      _key,      label,      lead,      body,      points[]{ _key, title, body },      coda,      figures[]{        _key,        caption,        kind,        placeholder,        image {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot, alt }      }    }  }
+// Query: *[_type == "project" && slug.current == $slug][0]{    _id,    name,    "slug": slug.current,    "type": select($locale == "vi" => coalesce(type_vi, type), type),    "blurb": select($locale == "vi" => coalesce(blurb_vi, blurb), blurb),    cardImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot, "alt": select($locale == "vi" => coalesce(alt_vi, alt), alt) },    heroImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot },    wideImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot, "alt": select($locale == "vi" => coalesce(alt_vi, alt), alt) },    "headline": select($locale == "vi" => coalesce(headline_vi, headline), headline),    "intro": select($locale == "vi" => coalesce(intro_vi, intro), intro),    facts[]{ _key, "label": select($locale == "vi" => coalesce(label_vi, label), label), "value": select($locale == "vi" => coalesce(value_vi, value), value) },    sections[]{      _key,      "label": select($locale == "vi" => coalesce(label_vi, label), label),      "lead": select($locale == "vi" => coalesce(lead_vi, lead), lead),      "body": select($locale == "vi" => coalesce(body_vi, body), body),      points[]{ _key, "title": select($locale == "vi" => coalesce(title_vi, title), title), "body": select($locale == "vi" => coalesce(body_vi, body), body) },      "coda": select($locale == "vi" => coalesce(coda_vi, coda), coda),      figures[]{        _key,        "caption": select($locale == "vi" => coalesce(caption_vi, caption), caption),        kind,        "placeholder": select($locale == "vi" => coalesce(placeholder_vi, placeholder), placeholder),        image {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot, "alt": select($locale == "vi" => coalesce(alt_vi, alt), alt) }      }    }  }
 export type PROJECT_QUERY_RESULT = {
   _id: string;
   name: string;
@@ -489,7 +518,7 @@ export type PROJECT_QUERY_RESULT = {
 
 // Source: ../dbla-nextjs/sanity/lib/queries.ts
 // Variable: SERVICES_QUERY
-// Query: *[_type == "service"] | order(orderRank) {    _id,    label,    title,    blurb,    items  }
+// Query: *[_type == "service"] | order(orderRank) {    _id,    "label": select($locale == "vi" => coalesce(label_vi, label), label),    "title": select($locale == "vi" => coalesce(title_vi, title), title),    "blurb": select($locale == "vi" => coalesce(blurb_vi, blurb), blurb),    "items": select($locale == "vi" => coalesce(items_vi, items), items)  }
 export type SERVICES_QUERY_RESULT = Array<{
   _id: string;
   label: string;
@@ -500,7 +529,7 @@ export type SERVICES_QUERY_RESULT = Array<{
 
 // Source: ../dbla-nextjs/sanity/lib/queries.ts
 // Variable: TEAM_QUERY
-// Query: *[_type == "teamMember"] | order(orderRank) {    _id,    name,    role,    intro,    expertise,    skills[]{ _key, name, level },    avatar  }
+// Query: *[_type == "teamMember"] | order(orderRank) {    _id,    name,    "role": select($locale == "vi" => coalesce(role_vi, role), role),    "intro": select($locale == "vi" => coalesce(intro_vi, intro), intro),    "expertise": select($locale == "vi" => coalesce(expertise_vi, expertise), expertise),    skills[]{ _key, "name": select($locale == "vi" => coalesce(name_vi, name), name), level },    avatar  }
 export type TEAM_QUERY_RESULT = Array<{
   _id: string;
   name: string;
@@ -529,7 +558,7 @@ export type TEAM_QUERY_RESULT = Array<{
 
 // Source: ../dbla-nextjs/sanity/lib/queries.ts
 // Variable: TESTIMONIALS_QUERY
-// Query: *[_type == "testimonial"] | order(orderRank) {    _id,    quote,    name,    role  }
+// Query: *[_type == "testimonial"] | order(orderRank) {    _id,    "quote": select($locale == "vi" => coalesce(quote_vi, quote), quote),    name,    "role": select($locale == "vi" => coalesce(role_vi, role), role)  }
 export type TESTIMONIALS_QUERY_RESULT = Array<{
   _id: string;
   quote: string;
@@ -540,13 +569,13 @@ export type TESTIMONIALS_QUERY_RESULT = Array<{
 // Query TypeMap
 declare global {
   interface SanityQueries {
-    "\n  *[_id == \"siteSettings\"][0]{\n    description,\n    email,\n    phone,\n    socialLinks[]{ _key, label, href },\n    legalLinks[]{ _key, label, href }\n  }\n": SITE_SETTINGS_QUERY_RESULT;
-    "\n  *[_type == \"project\" && defined(slug.current)] | order(orderRank) {\n    _id,\n    name,\n    \"slug\": slug.current,\n    type,\n    blurb,\n    cardImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n, alt },\n    heroImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n }\n  }\n": PROJECTS_QUERY_RESULT;
+    "\n  *[_id == \"siteSettings\"][0]{\n    \"description\": select($locale == \"vi\" => coalesce(description_vi, description), description),\n    email,\n    phone,\n    socialLinks[]{ _key, \"label\": select($locale == \"vi\" => coalesce(label_vi, label), label), href },\n    legalLinks[]{ _key, \"label\": select($locale == \"vi\" => coalesce(label_vi, label), label), href }\n  }\n": SITE_SETTINGS_QUERY_RESULT;
+    "\n  *[_type == \"project\" && defined(slug.current)] | order(orderRank) {\n    _id,\n    name,\n    \"slug\": slug.current,\n    \"type\": select($locale == \"vi\" => coalesce(type_vi, type), type),\n    \"blurb\": select($locale == \"vi\" => coalesce(blurb_vi, blurb), blurb),\n    cardImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n, \"alt\": select($locale == \"vi\" => coalesce(alt_vi, alt), alt) },\n    heroImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n }\n  }\n": PROJECTS_QUERY_RESULT;
     "\n  *[_type == \"project\" && defined(slug.current)]{ \"slug\": slug.current }\n": PROJECT_SLUGS_QUERY_RESULT;
-    "\n  *[_type == \"project\" && slug.current == $slug][0]{\n    _id,\n    name,\n    \"slug\": slug.current,\n    type,\n    blurb,\n    cardImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n, alt },\n    heroImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n },\n    wideImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n, alt },\n    headline,\n    intro,\n    facts[]{ _key, label, value },\n    sections[]{\n      _key,\n      label,\n      lead,\n      body,\n      points[]{ _key, title, body },\n      coda,\n      figures[]{\n        _key,\n        caption,\n        kind,\n        placeholder,\n        image { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n, alt }\n      }\n    }\n  }\n": PROJECT_QUERY_RESULT;
-    "\n  *[_type == \"service\"] | order(orderRank) {\n    _id,\n    label,\n    title,\n    blurb,\n    items\n  }\n": SERVICES_QUERY_RESULT;
-    "\n  *[_type == \"teamMember\"] | order(orderRank) {\n    _id,\n    name,\n    role,\n    intro,\n    expertise,\n    skills[]{ _key, name, level },\n    avatar\n  }\n": TEAM_QUERY_RESULT;
-    "\n  *[_type == \"testimonial\"] | order(orderRank) {\n    _id,\n    quote,\n    name,\n    role\n  }\n": TESTIMONIALS_QUERY_RESULT;
+    "\n  *[_type == \"project\" && slug.current == $slug][0]{\n    _id,\n    name,\n    \"slug\": slug.current,\n    \"type\": select($locale == \"vi\" => coalesce(type_vi, type), type),\n    \"blurb\": select($locale == \"vi\" => coalesce(blurb_vi, blurb), blurb),\n    cardImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n, \"alt\": select($locale == \"vi\" => coalesce(alt_vi, alt), alt) },\n    heroImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n },\n    wideImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n, \"alt\": select($locale == \"vi\" => coalesce(alt_vi, alt), alt) },\n    \"headline\": select($locale == \"vi\" => coalesce(headline_vi, headline), headline),\n    \"intro\": select($locale == \"vi\" => coalesce(intro_vi, intro), intro),\n    facts[]{ _key, \"label\": select($locale == \"vi\" => coalesce(label_vi, label), label), \"value\": select($locale == \"vi\" => coalesce(value_vi, value), value) },\n    sections[]{\n      _key,\n      \"label\": select($locale == \"vi\" => coalesce(label_vi, label), label),\n      \"lead\": select($locale == \"vi\" => coalesce(lead_vi, lead), lead),\n      \"body\": select($locale == \"vi\" => coalesce(body_vi, body), body),\n      points[]{ _key, \"title\": select($locale == \"vi\" => coalesce(title_vi, title), title), \"body\": select($locale == \"vi\" => coalesce(body_vi, body), body) },\n      \"coda\": select($locale == \"vi\" => coalesce(coda_vi, coda), coda),\n      figures[]{\n        _key,\n        \"caption\": select($locale == \"vi\" => coalesce(caption_vi, caption), caption),\n        kind,\n        \"placeholder\": select($locale == \"vi\" => coalesce(placeholder_vi, placeholder), placeholder),\n        image { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n, \"alt\": select($locale == \"vi\" => coalesce(alt_vi, alt), alt) }\n      }\n    }\n  }\n": PROJECT_QUERY_RESULT;
+    "\n  *[_type == \"service\"] | order(orderRank) {\n    _id,\n    \"label\": select($locale == \"vi\" => coalesce(label_vi, label), label),\n    \"title\": select($locale == \"vi\" => coalesce(title_vi, title), title),\n    \"blurb\": select($locale == \"vi\" => coalesce(blurb_vi, blurb), blurb),\n    \"items\": select($locale == \"vi\" => coalesce(items_vi, items), items)\n  }\n": SERVICES_QUERY_RESULT;
+    "\n  *[_type == \"teamMember\"] | order(orderRank) {\n    _id,\n    name,\n    \"role\": select($locale == \"vi\" => coalesce(role_vi, role), role),\n    \"intro\": select($locale == \"vi\" => coalesce(intro_vi, intro), intro),\n    \"expertise\": select($locale == \"vi\" => coalesce(expertise_vi, expertise), expertise),\n    skills[]{ _key, \"name\": select($locale == \"vi\" => coalesce(name_vi, name), name), level },\n    avatar\n  }\n": TEAM_QUERY_RESULT;
+    "\n  *[_type == \"testimonial\"] | order(orderRank) {\n    _id,\n    \"quote\": select($locale == \"vi\" => coalesce(quote_vi, quote), quote),\n    name,\n    \"role\": select($locale == \"vi\" => coalesce(role_vi, role), role)\n  }\n": TESTIMONIALS_QUERY_RESULT;
   }
 }
 // Lets @sanity/client releases that predate the global registry read it too

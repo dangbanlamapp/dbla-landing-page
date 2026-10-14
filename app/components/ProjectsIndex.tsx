@@ -17,6 +17,8 @@ import {
   projectNumber,
   type Project,
 } from "./project-data";
+import { useTranslations } from "next-intl";
+import { RICH } from "./rich";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
@@ -32,6 +34,8 @@ gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
  * cards are laid out in normal flow and arrive one at a time anyway.
  */
 export default function ProjectsIndex({ projects }: { projects: Project[] }) {
+  const t = useTranslations("Projects");
+  const common = useTranslations("Common");
   const container = useRef<HTMLElement>(null);
   const revealed = useRevealed();
 
@@ -269,11 +273,10 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
             data-split="up"
             className="heading-style text-6xl leading-heading lg:text-8xl"
           >
-            our <br /> projects
+            {t.rich("title", RICH)}
           </h1>
           <p data-fade className="max-w-[36ch] text-base leading-body">
-            Selected work, from first sketch to launch. Pick one to see how it
-            came together.
+            {t("intro")}
           </p>
         </div>
       </div>
@@ -321,7 +324,7 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
             */}
             <TransitionLink
               href={projectHref(project)}
-              aria-label={`Open ${project.name}`}
+              aria-label={common("openProject", { name: project.name })}
               className="group relative mx-auto aspect-square w-full max-w-[70vh] rounded-full outline-offset-8 outline-accent focus-visible:outline-2"
             >
               {/* The zero state, as on the homepage: before the wipe every
@@ -358,7 +361,7 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
                 aria-hidden
                 className={`${PILL} pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-accent text-background opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100`}
               >
-                View project
+                {common("viewProject")}
               </span>
             </TransitionLink>
 

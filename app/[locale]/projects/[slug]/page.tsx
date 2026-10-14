@@ -9,6 +9,8 @@ import {
   getProjectStory,
   getProjects,
 } from "@/sanity/lib/content";
+import { getTranslations } from "next-intl/server";
+import { pageLocale } from "@/i18n/locale";
 
 /*
   Every project published at build time is prerendered from this list. Any
@@ -18,14 +20,16 @@ import {
   reaches notFound() below.
 */
 export function generateStaticParams() {
+  // Slugs only: the [locale] layout above supplies the languages, and Next
+  // renders every slug once for each of them.
   return getProjectSlugs();
 }
 
 export async function generateMetadata({
   params,
-}: PageProps<"/projects/[slug]">): Promise<Metadata> {
+}: PageProps<"/[locale]/projects/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const project = await getProjectMeta(slug);
+  const project = await getProjectMeta(slug, await pageLocale(params));
   if (!project) return {};
 
   return {
@@ -40,14 +44,16 @@ export async function generateMetadata({
 
 export default async function ProjectPage({
   params,
-}: PageProps<"/projects/[slug]">) {
+}: PageProps<"/[locale]/projects/[slug]">) {
   const { slug } = await params;
+  const locale = await pageLocale(params);
+  const common = await getTranslations({ locale, namespace: "Common" });
 
   // The whole list, not just this project: the "01 / 04" counter and the
   // hand-off to the next project both read off this project's place in it.
   const [projects, story] = await Promise.all([
-    getProjects(),
-    getProjectStory(slug),
+    getProjects(locale),
+    getProjectStory(slug, locale),
   ]);
   const index = projects.findIndex((p) => p.slug === slug);
 
@@ -55,7 +61,7 @@ export default async function ProjectPage({
 
   return (
     <>
-      <BackHeader href="/projects" label="All projects" />
+      <BackHeader href="/projects" label={common("allProjects")} />
       <main>
         {/*
           Keyed on the slug so going from one project to the next — the

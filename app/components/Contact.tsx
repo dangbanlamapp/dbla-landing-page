@@ -2,6 +2,8 @@ import ContactInfo from "./ContactInfo";
 import DashedCircle from "./DashedCircle";
 import { PILL } from "./pill";
 import type { SiteSettings } from "./site-settings";
+import { useTranslations } from "next-intl";
+import { RICH } from "./rich";
 
 /**
  * Shared shape of the three fields. Underline-only: no box, no fill — the
@@ -32,17 +34,18 @@ const COLUMNS = "grid grid-cols-1 lg:grid-cols-2";
 
 /** label is the accessible name; text is what the reader actually sees. */
 const FIELDS = [
-  { id: "name", label: "Your name", type: "text", autoComplete: "name" },
+  { id: "name", type: "text", autoComplete: "name" },
   {
     id: "company",
-    label: "Your company name",
     type: "text",
     autoComplete: "organization",
   },
-  { id: "email", label: "Email", type: "email", autoComplete: "email" },
-];
+  { id: "email", type: "email", autoComplete: "email" },
+] as const;
 
 export default function Contact({ settings }: { settings: SiteSettings }) {
+  const t = useTranslations("Contact");
+  const common = useTranslations("Common");
   return (
     <section
       id="contact"
@@ -130,7 +133,7 @@ export default function Contact({ settings }: { settings: SiteSettings }) {
         */}
         <div className={`${COLUMNS} relative z-1`}>
           <h1 className="heading-style mb-[-0.3em] px-space-2x text-center text-5xl leading-heading sm:text-6xl lg:pr-space-2x lg:text-right lg:text-7xl xl:text-8xl">
-            Lets <br /> Talk
+            {t.rich("title", RICH)}
           </h1>
         </div>
 
@@ -152,8 +155,7 @@ export default function Contact({ settings }: { settings: SiteSettings }) {
               the largest step that is ~29px, which space-3x covers. */}
           <div className="flex flex-col items-center justify-between px-space-2x pt-space-3x pb-space-2x text-center lg:items-end lg:pt-[8vh] lg:pr-space-2x lg:pb-[8vh] lg:text-right">
             <p className="max-w-[46ch] pt-space-base text-base leading-body">
-              Réservez un appel découverte de 15 minutes. On parlera de votre
-              projet, vos objectifs, et si on est le bon partenaire.
+              {t("body")}
             </p>
 
             {/* The same block the menu prints, in the other colourway: this
@@ -199,14 +201,14 @@ export default function Contact({ settings }: { settings: SiteSettings }) {
                       exist separately for the accessible name — once a reader
                       starts typing, a placeholder-only field has none. */}
                   <label htmlFor={field.id} className="sr-only">
-                    {field.label}
+                    {t(field.id)}
                   </label>
                   <input
                     id={field.id}
                     name={field.id}
                     type={field.type}
                     autoComplete={field.autoComplete}
-                    placeholder={field.label}
+                    placeholder={t(field.id)}
                     className={FIELD}
                   />
                 </div>
@@ -216,7 +218,7 @@ export default function Contact({ settings }: { settings: SiteSettings }) {
                 type="button"
                 className={`${PILL} mt-space-2x self-start bg-background text-foreground lg:mt-space-3x`}
               >
-                Contact us
+                {common("contactUs")}
               </button>
             </form>
           </div>

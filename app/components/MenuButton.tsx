@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { SplitText } from "gsap/SplitText";
+import { useTranslations } from "next-intl";
 
 gsap.registerPlugin(useGSAP, SplitText);
 
@@ -31,6 +32,7 @@ export default function MenuButton({
   onToggle: () => void;
   className?: string;
 }) {
+  const t = useTranslations("Nav");
   const container = useRef<HTMLButtonElement>(null);
   const menuLabel = useRef<HTMLSpanElement>(null);
   const closeLabel = useRef<HTMLSpanElement>(null);
@@ -184,7 +186,7 @@ export default function MenuButton({
       type="button"
       onClick={onToggle}
       aria-expanded={open}
-      aria-label={open ? "Close menu" : "Open menu"}
+      aria-label={open ? t("closeMenu") : t("openMenu")}
       className={`relative grid cursor-pointer place-items-center overflow-hidden ${className ?? ""}`}
     >
       {/**
@@ -249,14 +251,14 @@ export default function MenuButton({
         aria-hidden="true"
         className="relative col-start-1 row-start-1"
       >
-        Menu
+        {t("menu")}
       </span>
       <span
         ref={closeLabel}
         aria-hidden="true"
         className="relative col-start-1 row-start-1 opacity-0"
       >
-        Close
+        {t("close")}
       </span>
     </button>
   );

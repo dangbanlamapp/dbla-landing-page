@@ -4,6 +4,7 @@
 // the useGSAP/scope shape the other sections use) only once it animates itself.
 
 import TransitionLink from "./TransitionLink";
+import { useTranslations } from "next-intl";
 
 /**
  * Purely the mark and its link — Header owns where it sits, and now its
@@ -36,11 +37,12 @@ export default function Logo({
   className?: string;
   onNavigate?: () => void;
 }) {
+  const t = useTranslations("Nav");
   return (
     <TransitionLink
       href="/"
       onClick={onNavigate}
-      aria-label="DBLA — home"
+      aria-label={t("logo")}
       className={`block ${className ?? ""}`}
     >
       <svg

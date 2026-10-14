@@ -10,6 +10,8 @@ import LocalTime from "./LocalTime";
 // Shared with MenuPanel, which prints the same legal row inside the open menu.
 import { YEAR } from "./legal";
 import { useSiteSettings } from "./SiteSettingsProvider";
+import LanguageSwitch from "./LanguageSwitch";
+import { useTranslations } from "next-intl";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -175,6 +177,8 @@ const WORDMARK =
 const REVEAL_SHIFT = 15;
 
 export default function Footer() {
+  const t = useTranslations("Footer");
+  const common = useTranslations("Common");
   const { legalLinks } = useSiteSettings();
   const container = useRef<HTMLElement>(null);
   const runway = useRef<HTMLDivElement>(null);
@@ -384,56 +388,60 @@ export default function Footer() {
           {/* Not <p>: this is a lone piece of metadata, not prose. */}
           <span className="flex-1 text-left">&copy; {YEAR} DBLA</span>
           <p className="flex-1 text-center">
-            Site by{" "}
+            {common("siteBy")}{" "}
             <a className="hover:underline" href="www.kaobui.com">
               Kaobui
             </a>
           </p>
-          <nav aria-label="Legal" className="flex-1">
-            <ul className="flex flex-col items-end gap-space--3x lg:flex-row lg:justify-end lg:gap-space-2x">
-              {legalLinks.map(({ label, href }) => (
-                <li key={label}>
-                  <a href={href} className="hover:underline">
-                    {label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          {/* Language switch after the legal links, as in MenuPanel. */}
+          <div className="flex flex-1 flex-col items-end gap-space--3x lg:flex-row lg:justify-end lg:gap-space-2x">
+            <nav aria-label={common("legal")}>
+              <ul className="flex flex-col items-end gap-space--3x whitespace-nowrap lg:flex-row lg:gap-space-2x">
+                {legalLinks.map(({ label, href }) => (
+                  <li key={label}>
+                    <a href={href} className="hover:underline">
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            <LanguageSwitch className="gap-space--3x" />
+          </div>
         </div>
 
         <div className="relative m-auto flex h-full w-[90vw] flex-col justify-center gap-space-4x py-space-4x pb-space-6x lg:justify-start lg:gap-[16vh] lg:py-space-6x">
           <div className="flex w-full flex-col items-center gap-space--1x text-center text-black lg:flex-row lg:items-start lg:gap-0">
             <p className="heading-style text-sm lg:flex-1 lg:text-left lg:text-base">
-              Hochiminh City, Vietnam <br />
+              {t("hcmc")} <br />
               <LocalTime timeZone="Asia/Ho_Chi_Minh" className="opacity-50" />
             </p>
             <p className="heading-style text-sm lg:flex-1 lg:text-base">
-              Working Worldwide.
+              {t("worldwide")}
             </p>
             <p className="heading-style text-sm lg:flex-1 lg:text-right lg:text-base">
-              Paris, France <br />
+              {t("paris")} <br />
               <LocalTime timeZone="Europe/Paris" className="opacity-50" />
             </p>{" "}
           </div>
           <div className="flex w-full flex-col items-center gap-space-3x lg:flex-row lg:items-end lg:gap-0">
             <nav className="text-base font-medium uppercase lg:flex-1 lg:text-md">
               <ul className="text-center lg:text-left">
-                <li>home</li>
-                <li>about</li>
-                <li>services</li>
-                <li>contact</li>
+                <li>{t("home")}</li>
+                <li>{t("about")}</li>
+                <li>{t("services")}</li>
+                <li>{t("contact")}</li>
               </ul>
             </nav>
             <div className="flex flex-col items-center gap-space--1x">
               <p className="heading-style text-center text-xl lg:text-3xl">
-                bring your ideas to life
+                {t("tagline")}
               </p>
               <a
                 className="rounded-md bg-background px-space-2x py-space--2x text-base font-bold tracking-tighter uppercase lg:text-md"
                 href=""
               >
-                get in touch
+                {common("getInTouch")}
               </a>
               <a className="text-base text-black lg:text-md" href="">
                 contact@dbla.com

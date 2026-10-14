@@ -13,8 +13,10 @@ import MenuButton from "./MenuButton";
 import MenuPanel from "./MenuPanel";
 import { BAR_ROW, BAR_SHELL, BAR_SURFACE } from "./bar";
 import { PILL } from "./pill";
+import { useTranslations } from "next-intl";
 
 export default function Header() {
+  const common = useTranslations("Common");
   const [open, setOpen] = useState(false);
 
   // Escape closes it. Bound only while open, so the page carries no keyboard
@@ -83,7 +85,7 @@ export default function Header() {
             href="/contact"
             className={`${PILL} pointer-events-auto hidden justify-self-end bg-foreground text-background lg:block`}
           >
-            Get in touch
+            {common("getInTouch")}
           </TransitionLink>
         </div>
       </header>

@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* `vi:` — styles for the Vietnamese pages only, e.g. `max-sm:vi:text-3xl`
+   where taller Vietnamese lines (see :root:lang(vi)) would not otherwise fit.
+   :lang() matches through inheritance from <html lang>, so it works on any
+   element without a lang attribute of its own. */
+@custom-variant vi (&:lang(vi));
+
 :root {
   --color-orange: #f8612c;
   --color-beige: #e1dcd1;
@@ -42,6 +48,31 @@
   --space-4x: calc(var(--space-base) * 3);
   --space-5x: calc(var(--space-base) * 4);
   --space-6x: calc(var(--space-base) * 6);
+}
+
+/*
+  Vietnamese line heights. Measured off Familjen Grotesk itself (ascent 1.03,
+  descent 0.23): a stacked capital — Ẩ, Ố, Ể — inks 1.02em above the baseline,
+  and a line box of height L only reaches (L + 0.80) / 2 above it. Every
+  SplitText line is wrapped in an `overflow: clip` mask exactly one line box
+  tall, so below L ≈ 1.24 the top of those marks is cut off and the word
+  changes: SẢN PHẨM SỐ read as "SÁN PHÂM SÔ" at the 0.75 the English uses.
+
+  Growing the line rather than padding the mask is deliberate. The masks size
+  themselves to the line, so the entrances stay exactly as tight as in
+  English — a padded mask would show a sliver of every line that slides in
+  from above before its tween starts. Vietnamese display type needs the extra
+  leading anyway: at 0.75 a mark collides with the line above it even where
+  nothing clips it (the contact page heading).
+
+  On :root itself, not a descendant: the theme derives `--text-*--line-height`
+  from these on :root, and a custom property's var() resolves where it is
+  declared. Body goes to 1.3 so uppercase labels in a mask clear the same
+  marks (1.15 fell ~0.05em short).
+*/
+:root:lang(vi) {
+  --line-height-heading: 1.25;
+  --line-height-body: 1.3;
 }
 
 @media (min-width: 1280px) {
@@ -180,6 +211,31 @@
 @layer components {
   .heading-style {
     @apply leading-none font-bold tracking-tighter uppercase;
+  }
+  /* leading-none is 1 — still short of the ~1.24 a stacked capital needs (see
+     :root:lang(vi)). It is `--tw-leading` that has to change, not just
+     line-height: every text-* size utility re-sets line-height from
+     `var(--tw-leading, …)` in the later utilities layer, so a plain
+     line-height here is overwritten by the element's own text-xl. Same layer
+     as the recipe, so a leading-* utility on the element still wins, exactly
+     as it does over leading-none in English. */
+  :lang(vi) .heading-style {
+    --tw-leading: var(--line-height-heading);
+    line-height: var(--line-height-heading);
+  }
+}
+
+/*
+  The `pb-[0.1em]` SplitText puts on each split heading line (its linesClass)
+  buys English room under a 0.75 line for descenders. Vietnamese no longer
+  needs it: at 1.25 the line box already reaches (1.25 - 0.80) / 2 = 0.225em
+  below the baseline, past the 0.20em of a dot below (Ạ, Ệ), so the padding
+  only opened the headings up further. In the utilities layer and one class
+  more specific than the utility itself, so it wins without !important.
+*/
+@layer utilities {
+  :lang(vi) .pb-\[0\.1em\] {
+    padding-bottom: 0;
   }
 }
 

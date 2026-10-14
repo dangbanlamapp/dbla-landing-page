@@ -15,6 +15,7 @@ import type {
 } from "@/app/components/project-stories";
 import type { Service } from "@/app/components/ServiceBlock";
 import type { SiteLink, SiteSettings } from "@/app/components/site-settings";
+import type { Locale } from "@/i18n/routing";
 import { urlFor } from "./image";
 import { SANITY_TAG, sanityFetch } from "./live";
 import {
@@ -36,6 +37,11 @@ import {
  * That boundary is deliberate: the animation code is dense and was built
  * around those types, and keeping the CMS on this side of it meant moving the
  * data source without touching a single timeline.
+ *
+ * Every getter takes the page's locale and hands it to the query as `$locale`,
+ * which picks each translated field's Vietnamese twin or its English — see
+ * `loc` in queries.ts. The shapes that come back are the same either way, so
+ * adding a language did not touch a timeline either.
  */
 
 // ── Images ──────────────────────────────────────────────────────────────────
@@ -105,9 +111,13 @@ export function toSiteSettings(
   };
 }
 
-export async function getSiteSettings({ stega }: { stega?: false } = {}) {
+export async function getSiteSettings(
+  locale: Locale,
+  { stega }: { stega?: false } = {},
+) {
   const { data } = await sanityFetch({
     query: SITE_SETTINGS_QUERY,
+    params: { locale },
     stega,
     tags: [SANITY_TAG],
   });
@@ -141,9 +151,10 @@ function toProjects(data: PROJECTS_QUERY_RESULT): Project[] {
   });
 }
 
-export async function getProjects() {
+export async function getProjects(locale: Locale) {
   const { data } = await sanityFetch({
     query: PROJECTS_QUERY,
+    params: { locale },
     tags: [SANITY_TAG],
   });
   return toProjects(data);
@@ -200,20 +211,20 @@ function toStory(data: QueriedStory): ProjectStory | undefined {
   };
 }
 
-export async function getProjectStory(slug: string) {
+export async function getProjectStory(slug: string, locale: Locale) {
   const { data } = await sanityFetch({
     query: PROJECT_QUERY,
-    params: { slug },
+    params: { slug, locale },
     tags: [SANITY_TAG],
   });
   return toStory(data);
 }
 
 /** Name and blurb for `generateMetadata`. Stega off: these go into <head>. */
-export async function getProjectMeta(slug: string) {
+export async function getProjectMeta(slug: string, locale: Locale) {
   const { data } = await sanityFetch({
     query: PROJECT_QUERY,
-    params: { slug },
+    params: { slug, locale },
     stega: false,
     tags: [SANITY_TAG],
   });
@@ -222,9 +233,10 @@ export async function getProjectMeta(slug: string) {
 
 // ── Homepage sections ───────────────────────────────────────────────────────
 
-export async function getServices(): Promise<Service[]> {
+export async function getServices(locale: Locale): Promise<Service[]> {
   const { data } = await sanityFetch({
     query: SERVICES_QUERY,
+    params: { locale },
     tags: [SANITY_TAG],
   });
   return data.map(({ label, title, blurb, items }) => ({
@@ -235,9 +247,10 @@ export async function getServices(): Promise<Service[]> {
   }));
 }
 
-export async function getTeam(): Promise<TeamMember[]> {
+export async function getTeam(locale: Locale): Promise<TeamMember[]> {
   const { data } = await sanityFetch({
     query: TEAM_QUERY,
+    params: { locale },
     tags: [SANITY_TAG],
   });
   return data.map((member) => ({
@@ -257,9 +270,10 @@ export async function getTeam(): Promise<TeamMember[]> {
   }));
 }
 
-export async function getTestimonials(): Promise<Testimonial[]> {
+export async function getTestimonials(locale: Locale): Promise<Testimonial[]> {
   const { data } = await sanityFetch({
     query: TESTIMONIALS_QUERY,
+    params: { locale },
     tags: [SANITY_TAG],
   });
   return data.map(({ quote, name, role }) => ({ quote, name, role }));

@@ -6,10 +6,13 @@ import { useGSAP } from "@gsap/react";
 import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import DashedCircle from "./DashedCircle";
+import { useTranslations } from "next-intl";
+import { RICH } from "./rich";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
 export default function OurMotto() {
+  const t = useTranslations("Motto");
   const container = useRef<HTMLElement>(null);
   const copy = useRef<HTMLDivElement>(null);
 
@@ -240,20 +243,19 @@ export default function OurMotto() {
           data-fade
           className="p-space--1x text-sm text-foreground/75 uppercase"
         >
-          our motto
+          {t("label")}
         </p>
         <p
           data-split="up"
           className="heading-style text-center text-xl lg:text-4xl"
         >
-          More than just products
-        </p>{" "}
+          {t("lead")}
+        </p>
         <h2
           data-split="up"
           className="heading-style text-center text-xl lg:text-4xl"
         >
-          we build <span className="text-accent">results</span> that <br />{" "}
-          matter to your business.
+          {t.rich("title", RICH)}
         </h2>
       </div>
     </section>

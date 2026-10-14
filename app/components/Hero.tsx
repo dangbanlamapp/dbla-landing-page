@@ -7,12 +7,16 @@ import { useGSAP } from "@gsap/react";
 import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRevealed } from "./Preloader";
+import { useTranslations } from "next-intl";
+import { RICH } from "./rich";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
 ScrollTrigger.config({ ignoreMobileResize: true });
 
 export default function Hero() {
+  const t = useTranslations("Hero");
+  const common = useTranslations("Common");
   const container = useRef<HTMLDivElement>(null);
   const revealed = useRevealed();
 
@@ -213,21 +217,27 @@ export default function Hero() {
             arbitrary value — the steps *are* the design token. text-4xl is
             ~61px at base and grows fluid past 1536px, which no phone can hold
             "DIGITAL PRODUCTs" at; it only comes back at xl, where the column
-            is wide enough for it again. */}
+            is wide enough for it again.
+
+            `max-sm:vi:text-3xl` on both: Vietnamese headings need 1.25
+            leading to keep their stacked accents (see :root:lang(vi) in
+            globals.css), and at text-4xl that pushed the paragraph and CTA
+            below the fold of the svh row on a phone. One step down fits both
+            rows exactly at 390x844. */}
         <h1
           data-split="up"
-          className="text-center text-4xl leading-heading font-bold tracking-tighter uppercase lg:text-right lg:text-3xl xl:text-4xl"
+          className="text-center text-4xl leading-heading font-bold tracking-tighter uppercase lg:text-right lg:text-3xl xl:text-4xl max-sm:vi:text-3xl"
         >
-          We build <br /> <span className="text-accent">DIGITAL PRODUCTs</span>
+          {t.rich("titleStart", RICH)}
         </h1>
       </div>
 
       <div className="row-start-2 flex flex-col items-center justify-start gap-space-2x p-space-base sm:p-space-2x lg:col-start-2 lg:items-start lg:gap-space-base">
         <h1
           data-split="down"
-          className="text-center text-4xl leading-heading font-bold tracking-tighter uppercase sm:text-2xl lg:text-left lg:text-3xl xl:text-4xl"
+          className="text-center text-4xl leading-heading font-bold tracking-tighter uppercase sm:text-2xl lg:text-left lg:text-3xl xl:text-4xl max-sm:vi:text-3xl"
         >
-          THAT GROW your <br /> <span className="text-accent">business</span>
+          {t.rich("titleEnd", RICH)}
         </h1>
         {/* leading-none is a desktop luxury: at text-base on a phone the copy
             wraps to four or five lines and needs the body leading to stay
@@ -236,15 +246,14 @@ export default function Hero() {
           data-fade
           className="max-w-[48ch] text-center text-base leading-body sm:text-md sm:leading-none lg:text-left"
         >
-          We are a product studio that helps non-technical founders go digital,
-          with a focus on business outcomes
+          {t("body")}
         </p>
         <TransitionLink
           data-fade
           className="rounded-md bg-accent px-space-2x py-space--2x text-base font-bold tracking-tighter uppercase sm:text-md"
           href="/contact"
         >
-          Contact us
+          {common("contactUs")}
         </TransitionLink>
       </div>
     </div>

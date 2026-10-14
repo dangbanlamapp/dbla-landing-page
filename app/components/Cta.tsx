@@ -8,6 +8,7 @@ import { SplitText } from "gsap/SplitText";
 import { useGSAP } from "@gsap/react";
 import DashedCircle from "./DashedCircle";
 import ScopeBar from "./ScopeBar";
+import { useTranslations } from "next-intl";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
@@ -74,6 +75,8 @@ const RING_GROW = 0.5;
 const FAN_EXPAND = 1 - RING_GROW;
 
 export default function Cta() {
+  const t = useTranslations("Cta");
+  const common = useTranslations("Common");
   const container = useRef<HTMLElement>(null);
   const ringRotator = useRef<HTMLDivElement>(null);
   const yLine = useRef<HTMLDivElement>(null);
@@ -311,19 +314,16 @@ export default function Cta() {
               data-split="up"
               className="heading-style max-w-[13ch] text-center text-4xl leading-heading 3xl:text-5xl"
             >
-              Your next step into digital starts here.
+              {t("title")}
             </h2>
           </div>
           <div className="flex flex-col items-center justify-start gap-space-base">
-            <p className="max-w-[36ch] text-center text-base">
-              Book a free call and let's talk through your goals, your
-              challenges, and how we can help your business thrive.
-            </p>
+            <p className="max-w-[36ch] text-center text-base">{t("body")}</p>
             <TransitionLink
               className="rounded-md bg-accent px-space-2x py-space--2x text-md font-bold tracking-tighter uppercase"
               href="/contact"
             >
-              Contact us
+              {common("contactUs")}
             </TransitionLink>
           </div>
         </div>

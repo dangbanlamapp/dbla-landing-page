@@ -10,8 +10,10 @@ import { YEAR } from "./legal";
 import { useSiteSettings } from "./SiteSettingsProvider";
 import { PILL } from "./pill";
 import ContactInfo from "./ContactInfo";
+import LanguageSwitch from "./LanguageSwitch";
 import { MENU_EASE as EASE, MENU_LEAD as LEAD } from "./menu-motion";
 import { holdScroll } from "./scroll-hold";
+import { useTranslations } from "next-intl";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -55,11 +57,11 @@ function Sheet({
 // Home is "/" rather than "#" now that the menu also renders on /projects: a
 // bare hash only means "the top of the homepage" while you are on it.
 const NAV_LINKS = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "#" },
-  { label: "Projects", href: "/projects" },
-  { label: "Contact", href: "/contact" },
-];
+  { key: "home", href: "/" },
+  { key: "about", href: "#" },
+  { key: "projects", href: "/projects" },
+  { key: "contact", href: "/contact" },
+] as const;
 
 /** In-page hashes stay plain anchors so Lenis keeps owning the scroll (its
  *  `anchors: { offset: -80 }`); only real routes go through the router. */
@@ -72,6 +74,8 @@ export default function MenuPanel({
   open: boolean;
   onNavigate: () => void;
 }) {
+  const t = useTranslations("Nav");
+  const common = useTranslations("Common");
   const settings = useSiteSettings();
 
   // The outer box positions; it is never transformed. Each sheet inside owns
@@ -187,21 +191,21 @@ export default function MenuPanel({
       >
         <div className="mx-auto flex w-full flex-col gap-space-3x px-space-base pb-space-2x lg:w-[90vw] lg:flex-row lg:justify-between lg:gap-0 lg:px-0">
           <div className="flex flex-col items-start gap-space-base">
-            <nav aria-label="Main">
+            <nav aria-label={t("main")}>
               <ul className="flex flex-col">
-                {NAV_LINKS.map(({ label, href }) => {
+                {NAV_LINKS.map(({ key, href }) => {
                   // Same element and styles either way — TransitionLink only when the
                   // href leaves the page, so the route change is client-side.
                   const Tag = isRoute(href) ? TransitionLink : "a";
 
                   return (
-                    <li key={label}>
+                    <li key={key}>
                       <Tag
                         href={href}
                         onClick={onNavigate}
                         className="heading-style block text-2xl transition-colors hover:text-foreground lg:text-5xl"
                       >
-                        {label}
+                        {t(key)}
                       </Tag>
                     </li>
                   );
@@ -214,7 +218,7 @@ export default function MenuPanel({
               onClick={onNavigate}
               className={`${PILL} bg-foreground text-background lg:hidden`}
             >
-              Get in touch
+              {common("getInTouch")}
             </TransitionLink>
           </div>
           <ContactInfo
@@ -228,7 +232,7 @@ export default function MenuPanel({
         <div className="mx-auto flex w-[90vw] flex-col items-start gap-space--3x py-space--2x text-xs text-background lg:flex-row lg:items-end lg:gap-space-2x lg:py-space-base lg:text-sm">
           <span className="text-left lg:flex-1">&copy; {YEAR} DBLA</span>
           <p className="lg:flex-1 lg:text-center">
-            Site by{" "}
+            {common("siteBy")}{" "}
             <a
               className="hover:underline"
               href="https://www.kaobui.com"
@@ -238,21 +242,26 @@ export default function MenuPanel({
               Kaobui
             </a>
           </p>
-          <nav aria-label="Legal" className="lg:flex-1">
-            <ul className="flex flex-row gap-space--3x lg:justify-end lg:gap-space-2x">
-              {settings.legalLinks.map(({ label, href }) => (
-                <li key={label}>
-                  <a
-                    href={href}
-                    onClick={onNavigate}
-                    className="hover:underline"
-                  >
-                    {label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          {/* The language switch rides at the end of the legal row: the one
+              strip printed on every route that has the menu. */}
+          <div className="flex flex-row gap-space-base lg:flex-1 lg:justify-end lg:gap-space-2x">
+            <nav aria-label={common("legal")}>
+              <ul className="flex flex-row gap-space--3x whitespace-nowrap lg:gap-space-2x">
+                {settings.legalLinks.map(({ label, href }) => (
+                  <li key={label}>
+                    <a
+                      href={href}
+                      onClick={onNavigate}
+                      className="hover:underline"
+                    >
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            <LanguageSwitch className="gap-space--3x" onNavigate={onNavigate} />
+          </div>
         </div>
       </Sheet>
     </div>
