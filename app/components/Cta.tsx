@@ -261,7 +261,7 @@ export default function Cta() {
           className="relative flex h-full flex-col gap-space-2x"
         >
           <div className="flex h-1/2 flex-col items-center justify-end pb-space-4x">
-            <h2 className="heading-style max-w-[13ch] text-center text-4xl leading-heading">
+            <h2 className="heading-style max-w-[13ch] text-center text-4xl xl:text-6xl leading-heading">
               Your next step into digital starts here.
             </h2>
           </div>
