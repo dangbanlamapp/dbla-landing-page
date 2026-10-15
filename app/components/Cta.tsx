@@ -74,7 +74,11 @@ const RING_GROW = 0.5;
  */
 const FAN_EXPAND = 1 - RING_GROW;
 
-export default function Cta() {
+/** The Studio's Homepage → Call to action. Each field missing falls back to
+ *  messages/. */
+export type CtaCopy = { title?: string; body?: string };
+
+export default function Cta({ copy: words = {} }: { copy?: CtaCopy }) {
   const t = useTranslations("Cta");
   const common = useTranslations("Common");
   const container = useRef<HTMLElement>(null);
@@ -314,11 +318,13 @@ export default function Cta() {
               data-split="up"
               className="heading-style max-w-[13ch] text-center text-4xl leading-heading 3xl:text-5xl"
             >
-              {t("title")}
+              {words.title ?? t("title")}
             </h2>
           </div>
           <div className="flex flex-col items-center justify-start gap-space-base">
-            <p className="max-w-[36ch] text-center text-base">{t("body")}</p>
+            <p className="max-w-[36ch] text-center text-base">
+              {words.body ?? t("body")}
+            </p>
             <TransitionLink
               className="rounded-md bg-accent px-space-2x py-space--2x text-md font-bold tracking-tighter uppercase"
               href="/contact"

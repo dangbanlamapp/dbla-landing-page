@@ -8,13 +8,20 @@ import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRevealed } from "./Preloader";
 import { useTranslations } from "next-intl";
-import { RICH } from "./rich";
+import { RICH, richHeading, type RichHeading } from "./rich";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
 ScrollTrigger.config({ ignoreMobileResize: true });
 
-export default function Hero() {
+/** The Studio's Homepage → Hero. Each field missing falls back to messages/. */
+export type HeroCopy = {
+  titleStart?: RichHeading;
+  titleEnd?: RichHeading;
+  body?: string;
+};
+
+export default function Hero({ copy: words = {} }: { copy?: HeroCopy }) {
   const t = useTranslations("Hero");
   const common = useTranslations("Common");
   const container = useRef<HTMLDivElement>(null);
@@ -228,7 +235,9 @@ export default function Hero() {
           data-split="up"
           className="text-center text-4xl leading-heading font-bold tracking-tighter uppercase lg:text-right lg:text-3xl xl:text-4xl max-sm:vi:text-3xl"
         >
-          {t.rich("titleStart", RICH)}
+          {words.titleStart
+            ? richHeading(words.titleStart)
+            : t.rich("titleStart", RICH)}
         </h1>
       </div>
 
@@ -237,7 +246,9 @@ export default function Hero() {
           data-split="down"
           className="text-center text-4xl leading-heading font-bold tracking-tighter uppercase sm:text-2xl lg:text-left lg:text-3xl xl:text-4xl max-sm:vi:text-3xl"
         >
-          {t.rich("titleEnd", RICH)}
+          {words.titleEnd
+            ? richHeading(words.titleEnd)
+            : t.rich("titleEnd", RICH)}
         </h1>
         {/* leading-none is a desktop luxury: at text-base on a phone the copy
             wraps to four or five lines and needs the body leading to stay
@@ -246,7 +257,7 @@ export default function Hero() {
           data-fade
           className="max-w-[48ch] text-center text-base leading-body sm:text-md sm:leading-none lg:text-left"
         >
-          {t("body")}
+          {words.body ?? t("body")}
         </p>
         <TransitionLink
           data-fade

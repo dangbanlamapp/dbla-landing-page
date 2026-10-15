@@ -6,7 +6,7 @@ import { useGSAP } from "@gsap/react";
 import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useTranslations } from "next-intl";
-import { RICH } from "./rich";
+import { RICH, richHeading, type RichHeading } from "./rich";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
@@ -16,6 +16,15 @@ const navButton =
 /** One quote in the carousel. The list is edited in the Studio (Testimonials)
  *  and arrives as a prop, in slide order. */
 export type Testimonial = { quote: string; name: string; role: string };
+
+/** The Studio's Homepage → Why us. Each field missing falls back to
+ *  messages/; the reasons fall back as a set, since they are numbered by
+ *  position. */
+export type WhyUsCopy = {
+  label?: string;
+  title?: RichHeading;
+  reasons?: { title: string; body: string }[];
+};
 
 const SLIDE_SECONDS = 4;
 
@@ -62,10 +71,17 @@ function NavArrow({ className }: { className?: string }) {
 
 export default function WhyUs({
   testimonials,
+  copy: words = {},
 }: {
   testimonials: Testimonial[];
+  copy?: WhyUsCopy;
 }) {
   const t = useTranslations("WhyUs");
+  const reasons = words.reasons ?? [
+    { title: t("expertiseTitle"), body: t("expertiseBody") },
+    { title: t("teamTitle"), body: t("teamBody") },
+    { title: t("resultsTitle"), body: t("resultsBody") },
+  ];
   const container = useRef<HTMLElement>(null);
   const copy = useRef<HTMLDivElement>(null);
   const list = useRef<HTMLDivElement>(null);
@@ -423,13 +439,13 @@ export default function WhyUs({
               data-split="up"
               className="text-xs text-foreground/75 uppercase lg:pr-space-4x lg:text-sm"
             >
-              {t("label")}
+              {words.label ?? t("label")}
             </p>
             <h2
               data-split="up"
               className="heading-style text-2xl leading-heading lg:text-right lg:text-4xl"
             >
-              {t.rich("title", RICH)}
+              {words.title ? richHeading(words.title) : t.rich("title", RICH)}
             </h2>
           </div>
           {/*
@@ -537,57 +553,25 @@ export default function WhyUs({
           ref={list}
           className="flex flex-col gap-space-4x px-space-base lg:pt-[50vh]"
         >
-          <div className="flex flex-col">
-            <p className="text-sm leading-none tracking-tighter uppercase opacity-50 lg:text-md">
-              01
-            </p>
-            <h3
-              data-split="down"
-              className="heading-style pb-space--1x text-xl font-medium text-accent lg:text-2xl"
-            >
-              {t("expertiseTitle")}
-            </h3>
-            <p
-              data-fade
-              className="max-w-[48ch] text-sm leading-body lg:text-base"
-            >
-              {t("expertiseBody")}
-            </p>
-          </div>
-          <div className="flex flex-col">
-            <p className="text-sm leading-none tracking-tighter uppercase opacity-50 lg:text-md">
-              02
-            </p>
-            <h3
-              data-split="down"
-              className="heading-style pb-space--1x text-xl font-medium text-accent lg:text-2xl"
-            >
-              {t("teamTitle")}
-            </h3>
-            <p
-              data-fade
-              className="max-w-[48ch] text-sm leading-body lg:text-base"
-            >
-              {t("teamBody")}
-            </p>
-          </div>
-          <div className="flex flex-col">
-            <p className="text-sm leading-none tracking-tighter uppercase opacity-50 lg:text-md">
-              03
-            </p>
-            <h3
-              data-split="down"
-              className="heading-style pb-space--1x text-xl font-medium text-accent lg:text-2xl"
-            >
-              {t("resultsTitle")}
-            </h3>
-            <p
-              data-fade
-              className="max-w-[48ch] text-sm leading-body lg:text-base"
-            >
-              {t("resultsBody")}
-            </p>
-          </div>
+          {reasons.map((reason, i) => (
+            <div key={i} className="flex flex-col">
+              <p className="text-sm leading-none tracking-tighter uppercase opacity-50 lg:text-md">
+                {String(i + 1).padStart(2, "0")}
+              </p>
+              <h3
+                data-split="down"
+                className="heading-style pb-space--1x text-xl font-medium text-accent lg:text-2xl"
+              >
+                {reason.title}
+              </h3>
+              <p
+                data-fade
+                className="max-w-[48ch] text-sm leading-body lg:text-base"
+              >
+                {reason.body}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
       <div id="cross-lines" className="absolute inset-0 hidden lg:block">

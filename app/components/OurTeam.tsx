@@ -7,7 +7,7 @@ import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Avatar, { type AvatarProps } from "./Avatar";
 import { useTranslations } from "next-intl";
-import { RICH } from "./rich";
+import { RICH, richHeading, type RichHeading } from "./rich";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
@@ -45,7 +45,16 @@ function Highlighted({ text }: { text: string }) {
   );
 }
 
-export default function OurTeam({ team }: { team: TeamMember[] }) {
+/** The Studio's Homepage → Team. Each field missing falls back to messages/. */
+export type TeamCopy = { label?: string; title?: RichHeading; body?: string };
+
+export default function OurTeam({
+  team,
+  copy: words = {},
+}: {
+  team: TeamMember[];
+  copy?: TeamCopy;
+}) {
   const t = useTranslations("Team");
   const container = useRef<HTMLElement>(null);
   const copy = useRef<HTMLDivElement>(null);
@@ -266,20 +275,20 @@ export default function OurTeam({ team }: { team: TeamMember[] }) {
               data-split="up"
               className="text-xs text-foreground/75 uppercase lg:text-sm"
             >
-              {t("label")}
+              {words.label ?? t("label")}
             </p>
             <h2
               data-split="up"
               className="heading-style text-2xl leading-heading lg:text-4xl"
             >
-              {t.rich("title", RICH)}
+              {words.title ? richHeading(words.title) : t.rich("title", RICH)}
             </h2>
           </div>
           <p
             data-fade
             className="max-w-[48ch] text-sm leading-body lg:text-base"
           >
-            {t("body")}
+            {words.body ?? t("body")}
           </p>
         </div>
 

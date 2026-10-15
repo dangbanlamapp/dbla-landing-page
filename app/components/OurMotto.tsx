@@ -6,11 +6,14 @@ import { useGSAP } from "@gsap/react";
 import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useTranslations } from "next-intl";
-import { RICH } from "./rich";
+import { RICH, richHeading, type RichHeading } from "./rich";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
-export default function OurMotto() {
+/** The Studio's Homepage → Motto. Each field missing falls back to messages/. */
+export type MottoCopy = { label?: string; lead?: string; title?: RichHeading };
+
+export default function OurMotto({ copy: words = {} }: { copy?: MottoCopy }) {
   const t = useTranslations("Motto");
   const container = useRef<HTMLElement>(null);
   const copy = useRef<HTMLDivElement>(null);
@@ -264,19 +267,19 @@ export default function OurMotto() {
           data-fade
           className="p-space--1x text-sm text-foreground/75 uppercase"
         >
-          {t("label")}
+          {words.label ?? t("label")}
         </p>
         <p
           data-split="up"
           className="heading-style text-center text-xl lg:text-4xl"
         >
-          {t("lead")}
+          {words.lead ?? t("lead")}
         </p>
         <h2
           data-split="up"
           className="heading-style text-center text-xl lg:text-4xl"
         >
-          {t.rich("title", RICH)}
+          {words.title ? richHeading(words.title) : t.rich("title", RICH)}
         </h2>
       </div>
     </section>
