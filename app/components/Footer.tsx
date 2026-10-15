@@ -10,7 +10,7 @@ import LocalTime from "./LocalTime";
 // Shared with MenuPanel, which prints the same legal row inside the open menu.
 import { YEAR } from "./legal";
 import { useSiteSettings } from "./SiteSettingsProvider";
-import LanguageSwitch from "./LanguageSwitch";
+// import LanguageSwitch from "./LanguageSwitch";
 import { useTranslations } from "next-intl";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -406,7 +406,9 @@ export default function Footer() {
                 ))}
               </ul>
             </nav>
-            <LanguageSwitch className="gap-space--3x" />
+            {/* Hidden until the Vietnamese copy is ready — restore with the
+                import above, and the matching one in MenuPanel. */}
+            {/* <LanguageSwitch className="gap-space--3x" /> */}
           </div>
         </div>
 

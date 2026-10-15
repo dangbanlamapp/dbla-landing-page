@@ -43,7 +43,7 @@ public/               halftone-bg.jpg, noise-bg.jpg + default Next svgs
 - **Every getter in `content.ts` takes the locale.** In Sanity, Vietnamese is a `_vi` twin beside each translated field (`blurb` / `blurb_vi`, added in the Studio with `translatable()`); queries resolve it with `loc()` in [queries.ts](sanity/lib/queries.ts), falling back to English. Slugs, images, order and numbers are shared.
 - **UI copy that lives in code goes in `messages/en.json` + `messages/vi.json`** (same keys, one namespace per section), read with `useTranslations` — or `getTranslations({ locale, namespace })` in `generateMetadata`. Keys are type-checked against en.json via [global.d.ts](global.d.ts). Headings with a line break or accent phrase use `t.rich(key, RICH)` from [rich.tsx](app/components/rich.tsx), with `<br></br>` / `<accent>…</accent>` in the message (ICU has no self-closing tags).
 - **Write internal hrefs without a locale** (`"/contact"`): [TransitionLink](app/components/TransitionLink.tsx) localizes them. A plain `<a>` to an internal page would drop a Vietnamese reader back into English.
-- [LanguageSwitch](app/components/LanguageSwitch.tsx) (in MenuPanel and Footer) is a plain `<a>` — a full load on purpose, since a new locale remounts the root layout anyway (the preloader plays again).
+- [LanguageSwitch](app/components/LanguageSwitch.tsx) (in MenuPanel and Footer) is a plain `<a>` — a full load on purpose, since a new locale remounts the root layout anyway (the preloader plays again). **Currently commented out in both places** until the Vietnamese copy is ready; `/vi` still resolves if typed directly.
 
 ## Content (Sanity)
 

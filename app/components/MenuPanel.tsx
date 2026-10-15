@@ -10,7 +10,7 @@ import { YEAR } from "./legal";
 import { useSiteSettings } from "./SiteSettingsProvider";
 import { PILL } from "./pill";
 import ContactInfo from "./ContactInfo";
-import LanguageSwitch from "./LanguageSwitch";
+// import LanguageSwitch from "./LanguageSwitch";
 import { MENU_EASE as EASE, MENU_LEAD as LEAD } from "./menu-motion";
 import { holdScroll } from "./scroll-hold";
 import { useTranslations } from "next-intl";
@@ -260,7 +260,9 @@ export default function MenuPanel({
                 ))}
               </ul>
             </nav>
-            <LanguageSwitch className="gap-space--3x" onNavigate={onNavigate} />
+            {/* Hidden until the Vietnamese copy is ready — restore with the
+                import above, and the matching one in Footer. */}
+            {/* <LanguageSwitch className="gap-space--3x" onNavigate={onNavigate} /> */}
           </div>
         </div>
       </Sheet>
