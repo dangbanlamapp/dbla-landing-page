@@ -11,6 +11,7 @@ import Services from "@/app/components/Services";
 import WhyUs from "@/app/components/WhyUs";
 import {
   contentKey,
+  getHomePage,
   getProjects,
   getServices,
   getTeam,
@@ -20,7 +21,8 @@ import { pageLocale } from "@/i18n/locale";
 
 export default async function Home({ params }: PageProps<"/[locale]">) {
   const locale = await pageLocale(params);
-  const [projects, services, team, testimonials] = await Promise.all([
+  const [copy, projects, services, team, testimonials] = await Promise.all([
+    getHomePage(locale),
     getProjects(locale),
     getServices(locale),
     getTeam(locale),
@@ -54,27 +56,46 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       */}
       <main className="relative z-1 bg-background">
         <HeaderBg />
-        <Hero />
-        <Intro />
         {/*
-          The four content-driven sections are each keyed on their content
-          (see contentKey) so a live publish remounts them rather than
-          patching text SplitText has already split. Each is skipped when its
-          list is empty: every one of them divides its pin, its carousel or
-          its grid by that count.
+          Every section is keyed on its content (see contentKey) — its
+          headings from the Homepage document, and its list where it has one
+          — so a live publish remounts it rather than patching text SplitText
+          has already split. The four with a list are skipped when it is
+          empty: every one of them divides its pin, its carousel or its grid
+          by that count.
         */}
+        <Hero key={contentKey(copy.hero)} copy={copy.hero} />
+        <Intro key={contentKey(copy.intro)} copy={copy.intro} />
         {services.length > 0 && (
-          <Services key={contentKey(services)} services={services} />
+          <Services
+            key={contentKey([services, copy.services])}
+            services={services}
+            copy={copy.services}
+          />
         )}
-        <OurMotto />
+        <OurMotto key={contentKey(copy.motto)} copy={copy.motto} />
         {projects.length > 0 && (
-          <Projects key={contentKey(projects)} projects={projects} />
+          <Projects
+            key={contentKey([projects, copy.projects])}
+            projects={projects}
+            copy={copy.projects}
+          />
         )}
         {testimonials.length > 0 && (
-          <WhyUs key={contentKey(testimonials)} testimonials={testimonials} />
+          <WhyUs
+            key={contentKey([testimonials, copy.whyUs])}
+            testimonials={testimonials}
+            copy={copy.whyUs}
+          />
         )}
-        {team.length > 0 && <OurTeam key={contentKey(team)} team={team} />}
-        <Cta />
+        {team.length > 0 && (
+          <OurTeam
+            key={contentKey([team, copy.team])}
+            team={team}
+            copy={copy.team}
+          />
+        )}
+        <Cta key={contentKey(copy.cta)} copy={copy.cta} />
       </main>
       <Footer />
     </>
