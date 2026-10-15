@@ -207,6 +207,17 @@
       mix-blend-mode: soft-light;
     }
   }
+  /* Off on touch devices, and it is a performance call, not a design one. A
+     fixed, full-viewport layer in soft-light has to be re-blended over every
+     pixel that changes beneath it, every frame — and the pinned Projects scrub
+     changes nearly all of them. Phone GPUs run out of fill rate there long
+     before anything else, which is most of what read as scroll jank. The query
+     is the same one Projects uses for its lighter timeline (TOUCH_QUERY). */
+  @media (max-width: 1023px), (pointer: coarse) {
+    body::after {
+      display: none;
+    }
+  }
 }
 @layer components {
   .heading-style {
@@ -301,5 +312,33 @@
        only ever a union — but leaving it implicit invites someone to read the
        four layers as the last one winning. */
     mask-composite: add;
+  }
+
+  /*
+    The homepage stack on touch devices (same query as TOUCH_QUERY in
+    Projects.tsx). The conic mask above cannot be composited: every scrubbed
+    frame re-rasterises four gradients at the circle's full size and re-masks a
+    photo under them, which a phone cannot keep up with. There the layers scale
+    in instead — a pure transform — so the mask is dropped entirely.
+
+    visibility: hidden is the no-SSR-flash half of that swap. With no mask, the
+    server-rendered stack would show the LAST image at full size until GSAP ran;
+    the timeline sets it back to visible in the same tick it parks every layer
+    at scale 0. will-change gives each layer its own compositor surface, so the
+    scale-in and the teardown's deal-out move a texture instead of repainting.
+
+    Scoped to [data-project-image]: the /projects index and the detail page
+    play the wipe once rather than scrubbing it, and keep the pinwheel.
+  */
+  @media (max-width: 1023px), (pointer: coarse) {
+    .quadrant-reveal[data-project-image] {
+      mask-image: none;
+      visibility: hidden;
+      will-change: transform;
+    }
+    [data-project-frame],
+    #projects-rings {
+      will-change: transform;
+    }
   }
 }

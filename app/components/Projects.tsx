@@ -176,6 +176,26 @@ const COUNTER_TRANSFORM: EffectTiming = {
 };
 const COUNTER_OPACITY: EffectTiming = { duration: 250, easing: "ease-out" };
 
+// Phones, tablets and anything narrow enough to get the stacked layout. They
+// get a lighter build of the same timeline: the images scale in rather than
+// wiping in through the conic mask, the photo drift is dropped, and the scrub
+// trails the scroll slightly. See the `touch` branches below, and the matching
+// CSS under .quadrant-reveal and body::after in globals.css — the string has to
+// stay identical in all three places.
+//
+// (pointer: coarse) as well as the width, because the expensive part is not the
+// layout: a touch scroll runs on the browser's compositor thread, ahead of the
+// JS that scrubs this timeline, and a large iPad in landscape has that problem
+// at desktop width.
+const TOUCH_QUERY = "(max-width: 1023px), (pointer: coarse)";
+
+// How far the scrub trails the scroll on touch, in seconds. `true` sets the
+// timeline to the scroll position once per JS frame, which on a phone is often
+// a frame behind the compositor's own scroll — the section visibly shakes.
+// A short catch-up absorbs that mismatch; long enough to hide it, short enough
+// that the stack still reads as attached to the finger.
+const TOUCH_SCRUB = 0.4;
+
 export default function Projects({ projects }: { projects: Project[] }) {
   const t = useTranslations("Projects");
   const container = useRef<HTMLElement>(null);
@@ -211,459 +231,511 @@ export default function Projects({ projects }: { projects: Project[] }) {
 
   useGSAP(
     () => {
-      const {
-        SLICE,
-        REVEAL_HALF,
-        TEXT_ENTER,
-        TEXT_EXIT,
-        TEARDOWN_AT,
-        OUTRO_AT,
-      } = schedule(projects.length);
+      // Built once per side of TOUCH_QUERY. matchMedia reverts the whole
+      // context when the query flips — every tween, ScrollTrigger and split
+      // inside — so crossing the breakpoint rebuilds the section from scratch
+      // instead of leaving a desktop timeline driving layers the touch CSS has
+      // already hidden. The always-true `any` condition is only there so the
+      // function also runs when `touch` does NOT match. The matchMedia is
+      // created inside useGSAP's context, so unmounting reverts it too.
+      const mm = gsap.matchMedia();
 
-      // ── The pin ────────────────────────────────────────────────────────────
-      // One trigger both pins the section and scrubs this timeline, following
-      // Services: a single set of start/end measurements to refresh, and
-      // anything added later is positioned against the same clock instead of
-      // re-deriving absolute scroll maths of its own.
-      //
-      // It stays separate from the entrance below — the two cover different
-      // runs of scroll (the entrance ends exactly where this starts), and the
-      // entrance is rebuilt from scratch on every autoSplit re-split, which
-      // would take the pin down with it.
-      //
-      // Pin spacing stays on (the default) — this is the last section, so
-      // nothing below can supply the scroll distance the pin consumes and the
-      // spacer has to.
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: container.current,
-          start: "top top",
-          end: () => "+=" + window.innerHeight * PIN_VIEWPORTS,
-          pin: true,
-          scrub: true,
-          invalidateOnRefresh: true,
-        },
-      });
+      mm.add(
+        { touch: TOUCH_QUERY, any: "all" },
+        (ctx) => {
+          const touch = Boolean(ctx.conditions?.touch);
+          const scrub = touch ? TOUCH_SCRUB : true;
 
-      // The timeline's unit of time is one viewport of scrolling, so position 0
-      // is the moment the pin engages and PIN_VIEWPORTS is the moment it
-      // releases. This empty spacer nails the duration there no matter what is
-      // added later — without it the timeline is only as long as its longest
-      // child, and every viewport-to-time mapping would silently rescale the
-      // next time a tween is added or removed.
-      tl.to({}, { duration: PIN_VIEWPORTS }, 0);
+          const {
+            SLICE,
+            REVEAL_HALF,
+            TEXT_ENTER,
+            TEXT_EXIT,
+            TEARDOWN_AT,
+            OUTRO_AT,
+          } = schedule(projects.length);
 
-      // ── The progress ring ──────────────────────────────────────────────────
-      // It spans the project slices from position 0, so the drawn fraction IS
-      // the fraction of the projects scrolled — the ring measures the sequence
-      // it sits beside, not the pin. It closes exactly on TEARDOWN_AT, which is
-      // what lets the closing slice scale it away without ever shrinking an
-      // unfinished dial.
-      //
-      // ease "none", for the same reason Services scrubs linearly — any other
-      // curve makes the ring run ahead of or behind the scrollbar, which reads
-      // as lag rather than as easing.
-      tl.to(
-        "[data-progress-arc]",
-        { strokeDashoffset: 0, duration: TEARDOWN_AT, ease: "none" },
-        0,
-      );
-
-      // ── The project images ─────────────────────────────────────────────────
-      // A stack: every image occupies the same circular frame, at rest and at
-      // full size the whole time, and is WIPED IN over its own slice on top of
-      // whatever is already there. There is no exit tween anywhere below, and
-      // that is the mechanism rather than an omission — an image is never
-      // dismissed, it is simply covered by the next one, so the stack only ever
-      // gains layers. A finished wipe is a fully opaque circle, which is what
-      // lets the next one cover it as completely as a scale-up used to.
-      //
-      // Read in DOM order, which the markup keys to the list's order, so index i
-      // is both the stacking level and the slice number. That is what keeps
-      // "the next one starts where the last one ended" out of the code: it
-      // falls out of i * SLICE.
-      //
-      // The reveal is a conic wipe cut into quadrants — see .quadrant-reveal in
-      // globals.css for the mask itself. Four wedges, one per corner, all
-      // opening clockwise from their own axis at the same moment, so the circle
-      // closes as a four-armed pinwheel rather than as one hand going round.
-      // Four separate properties rather than one shared angle: they happen to
-      // be given identical timing today, and holding them apart is what lets a
-      // corner be staggered or eased on its own later without touching the mask.
-      //
-      // ease "none" is the point of the whole beat. This is angular travel, and
-      // a clock hand that speeds up or slows down does not read as easing — it
-      // reads as the hand slipping. (The old scale entrance used expoScale for
-      // exactly the opposite reason: scale IS perceptually non-linear and needs
-      // the correction. Angle does not.)
-      //
-      // Two beats per slice, and the second is the drift: the mask is finished,
-      // so the frame and the four wedge boundaries stand still, and it is the
-      // picture BEHIND them that keeps creeping on power3.out. That is why the
-      // zoom targets [data-project-photo] and not the masked layer — scaling
-      // the layer would drag the revealed circle with it. It reads as a hold
-      // that has not quite stopped, so the next image's wipe lands against
-      // something still moving rather than against a frozen frame.
-      //
-      // fromTo on both, not from or to: the layer ships unrevealed and the
-      // photo unscaled (the no-SSR-flash rule), so a plain `from` would read
-      // those resting values as the END state and animate 0 -> 0. A plain `to`
-      // would be worse here than it was for the old drift — invalidateOnRefresh
-      // re-records a `to` tween's start from wherever the section happens to be
-      // sitting, and a refresh landing mid-pin would bake a half-open wedge in
-      // as the start of the sweep.
-      gsap.utils
-        .toArray<HTMLElement>("[data-project-image]", container.current)
-        .forEach((layer, i) => {
-          const at = i * SLICE;
-          const open = QUADRANT + "deg";
-
-          tl.fromTo(
-            layer,
-            {
-              "--sweep-0": "0deg",
-              "--sweep-1": "0deg",
-              "--sweep-2": "0deg",
-              "--sweep-3": "0deg",
+          // ── The pin ────────────────────────────────────────────────────────────
+          // One trigger both pins the section and scrubs this timeline, following
+          // Services: a single set of start/end measurements to refresh, and
+          // anything added later is positioned against the same clock instead of
+          // re-deriving absolute scroll maths of its own.
+          //
+          // It stays separate from the entrance below — the two cover different
+          // runs of scroll (the entrance ends exactly where this starts), and the
+          // entrance is rebuilt from scratch on every autoSplit re-split, which
+          // would take the pin down with it.
+          //
+          // Pin spacing stays on (the default) — this is the last section, so
+          // nothing below can supply the scroll distance the pin consumes and the
+          // spacer has to.
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: container.current,
+              start: "top top",
+              end: () => "+=" + window.innerHeight * PIN_VIEWPORTS,
+              pin: true,
+              scrub,
+              // Touch scrolling runs ahead of JS, so by the time ScrollTrigger
+              // swaps the section to position: fixed it has already scrolled a
+              // little past the start and snaps back. anticipatePin applies the
+              // pin slightly early to swallow that jump.
+              anticipatePin: touch ? 1 : 0,
+              invalidateOnRefresh: true,
             },
-            {
-              "--sweep-0": open,
-              "--sweep-1": open,
-              "--sweep-2": open,
-              "--sweep-3": open,
-              duration: REVEAL_HALF,
-              ease: "power4.inOut",
-            },
-            at,
-          ).fromTo(
-            layer.querySelector("[data-project-photo]"),
-            { scale: 1 },
-            { scale: ZOOM_SCALE, duration: SLICE, ease: "power3.out" },
-            at,
-          );
-        });
+          });
 
-      // ── The project counter ────────────────────────────────────────────────
-      // The number names the image ARRIVING, so it ticks at (i + STEP_AT) *
-      // SLICE — just inside the top of that project's slice, while its image is
-      // still growing. Ticking at the end of the entrance instead reads as
-      // late: by then the image has already announced the change, and the digit
-      // is only confirming something the reader watched happen.
-      //
-      // Built from SLICE, so the count stays welded to the stack it is counting
-      // and the two re-divide together when PIN_VIEWPORTS or the list changes.
-      //
-      // Derived from tl.time() on every update rather than incremented by a
-      // callback per step. A scrubbed timeline can cross half the pin in a
-      // single frame and runs backwards as readily as forwards, so anything
-      // counting events would drop steps or double-count; this is a pure
-      // function of timeline position, like everything else in the section —
-      // whatever frame you land on, the number is right for it.
-      const clampIndex = gsap.utils.clamp(0, projects.length);
+          // The timeline's unit of time is one viewport of scrolling, so position 0
+          // is the moment the pin engages and PIN_VIEWPORTS is the moment it
+          // releases. This empty spacer nails the duration there no matter what is
+          // added later — without it the timeline is only as long as its longest
+          // child, and every viewport-to-time mapping would silently rescale the
+          // next time a tween is added or removed.
+          tl.to({}, { duration: PIN_VIEWPORTS }, 0);
 
-      tl.eventCallback("onUpdate", () => {
-        const next = clampIndex(Math.floor(tl.time() / SLICE - STEP_AT) + 1);
-
-        // NumberFlow starts an animation on every value change, and React only
-        // bails out of a same-value setState after re-entering the component —
-        // at scrub rates that is sixty wasted renders a second. Holding the
-        // last written value in a ref means state is touched only on an actual
-        // step.
-        if (next !== shown.current) {
-          shown.current = next;
-          setLanded(next);
-        }
-
-        const nextDealt = tl.time() >= TEARDOWN_AT;
-        if (nextDealt !== dealtShown.current) {
-          dealtShown.current = nextDealt;
-          setDealt(nextDealt);
-        }
-      });
-
-      // The counter leaves with the last project, in the same direction the
-      // heading's lines take (positive yPercent is downward, matching a
-      // data-split="up" element retreating through the mask edge it arrived
-      // from). It moves as a whole rather than as split lines: NumberFlow owns
-      // a shadow DOM of its own and runs its own vertical digit animation, so
-      // splitting it — or clipping it in a mask tight enough to read as one —
-      // would cut into the roll it does on every step.
-      //
-      // A plain `to`, so it records its start from wherever the layout leaves
-      // it and no resting value is written down twice.
-      tl.to(
-        "[data-counter]",
-        {
-          yPercent: 100,
-          autoAlpha: 0,
-          duration: TEXT_EXIT,
-          ease: "power3.in",
-        },
-        OUTRO_AT,
-      );
-
-      // ── The teardown ───────────────────────────────────────────────────────
-      // The closing slice, and the only stretch of the pin with no project in
-      // it. The rings collapse to nothing while the frame draws back and the
-      // stack fans out into a row, so the section reads as one movement that
-      // resolves into a contact sheet of everything just shown, rather than as
-      // four things independently leaving.
-      //
-      // One duration and one ease across all of it, from one position: this is
-      // a single gesture, and giving each part its own timing is how a gesture
-      // turns into several animations that happen to overlap. power3.inOut so
-      // the collapse eases out of the hold that precedes it and settles rather
-      // than slamming into the end of the pin.
-      //
-      // Plain `to` tweens: each records its start from wherever the section
-      // actually is when the teardown begins, so the resting values — including
-      // the last photo's ZOOM_SCALE — are never written down a second time.
-      tl.to(
-        ["#projects-rings", "#projects-progress"],
-        {
-          scale: 0,
-          rotate: "180deg",
-          duration: SLICE / 2,
-          ease: "power3.inOut",
-        },
-        TEARDOWN_AT,
-      )
-        .to(
-          "[data-project-frame]",
-          {
-            scale: rowScale(projects.length),
-            duration: SLICE,
-            ease: "power3.inOut",
-          },
-          TEARDOWN_AT,
-        )
-        // ── The row ──────────────────────────────────────────────────────────
-        // The three finished images have been sitting under the fourth this
-        // whole time, each a completed circle — nothing is created here, the
-        // stack is simply dealt out. They are below the last project in DOM
-        // order, so they slide out from BEHIND it rather than across it.
-        //
-        // xPercent, not x, and that is what keeps the pixel maths out of this:
-        // a percentage is of the layer's own width, the layer is the frame's
-        // box, and the frame is square — so 100 is exactly one diameter, at any
-        // viewport, and it rides the frame's own scale down for free. All the
-        // responsive work is already done inside rowScale().
-        //
-        // The offsets are centred on the middle of the row rather than on any
-        // one image, so the group lands on the same centre line as the crosshair
-        // and the rings it replaces. With four projects that is -165, -55, +55,
-        // +165 — the last image included, shifting half a step right, because a
-        // row of four has no middle to hold.
-        //
-        // No stagger. Equal duration over unequal distance already means the
-        // outer circles travel faster and all four arrive together, which reads
-        // as one hand dealing them out; staggering would turn it into a queue.
-        .to(
-          "[data-project-image]",
-          {
-            xPercent: (i: number) => (i - (projects.length - 1) / 2) * ROW_STEP,
-            duration: SLICE,
-            ease: "power4.inOut",
-          },
-          TEARDOWN_AT,
-        )
-        .to(
-          "[data-frame-fill]",
-          { autoAlpha: 0, duration: 0, ease: "none" },
-          TEARDOWN_AT,
-        );
-
-      // ── The project copy ───────────────────────────────────────────────────
-      /**
-       * A masked line reveal plus its mirrored exit, as one unit — the same
-       * helper Services uses, and for the same reason.
-       *
-       * The pair has to be built inside onSplit and returned together:
-       * autoSplit re-splits on font load and on resize, and GSAP kills whatever
-       * onSplit returned before doing so. Returning a timeline rather than a
-       * tween is what lets the exit be cleaned up too — killing it lifts it out
-       * of its parent, and the next onSplit adds a replacement at the same
-       * position. Return only the entrance and the exit is left pointing at
-       * line elements that no longer exist.
-       */
-      const splitInOut = (
-        el: HTMLElement,
-        parent: gsap.core.Timeline,
-        at: number,
-        exitAt: number,
-      ) => {
-        const yPercent = el.dataset.split === "down" ? -150 : 150;
-
-        SplitText.create(el, {
-          type: "lines",
-          mask: "lines",
-          // Same descender fix as the section heading below.
-          linesClass: "pb-[0.15em]",
-          autoSplit: true,
-          onSplit: (self) => {
-            const lines = gsap.timeline();
-
-            lines.from(
-              self.lines,
-              {
-                yPercent,
-                duration: TEXT_ENTER,
-                ease: "power3.out",
-                stagger: TEXT_STAGGER,
-              },
-              0,
-            );
-
-            // The mirror: the SAME yPercent, so each line retreats through the
-            // edge of the mask it arrived from rather than carrying on past it.
-            // from: "end" reverses the stagger order too, so the exit reads as
-            // the entrance rewound.
-            lines.to(
-              self.lines,
-              {
-                yPercent,
-                duration: TEXT_EXIT,
-                ease: "power3.in",
-                stagger: { each: TEXT_STAGGER, from: "end" },
-              },
-              exitAt - at,
-            );
-
-            parent.add(lines, at);
-            return lines;
-          },
-        });
-      };
-
-      // One nested timeline per block, placed on the master at its slice. The
-      // internal rhythm is written once here and the master only decides WHEN,
-      // so a block cannot be retimed into its neighbour's slice by accident.
-      //
-      // Block i covers exactly slice i — it enters as its image starts growing
-      // and is gone by the moment the next image begins, so the copy turns over
-      // on the same beat as the picture. The first block sits at position 0,
-      // which is what leaves the column empty until the first image arrives.
-      gsap.utils
-        .toArray<HTMLElement>("[data-project-block]", container.current)
-        .forEach((block, i) => {
-          const btl = gsap.timeline();
-
-          // The same spacer as the master, for the same reason: autoSplit
-          // removes and re-adds the line tweens above, and without a fixed
-          // length the block would rescale under itself and drift out of its
-          // slice.
-          btl.to({}, { duration: SLICE }, 0);
-
-          const exitAt = SLICE - TEXT_EXIT;
-
-          // fromTo, not from — the block ships invisible so the four do not
-          // pile up before hydration, and a plain from would read that as the
-          // end state and animate 0 -> 0. autoAlpha rather than opacity: it
-          // parks visibility: hidden at zero, keeping the three inactive blocks
-          // out of hit-testing and out of the accessibility tree instead of
-          // leaving them stacked invisibly over the live one.
-          btl.fromTo(
-            block,
-            { autoAlpha: 0 },
-            { autoAlpha: 1, duration: TEXT_ENTER, ease: "power2.out" },
+          // ── The progress ring ──────────────────────────────────────────────────
+          // It spans the project slices from position 0, so the drawn fraction IS
+          // the fraction of the projects scrolled — the ring measures the sequence
+          // it sits beside, not the pin. It closes exactly on TEARDOWN_AT, which is
+          // what lets the closing slice scale it away without ever shrinking an
+          // unfinished dial.
+          //
+          // ease "none", for the same reason Services scrubs linearly — any other
+          // curve makes the ring run ahead of or behind the scrollbar, which reads
+          // as lag rather than as easing.
+          tl.to(
+            "[data-progress-arc]",
+            { strokeDashoffset: 0, duration: TEARDOWN_AT, ease: "none" },
             0,
           );
-          btl.to(
-            block,
-            { autoAlpha: 0, duration: TEXT_EXIT, ease: "power2.in" },
-            exitAt,
-          );
 
-          // Type "up", name and blurb "down" — see ProjectBlock.
+          // ── The project images ─────────────────────────────────────────────────
+          // A stack: every image occupies the same circular frame, at rest and at
+          // full size the whole time, and is WIPED IN over its own slice on top of
+          // whatever is already there. There is no exit tween anywhere below, and
+          // that is the mechanism rather than an omission — an image is never
+          // dismissed, it is simply covered by the next one, so the stack only ever
+          // gains layers. A finished wipe is a fully opaque circle, which is what
+          // lets the next one cover it as completely as a scale-up used to.
+          //
+          // Read in DOM order, which the markup keys to the list's order, so index i
+          // is both the stacking level and the slice number. That is what keeps
+          // "the next one starts where the last one ended" out of the code: it
+          // falls out of i * SLICE.
+          //
+          // The reveal is a conic wipe cut into quadrants — see .quadrant-reveal in
+          // globals.css for the mask itself. Four wedges, one per corner, all
+          // opening clockwise from their own axis at the same moment, so the circle
+          // closes as a four-armed pinwheel rather than as one hand going round.
+          // Four separate properties rather than one shared angle: they happen to
+          // be given identical timing today, and holding them apart is what lets a
+          // corner be staggered or eased on its own later without touching the mask.
+          //
+          // ease "none" is the point of the whole beat. This is angular travel, and
+          // a clock hand that speeds up or slows down does not read as easing — it
+          // reads as the hand slipping. (The old scale entrance used expoScale for
+          // exactly the opposite reason: scale IS perceptually non-linear and needs
+          // the correction. Angle does not.)
+          //
+          // Two beats per slice, and the second is the drift: the mask is finished,
+          // so the frame and the four wedge boundaries stand still, and it is the
+          // picture BEHIND them that keeps creeping on power3.out. That is why the
+          // zoom targets [data-project-photo] and not the masked layer — scaling
+          // the layer would drag the revealed circle with it. It reads as a hold
+          // that has not quite stopped, so the next image's wipe lands against
+          // something still moving rather than against a frozen frame.
+          //
+          // fromTo on both, not from or to: the layer ships unrevealed and the
+          // photo unscaled (the no-SSR-flash rule), so a plain `from` would read
+          // those resting values as the END state and animate 0 -> 0. A plain `to`
+          // would be worse here than it was for the old drift — invalidateOnRefresh
+          // re-records a `to` tween's start from wherever the section happens to be
+          // sitting, and a refresh landing mid-pin would bake a half-open wedge in
+          // as the start of the sweep.
           gsap.utils
-            .toArray<HTMLElement>("[data-split]", block)
-            .forEach((el) => splitInOut(el, btl, 0, exitAt));
+            .toArray<HTMLElement>("[data-project-image]", container.current)
+            .forEach((layer, i) => {
+              const at = i * SLICE;
+              const open = QUADRANT + "deg";
 
-          tl.add(btl, i * SLICE);
-        });
+              // Touch: the same stack and the same slices, but each image grows in
+              // from the centre on `scale` — a compositor-only property, on a layer
+              // the touch CSS has already promoted — instead of the conic mask,
+              // which repaints at full size every frame. The layers ship hidden
+              // there (see globals.css); the set below shows them in the same tick
+              // the fromTo parks them at scale 0, and matchMedia reverts it if the
+              // query flips. No drift either: a second transform animating under a
+              // rounded clip is the next most expensive thing per frame, and on a
+              // phone-sized circle it was barely visible.
+              //
+              // power2.inOut rather than the wipe's power4: scale is perceptually
+              // front-loaded (area grows with its square), so a softer curve keeps
+              // the growth from reading as a sudden pop at the end.
+              if (touch) {
+                gsap.set(layer, { visibility: "visible" });
+                tl.fromTo(
+                  layer,
+                  { scale: 0 },
+                  { scale: 1, duration: REVEAL_HALF, ease: "power2.inOut" },
+                  at,
+                );
+                return;
+              }
 
-      // ── The section heading ────────────────────────────────────────────────
-      // Same contract as Hero and Intro: data-split declares which way the
-      // lines travel, so the direction lives in the markup next to the copy.
-      //
-      // Scoped to #projects-heading, because the project blocks above carry the
-      // very same attribute — an unscoped query would sweep all four of them
-      // into the heading's entrance and animate them a second time.
-      const blocks = gsap.utils.toArray<HTMLElement>(
-        "#projects-heading [data-split]",
-        container.current,
-      );
+              tl.fromTo(
+                layer,
+                {
+                  "--sweep-0": "0deg",
+                  "--sweep-1": "0deg",
+                  "--sweep-2": "0deg",
+                  "--sweep-3": "0deg",
+                },
+                {
+                  "--sweep-0": open,
+                  "--sweep-1": open,
+                  "--sweep-2": open,
+                  "--sweep-3": open,
+                  duration: REVEAL_HALF,
+                  ease: "power4.inOut",
+                },
+                at,
+              ).fromTo(
+                layer.querySelector("[data-project-photo]"),
+                { scale: 1 },
+                { scale: ZOOM_SCALE, duration: SLICE, ease: "power3.out" },
+                at,
+              );
+            });
 
-      blocks.forEach((block) => {
-        const yPercent = block.dataset.split === "down" ? -150 : 150;
+          // ── The project counter ────────────────────────────────────────────────
+          // The number names the image ARRIVING, so it ticks at (i + STEP_AT) *
+          // SLICE — just inside the top of that project's slice, while its image is
+          // still growing. Ticking at the end of the entrance instead reads as
+          // late: by then the image has already announced the change, and the digit
+          // is only confirming something the reader watched happen.
+          //
+          // Built from SLICE, so the count stays welded to the stack it is counting
+          // and the two re-divide together when PIN_VIEWPORTS or the list changes.
+          //
+          // Derived from tl.time() on every update rather than incremented by a
+          // callback per step. A scrubbed timeline can cross half the pin in a
+          // single frame and runs backwards as readily as forwards, so anything
+          // counting events would drop steps or double-count; this is a pure
+          // function of timeline position, like everything else in the section —
+          // whatever frame you land on, the number is right for it.
+          const clampIndex = gsap.utils.clamp(0, projects.length);
 
-        // The heading is the one element in the section whose entrance and exit
-        // are driven by DIFFERENT clocks: it arrives on its own pre-pin trigger
-        // (below) and leaves on the master pin timeline at OUTRO_AT. That rules
-        // out the splitInOut pattern used for the project blocks, where both
-        // halves share one returned timeline.
-        //
-        // SplitText keeps exactly one animation per split — whatever onSplit
-        // returns — and reverts it before re-splitting. The entrance claims that
-        // slot because it owns a ScrollTrigger that has to go down with it, so
-        // the exit is held here and killed from onRevert instead. Killing it
-        // also lifts it out of the master timeline, and the next onSplit adds a
-        // replacement at the same position.
-        let exit: gsap.core.Timeline | undefined;
+          tl.eventCallback("onUpdate", () => {
+            const next = clampIndex(
+              Math.floor(tl.time() / SLICE - STEP_AT) + 1,
+            );
 
-        // autoSplit re-splits on font load / resize, so onSplit holds the tween
-        // and returning it lets GSAP kill it — and the ScrollTrigger built with
-        // it — before each re-split.
-        SplitText.create(block, {
-          type: "lines",
-          mask: "lines",
-          // The mask is sized to the line box, and at leading-heading (0.75)
-          // that box stops above the descenders — the "j" in "projects" gets
-          // shaved off. Padding the line, not the h2, is what fixes it: the
-          // padding grows the box the mask is cut from. In em so it tracks the
-          // font size through the type scale.
-          linesClass: "pb-[0.15em]",
-          autoSplit: true,
-          onRevert: () => {
-            exit?.kill();
-            exit = undefined;
-          },
-          onSplit: (self) => {
-            // The mirror of the entrance below: the SAME yPercent, so the lines
-            // retreat through the edge of the mask they arrived from rather
-            // than carrying on past it, and from: "end" reverses the stagger so
-            // the exit reads as the entrance rewound. Same shape as splitInOut,
-            // just parented to the master by hand.
-            exit = gsap.timeline();
-            exit.to(self.lines, {
-              yPercent,
+            // NumberFlow starts an animation on every value change, and React only
+            // bails out of a same-value setState after re-entering the component —
+            // at scrub rates that is sixty wasted renders a second. Holding the
+            // last written value in a ref means state is touched only on an actual
+            // step.
+            if (next !== shown.current) {
+              shown.current = next;
+              setLanded(next);
+            }
+
+            const nextDealt = tl.time() >= TEARDOWN_AT;
+            if (nextDealt !== dealtShown.current) {
+              dealtShown.current = nextDealt;
+              setDealt(nextDealt);
+            }
+          });
+
+          // The counter leaves with the last project, in the same direction the
+          // heading's lines take (positive yPercent is downward, matching a
+          // data-split="up" element retreating through the mask edge it arrived
+          // from). It moves as a whole rather than as split lines: NumberFlow owns
+          // a shadow DOM of its own and runs its own vertical digit animation, so
+          // splitting it — or clipping it in a mask tight enough to read as one —
+          // would cut into the roll it does on every step.
+          //
+          // A plain `to`, so it records its start from wherever the layout leaves
+          // it and no resting value is written down twice.
+          tl.to(
+            "[data-counter]",
+            {
+              yPercent: 100,
+              autoAlpha: 0,
               duration: TEXT_EXIT,
               ease: "power3.in",
-              stagger: { each: TEXT_STAGGER, from: "end" },
-            });
-            tl.add(exit, OUTRO_AT);
+            },
+            OUTRO_AT,
+          );
 
-            return gsap.from(self.lines, {
-              yPercent,
-              ease: "none",
-              stagger: 0.12,
-              // The section itself is the trigger, not the heading: the lines
-              // arrive as the section climbs the last half of the viewport,
-              // which is a fixed run of scroll no matter where in the layout
-              // the h2 happens to sit.
-              //
-              // ease "none" because this is scrubbed — the lines track the
-              // scrollbar exactly, and any other curve reads as scroll lag.
-              scrollTrigger: {
-                trigger: container.current,
-                start: "top 50%",
-                end: "top top",
-                scrub: true,
+          // ── The teardown ───────────────────────────────────────────────────────
+          // The closing slice, and the only stretch of the pin with no project in
+          // it. The rings collapse to nothing while the frame draws back and the
+          // stack fans out into a row, so the section reads as one movement that
+          // resolves into a contact sheet of everything just shown, rather than as
+          // four things independently leaving.
+          //
+          // One duration and one ease across all of it, from one position: this is
+          // a single gesture, and giving each part its own timing is how a gesture
+          // turns into several animations that happen to overlap. power3.inOut so
+          // the collapse eases out of the hold that precedes it and settles rather
+          // than slamming into the end of the pin.
+          //
+          // Plain `to` tweens: each records its start from wherever the section
+          // actually is when the teardown begins, so the resting values — including
+          // the last photo's ZOOM_SCALE — are never written down a second time.
+          tl.to(
+            ["#projects-rings", "#projects-progress"],
+            {
+              scale: 0,
+              rotate: "180deg",
+              duration: SLICE / 2,
+              ease: "power3.inOut",
+            },
+            TEARDOWN_AT,
+          )
+            .to(
+              "[data-project-frame]",
+              {
+                scale: rowScale(projects.length),
+                duration: SLICE,
+                ease: "power3.inOut",
+              },
+              TEARDOWN_AT,
+            )
+            // ── The row ──────────────────────────────────────────────────────────
+            // The three finished images have been sitting under the fourth this
+            // whole time, each a completed circle — nothing is created here, the
+            // stack is simply dealt out. They are below the last project in DOM
+            // order, so they slide out from BEHIND it rather than across it.
+            //
+            // xPercent, not x, and that is what keeps the pixel maths out of this:
+            // a percentage is of the layer's own width, the layer is the frame's
+            // box, and the frame is square — so 100 is exactly one diameter, at any
+            // viewport, and it rides the frame's own scale down for free. All the
+            // responsive work is already done inside rowScale().
+            //
+            // The offsets are centred on the middle of the row rather than on any
+            // one image, so the group lands on the same centre line as the crosshair
+            // and the rings it replaces. With four projects that is -165, -55, +55,
+            // +165 — the last image included, shifting half a step right, because a
+            // row of four has no middle to hold.
+            //
+            // No stagger. Equal duration over unequal distance already means the
+            // outer circles travel faster and all four arrive together, which reads
+            // as one hand dealing them out; staggering would turn it into a queue.
+            .to(
+              "[data-project-image]",
+              {
+                xPercent: (i: number) =>
+                  (i - (projects.length - 1) / 2) * ROW_STEP,
+                duration: SLICE,
+                ease: "power4.inOut",
+              },
+              TEARDOWN_AT,
+            )
+            .to(
+              "[data-frame-fill]",
+              { autoAlpha: 0, duration: 0, ease: "none" },
+              TEARDOWN_AT,
+            );
+
+          // ── The project copy ───────────────────────────────────────────────────
+          /**
+           * A masked line reveal plus its mirrored exit, as one unit — the same
+           * helper Services uses, and for the same reason.
+           *
+           * The pair has to be built inside onSplit and returned together:
+           * autoSplit re-splits on font load and on resize, and GSAP kills whatever
+           * onSplit returned before doing so. Returning a timeline rather than a
+           * tween is what lets the exit be cleaned up too — killing it lifts it out
+           * of its parent, and the next onSplit adds a replacement at the same
+           * position. Return only the entrance and the exit is left pointing at
+           * line elements that no longer exist.
+           */
+          const splitInOut = (
+            el: HTMLElement,
+            parent: gsap.core.Timeline,
+            at: number,
+            exitAt: number,
+          ) => {
+            const yPercent = el.dataset.split === "down" ? -150 : 150;
+
+            SplitText.create(el, {
+              type: "lines",
+              mask: "lines",
+              // Same descender fix as the section heading below.
+              linesClass: "pb-[0.15em]",
+              autoSplit: true,
+              onSplit: (self) => {
+                const lines = gsap.timeline();
+
+                lines.from(
+                  self.lines,
+                  {
+                    yPercent,
+                    duration: TEXT_ENTER,
+                    ease: "power3.out",
+                    stagger: TEXT_STAGGER,
+                  },
+                  0,
+                );
+
+                // The mirror: the SAME yPercent, so each line retreats through the
+                // edge of the mask it arrived from rather than carrying on past it.
+                // from: "end" reverses the stagger order too, so the exit reads as
+                // the entrance rewound.
+                lines.to(
+                  self.lines,
+                  {
+                    yPercent,
+                    duration: TEXT_EXIT,
+                    ease: "power3.in",
+                    stagger: { each: TEXT_STAGGER, from: "end" },
+                  },
+                  exitAt - at,
+                );
+
+                parent.add(lines, at);
+                return lines;
               },
             });
-          },
-        });
-      });
+          };
+
+          // One nested timeline per block, placed on the master at its slice. The
+          // internal rhythm is written once here and the master only decides WHEN,
+          // so a block cannot be retimed into its neighbour's slice by accident.
+          //
+          // Block i covers exactly slice i — it enters as its image starts growing
+          // and is gone by the moment the next image begins, so the copy turns over
+          // on the same beat as the picture. The first block sits at position 0,
+          // which is what leaves the column empty until the first image arrives.
+          gsap.utils
+            .toArray<HTMLElement>("[data-project-block]", container.current)
+            .forEach((block, i) => {
+              const btl = gsap.timeline();
+
+              // The same spacer as the master, for the same reason: autoSplit
+              // removes and re-adds the line tweens above, and without a fixed
+              // length the block would rescale under itself and drift out of its
+              // slice.
+              btl.to({}, { duration: SLICE }, 0);
+
+              const exitAt = SLICE - TEXT_EXIT;
+
+              // fromTo, not from — the block ships invisible so the four do not
+              // pile up before hydration, and a plain from would read that as the
+              // end state and animate 0 -> 0. autoAlpha rather than opacity: it
+              // parks visibility: hidden at zero, keeping the three inactive blocks
+              // out of hit-testing and out of the accessibility tree instead of
+              // leaving them stacked invisibly over the live one.
+              btl.fromTo(
+                block,
+                { autoAlpha: 0 },
+                { autoAlpha: 1, duration: TEXT_ENTER, ease: "power2.out" },
+                0,
+              );
+              btl.to(
+                block,
+                { autoAlpha: 0, duration: TEXT_EXIT, ease: "power2.in" },
+                exitAt,
+              );
+
+              // Type "up", name and blurb "down" — see ProjectBlock.
+              gsap.utils
+                .toArray<HTMLElement>("[data-split]", block)
+                .forEach((el) => splitInOut(el, btl, 0, exitAt));
+
+              tl.add(btl, i * SLICE);
+            });
+
+          // ── The section heading ────────────────────────────────────────────────
+          // Same contract as Hero and Intro: data-split declares which way the
+          // lines travel, so the direction lives in the markup next to the copy.
+          //
+          // Scoped to #projects-heading, because the project blocks above carry the
+          // very same attribute — an unscoped query would sweep all four of them
+          // into the heading's entrance and animate them a second time.
+          const blocks = gsap.utils.toArray<HTMLElement>(
+            "#projects-heading [data-split]",
+            container.current,
+          );
+
+          blocks.forEach((block) => {
+            const yPercent = block.dataset.split === "down" ? -150 : 150;
+
+            // The heading is the one element in the section whose entrance and exit
+            // are driven by DIFFERENT clocks: it arrives on its own pre-pin trigger
+            // (below) and leaves on the master pin timeline at OUTRO_AT. That rules
+            // out the splitInOut pattern used for the project blocks, where both
+            // halves share one returned timeline.
+            //
+            // SplitText keeps exactly one animation per split — whatever onSplit
+            // returns — and reverts it before re-splitting. The entrance claims that
+            // slot because it owns a ScrollTrigger that has to go down with it, so
+            // the exit is held here and killed from onRevert instead. Killing it
+            // also lifts it out of the master timeline, and the next onSplit adds a
+            // replacement at the same position.
+            let exit: gsap.core.Timeline | undefined;
+
+            // autoSplit re-splits on font load / resize, so onSplit holds the tween
+            // and returning it lets GSAP kill it — and the ScrollTrigger built with
+            // it — before each re-split.
+            SplitText.create(block, {
+              type: "lines",
+              mask: "lines",
+              // The mask is sized to the line box, and at leading-heading (0.75)
+              // that box stops above the descenders — the "j" in "projects" gets
+              // shaved off. Padding the line, not the h2, is what fixes it: the
+              // padding grows the box the mask is cut from. In em so it tracks the
+              // font size through the type scale.
+              linesClass: "pb-[0.15em]",
+              autoSplit: true,
+              onRevert: () => {
+                exit?.kill();
+                exit = undefined;
+              },
+              onSplit: (self) => {
+                // The mirror of the entrance below: the SAME yPercent, so the lines
+                // retreat through the edge of the mask they arrived from rather
+                // than carrying on past it, and from: "end" reverses the stagger so
+                // the exit reads as the entrance rewound. Same shape as splitInOut,
+                // just parented to the master by hand.
+                exit = gsap.timeline();
+                exit.to(self.lines, {
+                  yPercent,
+                  duration: TEXT_EXIT,
+                  ease: "power3.in",
+                  stagger: { each: TEXT_STAGGER, from: "end" },
+                });
+                tl.add(exit, OUTRO_AT);
+
+                return gsap.from(self.lines, {
+                  yPercent,
+                  ease: "none",
+                  stagger: 0.12,
+                  // The section itself is the trigger, not the heading: the lines
+                  // arrive as the section climbs the last half of the viewport,
+                  // which is a fixed run of scroll no matter where in the layout
+                  // the h2 happens to sit.
+                  //
+                  // ease "none" because this is scrubbed — the lines track the
+                  // scrollbar exactly, and any other curve reads as scroll lag.
+                  scrollTrigger: {
+                    trigger: container.current,
+                    start: "top 50%",
+                    end: "top top",
+                    scrub,
+                  },
+                });
+              },
+            });
+          });
+        },
+        // matchMedia keeps its own context, so it needs the scope passed
+        // again or the selector strings above would query the whole page.
+        container.current ?? undefined,
+      );
     },
     { scope: container },
   );
