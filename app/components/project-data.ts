@@ -25,6 +25,12 @@ export type Project = ProjectCopy & {
   /** URL segment under /projects. Lowercase, no punctuation — "Ru:tine24"
    *  cannot be a path segment as written. */
   slug: string;
+  /**
+   * Whether the project has a page to open. Off for work whose page is not
+   * ready: it is still listed everywhere, but its picture is not a link (see
+   * ProjectLink), the hand-off skips it and its URL is a 404.
+   */
+  hasPage: boolean;
   src: StaticImageData;
   alt: string;
   /**

@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import ContactInfo from "./ContactInfo";
 import DashedCircle from "./DashedCircle";
 import { PILL } from "./pill";
@@ -43,7 +44,41 @@ const FIELDS = [
   { id: "email", type: "email", autoComplete: "email" },
 ] as const;
 
-export default function Contact({ settings }: { settings: SiteSettings }) {
+/**
+ * The page's words, from the Studio's "Contact page" singleton. Every field is
+ * optional and each one missing falls back to its messages/ string on its own,
+ * so a blank or half-filled document still renders the page whole. The three
+ * placeholder keys match FIELDS' ids, which is what lets the loop below read
+ * them by id.
+ */
+export type ContactCopy = {
+  /** Plain text; each newline becomes a line break, as `<br></br>` does in
+   *  the message it replaces. */
+  title?: string;
+  body?: string;
+  name?: string;
+  company?: string;
+  email?: string;
+  submit?: string;
+};
+
+/** A Studio title's newlines as the heading's line breaks. */
+function withBreaks(text: string) {
+  return text.split("\n").map((line, i) => (
+    <Fragment key={i}>
+      {i > 0 && <br />}
+      {line}
+    </Fragment>
+  ));
+}
+
+export default function Contact({
+  settings,
+  copy = {},
+}: {
+  settings: SiteSettings;
+  copy?: ContactCopy;
+}) {
   const t = useTranslations("Contact");
   const common = useTranslations("Common");
   return (
@@ -133,7 +168,7 @@ export default function Contact({ settings }: { settings: SiteSettings }) {
         */}
         <div className={`${COLUMNS} relative z-1`}>
           <h1 className="heading-style mb-[-0.3em] px-space-2x text-center text-5xl leading-heading sm:text-6xl lg:pr-space-2x lg:text-right lg:text-7xl xl:text-8xl">
-            {t.rich("title", RICH)}
+            {copy.title ? withBreaks(copy.title) : t.rich("title", RICH)}
           </h1>
         </div>
 
@@ -155,7 +190,7 @@ export default function Contact({ settings }: { settings: SiteSettings }) {
               the largest step that is ~29px, which space-3x covers. */}
           <div className="flex flex-col items-center justify-between px-space-2x pt-space-3x pb-space-2x text-center lg:items-end lg:pt-[8vh] lg:pr-space-2x lg:pb-[8vh] lg:text-right">
             <p className="max-w-[46ch] pt-space-base text-base leading-body">
-              {t("body")}
+              {copy.body ?? t("body")}
             </p>
 
             {/* The same block the menu prints, in the other colourway: this
@@ -201,14 +236,14 @@ export default function Contact({ settings }: { settings: SiteSettings }) {
                       exist separately for the accessible name — once a reader
                       starts typing, a placeholder-only field has none. */}
                   <label htmlFor={field.id} className="sr-only">
-                    {t(field.id)}
+                    {copy[field.id] ?? t(field.id)}
                   </label>
                   <input
                     id={field.id}
                     name={field.id}
                     type={field.type}
                     autoComplete={field.autoComplete}
-                    placeholder={t(field.id)}
+                    placeholder={copy[field.id] ?? t(field.id)}
                     className={FIELD}
                   />
                 </div>
@@ -218,7 +253,7 @@ export default function Contact({ settings }: { settings: SiteSettings }) {
                 type="button"
                 className={`${PILL} mt-space-2x self-start bg-background text-foreground lg:mt-space-3x`}
               >
-                {common("contactUs")}
+                {copy.submit ?? common("contactUs")}
               </button>
             </form>
           </div>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import BackHeader from "@/app/components/BackHeader";
 import Contact from "@/app/components/Contact";
-import { getSiteSettings } from "@/sanity/lib/content";
+import { getContactPage, getSiteSettings } from "@/sanity/lib/content";
 import { getTranslations } from "next-intl/server";
 import { pageLocale } from "@/i18n/locale";
 
@@ -10,20 +10,30 @@ export async function generateMetadata({
 }: PageProps<"/[locale]/contact">): Promise<Metadata> {
   const locale = await pageLocale(params);
   const t = await getTranslations({ locale, namespace: "Metadata" });
+  // stega: false — this goes into <head>. The messages are used only for the
+  // fields the Studio's Contact page leaves empty.
+  const { metaTitle, metaDescription } = await getContactPage(locale, {
+    stega: false,
+  });
   return {
     // Bare, like /projects: the root layout's template adds " | DBLA". This
     // used to say "Contact — DBLA" and so printed the brand twice.
-    title: t("contactTitle"),
-    description: t("contactDescription"),
+    title: metaTitle ?? t("contactTitle"),
+    description: metaDescription ?? t("contactDescription"),
   };
 }
 
 export default async function ContactPage({
   params,
 }: PageProps<"/[locale]/contact">) {
-  // The same settings the root layout fetched — Next dedupes the request —
-  // read here and passed down so ContactInfo can stay a server component.
-  const settings = await getSiteSettings(await pageLocale(params));
+  const locale = await pageLocale(params);
+  // The settings are the same ones the root layout fetched — Next dedupes the
+  // request — read here and passed down so ContactInfo can stay a server
+  // component. The copy is this page's own.
+  const [settings, copy] = await Promise.all([
+    getSiteSettings(locale),
+    getContactPage(locale),
+  ]);
 
   /*
     No Footer here, unlike page.tsx, and that removes a whole mechanism rather
@@ -46,7 +56,7 @@ export default async function ContactPage({
     <>
       <BackHeader />
       <main>
-        <Contact settings={settings} />
+        <Contact settings={settings} copy={copy} />
       </main>
     </>
   );

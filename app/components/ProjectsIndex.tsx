@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import TransitionLink from "./TransitionLink";
 import Image from "next/image";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -9,11 +8,10 @@ import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import DashedCircle from "./DashedCircle";
 import { useRevealed } from "./Preloader";
-import { PILL } from "./pill";
+import ProjectLink from "./ProjectLink";
 import {
   SWEEP_CLOSED,
   SWEEP_OPEN,
-  projectHref,
   projectNumber,
   type Project,
 } from "./project-data";
@@ -35,7 +33,6 @@ gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
  */
 export default function ProjectsIndex({ projects }: { projects: Project[] }) {
   const t = useTranslations("Projects");
-  const common = useTranslations("Common");
   const container = useRef<HTMLElement>(null);
   const revealed = useRevealed();
 
@@ -321,11 +318,13 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
               width a 1440px screen would print a 660px circle, taller than a
               laptop's viewport, and the name below it would never share the
               screen with its picture.
+
+              A project without a page gets the same circle as a plain
+              picture — no link, no zoom, no pill (see ProjectLink).
             */}
-            <TransitionLink
-              href={projectHref(project)}
-              aria-label={common("openProject", { name: project.name })}
-              className="group relative mx-auto aspect-square w-full max-w-[70vh] rounded-full outline-offset-8 outline-accent focus-visible:outline-2"
+            <ProjectLink
+              project={project}
+              className="relative mx-auto aspect-square w-full max-w-[70vh] rounded-full outline-offset-8 outline-accent focus-visible:outline-2"
             >
               {/* The zero state, as on the homepage: before the wipe every
                   wedge is closed and this orange disc is what shows. */}
@@ -353,17 +352,7 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
                   />
                 </div>
               </div>
-
-              {/* The affordance. Hidden until hover so the circles stay clean
-                  pictures at rest; on touch there is no hover, but the whole
-                  circle is still the target, so nothing is lost. */}
-              <span
-                aria-hidden
-                className={`${PILL} pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-accent text-background opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100`}
-              >
-                {common("viewProject")}
-              </span>
-            </TransitionLink>
+            </ProjectLink>
 
             {/* Name drops in from above, blurb follows — the ProjectBlock
                 direction, so a project's copy moves the same way on every

@@ -7,12 +7,11 @@ import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import NumberFlow from "@number-flow/react";
 import Image from "next/image";
-import TransitionLink from "./TransitionLink";
 import ProjectBlock from "./ProjectBlock";
+import ProjectLink from "./ProjectLink";
 import DashedCircle from "./DashedCircle";
 import ProgressRing from "./ProgressRing";
-import { PILL } from "./pill";
-import { projectHref, type Project } from "./project-data";
+import type { Project } from "./project-data";
 import { useTranslations } from "next-intl";
 import { RICH } from "./rich";
 
@@ -179,7 +178,6 @@ const COUNTER_OPACITY: EffectTiming = { duration: 250, easing: "ease-out" };
 
 export default function Projects({ projects }: { projects: Project[] }) {
   const t = useTranslations("Projects");
-  const common = useTranslations("Common");
   const container = useRef<HTMLElement>(null);
 
   // How many project entrances have completed — 0 through projects.length, so
@@ -671,16 +669,23 @@ export default function Projects({ projects }: { projects: Project[] }) {
   );
 
   return (
-    // overflow-hidden is load-bearing now, not tidiness: the teardown throws
-    // the four layers well outside the centre column, and a pinned section is
+    // overflow-x-clip is load-bearing, not tidiness: the teardown throws the
+    // four layers well outside the centre column, and a pinned section is
     // position: fixed — transformed children hanging off it can extend the
-    // document's horizontal scroll area. It is also what trims the crosshair
-    // below and, on a phone, the dashed ring — which at 1.3 frame diameters is
+    // document's horizontal scroll area. It also trims the x-line below and,
+    // on a phone, the dashed ring, which at 1.3 frame diameters is
     // deliberately wider than a portrait viewport.
+    //
+    // Horizontal only, NOT overflow-hidden: on desktop the ring is 90vw, i.e.
+    // taller than the h-screen section on any landscape screen, and a vertical
+    // clip sliced its top and bottom arcs off flat. Letting it spill up over
+    // the motto is the intended look. `clip` on one axis with `visible` on the
+    // other is the one overflow pairing CSS honours as written — `hidden`
+    // would promote the other axis to `auto` and make this a scroll container.
     <section
       id="projects"
       ref={container}
-      className="relative h-screen overflow-hidden"
+      className="relative h-screen overflow-x-clip"
     >
       {/*
         Three tracks — heading/counter, the circle, the copy — laid out as ROWS
@@ -777,14 +782,18 @@ export default function Projects({ projects }: { projects: Project[] }) {
               // each circle opens its own project. Layers that are not live
               // (see isLive) drop out of hit-testing AND out of the tab order,
               // so neither a click nor a Tab lands on a picture that is buried
-              // under another one.
-              <TransitionLink
+              // under another one. A project without a page renders the same
+              // layer as a plain picture (see ProjectLink).
+              //
+              // The "View project" pill ProjectLink adds is inside the layer,
+              // so it is masked by the wipe and rides the teardown with its
+              // own circle.
+              <ProjectLink
                 key={project.slug}
-                href={projectHref(project)}
-                aria-label={common("openProject", { name: project.name })}
+                project={project}
                 tabIndex={isLive(i) ? undefined : -1}
                 data-project-image
-                className={`quadrant-reveal group absolute inset-0 overflow-hidden rounded-full ${
+                className={`quadrant-reveal absolute inset-0 overflow-hidden rounded-full ${
                   isLive(i) ? "" : "pointer-events-none"
                 }`}
               >
@@ -807,16 +816,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
                     className="object-cover"
                   />
                 </div>
-                {/* The same affordance as the /projects index. Inside the
-                    layer, so it is masked by the wipe and rides the teardown
-                    with its own circle. */}
-                <span
-                  aria-hidden
-                  className={`${PILL} pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-accent text-background opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100`}
-                >
-                  {common("viewProject")}
-                </span>
-              </TransitionLink>
+              </ProjectLink>
             ))}
           </div>
           {/*
@@ -871,7 +871,8 @@ export default function Projects({ projects }: { projects: Project[] }) {
       </div>
       {/* Centre crosshair: both rules are sized in vmax so they overshoot the
           viewport on either axis and stay full-bleed through any resize —
-          the section's overflow-hidden does the trimming.
+          the section's overflow-x-clip does the trimming (the y-line is
+          exactly h-screen, so the vertical axis needs none).
 
           pointer-events-none because it is the last thing in the section and
           covers all of it — without it, it is the crosshair that catches the

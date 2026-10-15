@@ -57,15 +57,35 @@ export const SITE_SETTINGS_QUERY = defineQuery(`
   }
 `);
 
+/** The words on /contact. Every field may be null — the page falls back to
+ *  messages/ for each one left empty. */
+export const CONTACT_PAGE_QUERY = defineQuery(`
+  *[_id == "contactPage"][0]{
+    ${loc("title")},
+    ${loc("body")},
+    ${loc("namePlaceholder")},
+    ${loc("companyPlaceholder")},
+    ${loc("emailPlaceholder")},
+    ${loc("submitLabel")},
+    ${loc("metaTitle")},
+    ${loc("metaDescription")}
+  }
+`);
+
 /** The card fields — what the homepage stack, the index and the preloader
  *  need. No case study: none of those has a use for it. `heroImage` comes
  *  along because the detail page's "next project" circle opens on the NEXT
- *  project's hero shot, and that page only fetches its own story. */
+ *  project's hero shot, and that page only fetches its own story.
+ *
+ *  Every project is listed, page or not — one without a page still shows, it
+ *  just is not a link. `hasPage` is coalesced to true so projects published
+ *  before the toggle existed keep their pages. */
 export const PROJECTS_QUERY = defineQuery(`
   *[_type == "project" && defined(slug.current)] | order(orderRank) {
     _id,
     name,
     "slug": slug.current,
+    "hasPage": coalesce(hasPage, true),
     ${loc("type")},
     ${loc("blurb")},
     cardImage { ${IMAGE}, ${loc("alt")} },
@@ -73,15 +93,18 @@ export const PROJECTS_QUERY = defineQuery(`
   }
 `);
 
-/** For generateStaticParams. Slugs are shared by both languages. */
+/** For generateStaticParams. Slugs are shared by both languages. Projects
+ *  with their page switched off are never prerendered. */
 export const PROJECT_SLUGS_QUERY = defineQuery(`
-  *[_type == "project" && defined(slug.current)]{ "slug": slug.current }
+  *[_type == "project" && defined(slug.current) && coalesce(hasPage, true)]{ "slug": slug.current }
 `);
 
 /** One project with its case study. `headline` is what marks a story as
- *  present — a project without one renders hero, wide image and blurb only. */
+ *  present — a project without one renders hero, wide image and blurb only.
+ *  A project with its page switched off matches nothing, so neither its story
+ *  nor its metadata is ever served. */
 export const PROJECT_QUERY = defineQuery(`
-  *[_type == "project" && slug.current == $slug][0]{
+  *[_type == "project" && slug.current == $slug && coalesce(hasPage, true)][0]{
     _id,
     name,
     "slug": slug.current,
