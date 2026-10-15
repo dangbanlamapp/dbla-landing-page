@@ -19,6 +19,11 @@ import { defineQuery } from "next-sanity";
  * through `loc` — see there.
  */
 
+// Singletons are matched on `_type` as well as their fixed `_id`. The id alone
+// finds the document, but TypeGen cannot narrow on it, so it would type the
+// result as a union over every document type — and a `title` that is plain
+// text on one page and rich text on another would widen everywhere.
+
 // Interpolated into the queries below. TypeGen resolves template literals
 // built from constants in the same file.
 const IMAGE = /* groq */ `
@@ -48,7 +53,7 @@ const loc = <F extends string>(field: F) =>
   /* groq */ `"${field}": select($locale == "vi" => coalesce(${field}_vi, ${field}), ${field})` as const;
 
 export const SITE_SETTINGS_QUERY = defineQuery(`
-  *[_id == "siteSettings"][0]{
+  *[_type == "siteSettings" && _id == "siteSettings"][0]{
     ${loc("description")},
     email,
     phone,
@@ -60,13 +65,43 @@ export const SITE_SETTINGS_QUERY = defineQuery(`
 /** The words on /contact. Every field may be null — the page falls back to
  *  messages/ for each one left empty. */
 export const CONTACT_PAGE_QUERY = defineQuery(`
-  *[_id == "contactPage"][0]{
+  *[_type == "contactPage" && _id == "contactPage"][0]{
     ${loc("title")},
     ${loc("body")},
     ${loc("namePlaceholder")},
     ${loc("companyPlaceholder")},
     ${loc("emailPlaceholder")},
     ${loc("submitLabel")},
+    ${loc("metaTitle")},
+    ${loc("metaDescription")}
+  }
+`);
+
+/** The homepage's headings and the copy around them, one object per section.
+ *  Every field may be null — each component falls back to messages/ for each
+ *  one left empty. */
+export const HOME_PAGE_QUERY = defineQuery(`
+  *[_type == "homePage" && _id == "homePage"][0]{
+    hero{ ${loc("titleStart")}, ${loc("titleEnd")}, ${loc("body")} },
+    intro{ ${loc("label")}, ${loc("statement")}, ${loc("gap")} },
+    services{ ${loc("label")}, ${loc("title")} },
+    motto{ ${loc("label")}, ${loc("lead")}, ${loc("title")} },
+    projects{ ${loc("title")} },
+    whyUs{
+      ${loc("label")},
+      ${loc("title")},
+      reasons[]{ _key, ${loc("title")}, ${loc("body")} }
+    },
+    team{ ${loc("label")}, ${loc("title")}, ${loc("body")} },
+    cta{ ${loc("title")}, ${loc("body")} }
+  }
+`);
+
+/** The words on /projects, with the same fallback as the contact page. */
+export const PROJECTS_PAGE_QUERY = defineQuery(`
+  *[_type == "projectsPage" && _id == "projectsPage"][0]{
+    ${loc("title")},
+    ${loc("intro")},
     ${loc("metaTitle")},
     ${loc("metaDescription")}
   }

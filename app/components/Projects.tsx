@@ -13,7 +13,7 @@ import DashedCircle from "./DashedCircle";
 import ProgressRing from "./ProgressRing";
 import type { Project } from "./project-data";
 import { useTranslations } from "next-intl";
-import { RICH } from "./rich";
+import { RICH, richHeading, type RichHeading } from "./rich";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
@@ -196,7 +196,16 @@ const TOUCH_QUERY = "(max-width: 1023px), (pointer: coarse)";
 // that the stack still reads as attached to the finger.
 const TOUCH_SCRUB = 0.4;
 
-export default function Projects({ projects }: { projects: Project[] }) {
+/** The Studio's Homepage → Projects. A missing heading falls back to messages/. */
+export type ProjectsCopy = { title?: RichHeading };
+
+export default function Projects({
+  projects,
+  copy: words = {},
+}: {
+  projects: Project[];
+  copy?: ProjectsCopy;
+}) {
   const t = useTranslations("Projects");
   const container = useRef<HTMLElement>(null);
 
@@ -778,7 +787,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
               data-split="up"
               className="heading-style text-center text-2xl leading-heading lg:text-right lg:text-4xl"
             >
-              {t.rich("title", RICH)}
+              {words.title ? richHeading(words.title) : t.rich("title", RICH)}
             </h2>
           </div>
           <div className="text-center lg:flex-1 lg:p-space-base lg:text-left">

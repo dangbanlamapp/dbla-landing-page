@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Header from "@/app/components/Header";
 import ProjectsIndex from "@/app/components/ProjectsIndex";
-import { contentKey, getProjects } from "@/sanity/lib/content";
+import { contentKey, getProjects, getProjectsPage } from "@/sanity/lib/content";
 import { getTranslations } from "next-intl/server";
 import { pageLocale } from "@/i18n/locale";
 
@@ -10,17 +10,27 @@ export async function generateMetadata({
 }: PageProps<"/[locale]/projects">): Promise<Metadata> {
   const locale = await pageLocale(params);
   const t = await getTranslations({ locale, namespace: "Metadata" });
+  // stega: false — this goes into <head>. The messages are used only for the
+  // fields the Studio's Projects page leaves empty.
+  const { metaTitle, metaDescription } = await getProjectsPage(locale, {
+    stega: false,
+  });
   return {
     // Bare, so the root layout's "%s | DBLA" template supplies the suffix.
-    title: t("projectsTitle"),
-    description: t("projectsDescription"),
+    title: metaTitle ?? t("projectsTitle"),
+    description: metaDescription ?? t("projectsDescription"),
   };
 }
 
 export default async function ProjectsPage({
   params,
 }: PageProps<"/[locale]/projects">) {
-  const projects = await getProjects(await pageLocale(params));
+  const locale = await pageLocale(params);
+  const [projects, { title, intro }] = await Promise.all([
+    getProjects(locale),
+    getProjectsPage(locale),
+  ]);
+  const copy = { title, intro };
 
   /*
     The homepage's Header, menu and all, rather than BackHeader. This is a
@@ -42,7 +52,11 @@ export default async function ProjectsPage({
       <main>
         {/* Keyed on its content for the same reason as the homepage
             sections — see contentKey. */}
-        <ProjectsIndex key={contentKey(projects)} projects={projects} />
+        <ProjectsIndex
+          key={contentKey([projects, copy])}
+          projects={projects}
+          copy={copy}
+        />
       </main>
     </>
   );

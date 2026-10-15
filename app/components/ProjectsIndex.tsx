@@ -16,7 +16,7 @@ import {
   type Project,
 } from "./project-data";
 import { useTranslations } from "next-intl";
-import { RICH } from "./rich";
+import { RICH, richHeading, type RichHeading } from "./rich";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
@@ -31,7 +31,16 @@ gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
  * this page has no pin at all and gives each card its own trigger, because the
  * cards are laid out in normal flow and arrive one at a time anyway.
  */
-export default function ProjectsIndex({ projects }: { projects: Project[] }) {
+/** The Studio's Projects page. Each field missing falls back to messages/. */
+export type ProjectsIndexCopy = { title?: RichHeading; intro?: string };
+
+export default function ProjectsIndex({
+  projects,
+  copy: words = {},
+}: {
+  projects: Project[];
+  copy?: ProjectsIndexCopy;
+}) {
   const t = useTranslations("Projects");
   const container = useRef<HTMLElement>(null);
   const revealed = useRevealed();
@@ -270,10 +279,10 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
             data-split="up"
             className="heading-style text-6xl leading-heading lg:text-8xl"
           >
-            {t.rich("title", RICH)}
+            {words.title ? richHeading(words.title) : t.rich("title", RICH)}
           </h1>
           <p data-fade className="max-w-[36ch] text-base leading-body">
-            {t("intro")}
+            {words.intro ?? t("intro")}
           </p>
         </div>
       </div>

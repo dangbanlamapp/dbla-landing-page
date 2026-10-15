@@ -9,7 +9,10 @@ import { useTranslations } from "next-intl";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
-export default function Intro() {
+/** The Studio's Homepage → Mission. Each field missing falls back to messages/. */
+export type IntroCopy = { label?: string; statement?: string; gap?: string };
+
+export default function Intro({ copy: words = {} }: { copy?: IntroCopy }) {
   const t = useTranslations("Intro");
   const container = useRef<HTMLElement>(null);
   const content = useRef<HTMLDivElement>(null);
@@ -157,13 +160,13 @@ export default function Intro() {
       >
         <div className="flex h-full flex-col items-center justify-end">
           <p data-split="up" className="text-sm text-secondary uppercase">
-            {t("label")}
+            {words.label ?? t("label")}
           </p>
           <p
             data-split="up"
             className="heading-style max-w-[32ch] text-center text-xl lg:text-3xl"
           >
-            {t("statement")}
+            {words.statement ?? t("statement")}
           </p>
         </div>
         <div className="flex h-full items-start justify-center">
@@ -171,7 +174,7 @@ export default function Intro() {
             data-split="up"
             className="heading-style max-w-[32ch] text-center text-xl text-accent lg:text-3xl"
           >
-            {t("gap")}
+            {words.gap ?? t("gap")}
           </p>
         </div>
       </div>

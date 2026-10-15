@@ -7,8 +7,16 @@ import type {
   SanityImageCrop,
 } from "@/sanity.types";
 import type { ContactCopy } from "@/app/components/Contact";
-import type { TeamMember } from "@/app/components/OurTeam";
-import type { Testimonial } from "@/app/components/WhyUs";
+import type { CtaCopy } from "@/app/components/Cta";
+import type { HeroCopy } from "@/app/components/Hero";
+import type { IntroCopy } from "@/app/components/Intro";
+import type { MottoCopy } from "@/app/components/OurMotto";
+import type { TeamCopy, TeamMember } from "@/app/components/OurTeam";
+import type { ProjectsCopy } from "@/app/components/Projects";
+import type { ProjectsIndexCopy } from "@/app/components/ProjectsIndex";
+import type { ServicesCopy } from "@/app/components/Services";
+import type { Testimonial, WhyUsCopy } from "@/app/components/WhyUs";
+import type { RichHeading } from "@/app/components/rich";
 import type { Project } from "@/app/components/project-data";
 import type {
   ProjectStory,
@@ -21,6 +29,8 @@ import { urlFor } from "./image";
 import { SANITY_TAG, sanityFetch } from "./live";
 import {
   CONTACT_PAGE_QUERY,
+  HOME_PAGE_QUERY,
+  PROJECTS_PAGE_QUERY,
   PROJECTS_QUERY,
   PROJECT_QUERY,
   PROJECT_SLUGS_QUERY,
@@ -154,6 +164,127 @@ export async function getContactPage(
     company: text(data?.companyPlaceholder),
     email: text(data?.emailPlaceholder),
     submit: text(data?.submitLabel),
+    metaTitle: text(data?.metaTitle),
+    metaDescription: text(data?.metaDescription),
+  };
+}
+
+// ── Homepage and /projects copy ─────────────────────────────────────────────
+
+/** A `headingText` field as the query returns it, typed only as far as it is read. */
+type QueriedHeading = { children?: { text?: string; marks?: string[] }[] }[];
+
+/**
+ * A Studio heading as the lines `richHeading` renders. Each block is a line,
+ * and so is each Shift+Enter inside one, which arrives as a "\n" in the text.
+ *
+ * Undefined when there are no words in it — an emptied heading comes back as
+ * one blank block rather than null, and should fall back to messages/ just
+ * the same. Blank lines at either end are dropped for the same reason: a
+ * stray Enter after the last word would otherwise print a trailing break.
+ *
+ * Marks are cleaned because they are compared against a literal; the text is
+ * not, so Visual Editing can still find it.
+ */
+function heading(blocks: QueriedHeading | null | undefined) {
+  const lines: RichHeading = [];
+  for (const block of blocks ?? []) {
+    lines.push([]);
+    for (const span of block.children ?? []) {
+      const accent = (span.marks ?? []).some(
+        (mark) => stegaClean(mark) === "accent",
+      );
+      (span.text ?? "").split("\n").forEach((text, i) => {
+        if (i > 0) lines.push([]);
+        if (text) lines[lines.length - 1].push({ text, accent });
+      });
+    }
+  }
+
+  const blank = (line: RichHeading[number]) =>
+    !line.some(({ text }) => stegaClean(text).trim());
+  while (lines.length && blank(lines[0])) lines.shift();
+  while (lines.length && blank(lines[lines.length - 1])) lines.pop();
+  return lines.length ? lines : undefined;
+}
+
+/**
+ * The homepage's headings and section copy, one object per section, every
+ * field optional — each component fills its gaps from messages/ field by
+ * field, as Contact does.
+ */
+export async function getHomePage(locale: Locale): Promise<{
+  hero: HeroCopy;
+  intro: IntroCopy;
+  services: ServicesCopy;
+  motto: MottoCopy;
+  projects: ProjectsCopy;
+  whyUs: WhyUsCopy;
+  team: TeamCopy;
+  cta: CtaCopy;
+}> {
+  const { data } = await sanityFetch({
+    query: HOME_PAGE_QUERY,
+    params: { locale },
+    tags: [SANITY_TAG],
+  });
+  const { hero, intro, services, motto, projects, whyUs, team, cta } =
+    data ?? {};
+  return {
+    hero: {
+      titleStart: heading(hero?.titleStart),
+      titleEnd: heading(hero?.titleEnd),
+      body: text(hero?.body),
+    },
+    intro: {
+      label: text(intro?.label),
+      statement: text(intro?.statement),
+      gap: text(intro?.gap),
+    },
+    services: { label: text(services?.label), title: text(services?.title) },
+    motto: {
+      label: text(motto?.label),
+      lead: text(motto?.lead),
+      title: heading(motto?.title),
+    },
+    projects: { title: heading(projects?.title) },
+    whyUs: {
+      label: text(whyUs?.label),
+      title: heading(whyUs?.title),
+      // All or nothing: the reasons are numbered by position, so mixing the
+      // Studio's with the fallback's would print them out of sequence.
+      reasons: list(
+        (whyUs?.reasons ?? []).flatMap(({ title, body }) =>
+          title ? [{ title, body: body ?? "" }] : [],
+        ),
+      ),
+    },
+    team: {
+      label: text(team?.label),
+      title: heading(team?.title),
+      body: text(team?.body),
+    },
+    cta: { title: text(cta?.title), body: text(cta?.body) },
+  };
+}
+
+/** /projects' copy, with the meta fields for `generateMetadata` — which calls
+ *  this with stega off — as on the contact page. */
+export async function getProjectsPage(
+  locale: Locale,
+  { stega }: { stega?: false } = {},
+): Promise<
+  ProjectsIndexCopy & { metaTitle?: string; metaDescription?: string }
+> {
+  const { data } = await sanityFetch({
+    query: PROJECTS_PAGE_QUERY,
+    params: { locale },
+    stega,
+    tags: [SANITY_TAG],
+  });
+  return {
+    title: heading(data?.title),
+    intro: text(data?.intro),
     metaTitle: text(data?.metaTitle),
     metaDescription: text(data?.metaDescription),
   };

@@ -36,7 +36,16 @@ const ACCENT_GROW_PORTRAIT = 3.5;
 // Content drives the pin length: one service is one viewport of scrolling (see
 // VIEWPORTS), so adding a service in the Studio grows the pin by 100vh and
 // slots its block into the sequence without a position being rewritten.
-export default function Services({ services }: { services: Service[] }) {
+/** The Studio's Homepage → Services. Each field missing falls back to messages/. */
+export type ServicesCopy = { label?: string; title?: string };
+
+export default function Services({
+  services,
+  copy: words = {},
+}: {
+  services: Service[];
+  copy?: ServicesCopy;
+}) {
   const t = useTranslations("Services");
   const container = useRef<HTMLElement>(null);
   const accentCircle = useRef<HTMLDivElement>(null);
@@ -600,13 +609,13 @@ export default function Services({ services }: { services: Service[] }) {
           className="flex h-1/2 flex-col items-center justify-end pb-space-2x"
         >
           <p data-fade className="text-xs text-white/75 uppercase sm:text-sm">
-            {t("label")}
+            {words.label ?? t("label")}
           </p>
           <h2
             data-split="up"
             className="heading-style text-xl text-white sm:text-2xl lg:text-4xl"
           >
-            {t("title")}
+            {words.title ?? t("title")}
           </h2>
         </div>
       </div>
