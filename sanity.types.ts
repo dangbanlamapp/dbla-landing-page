@@ -146,6 +146,7 @@ export type Project = {
   orderRank?: string;
   name: string;
   slug: Slug;
+  hasPage?: boolean;
   type: string;
   type_vi?: string;
   blurb: string;
@@ -212,6 +213,30 @@ export type Slug = {
   _type: "slug";
   current: string;
   source?: string;
+};
+
+export type ContactPage = {
+  _id: string;
+  _type: "contactPage";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  title_vi?: string;
+  body?: string;
+  body_vi?: string;
+  namePlaceholder?: string;
+  namePlaceholder_vi?: string;
+  companyPlaceholder?: string;
+  companyPlaceholder_vi?: string;
+  emailPlaceholder?: string;
+  emailPlaceholder_vi?: string;
+  submitLabel?: string;
+  submitLabel_vi?: string;
+  metaTitle?: string;
+  metaTitle_vi?: string;
+  metaDescription?: string;
+  metaDescription_vi?: string;
 };
 
 export type SiteSettings = {
@@ -329,7 +354,7 @@ export type Geopoint = {
   alt?: number;
 };
 
-export type AllSanitySchemaTypes = StorySection | SanityImageAssetReference | StoryFigure | Link | Testimonial | TeamMember | Service | Project | SanityImageCrop | SanityImageHotspot | Slug | SiteSettings | SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityImageMetadata | SanityFileAsset | SanityAssetSourceData | SanityImageAsset | Geopoint;
+export type AllSanitySchemaTypes = StorySection | SanityImageAssetReference | StoryFigure | Link | Testimonial | TeamMember | Service | Project | SanityImageCrop | SanityImageHotspot | Slug | ContactPage | SiteSettings | SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityImageMetadata | SanityFileAsset | SanityAssetSourceData | SanityImageAsset | Geopoint;
 
 // Source: ../dbla-nextjs/sanity/lib/queries.ts
 // Variable: SITE_SETTINGS_QUERY
@@ -363,12 +388,54 @@ export type SITE_SETTINGS_QUERY_RESULT = {
 } | null;
 
 // Source: ../dbla-nextjs/sanity/lib/queries.ts
+// Variable: CONTACT_PAGE_QUERY
+// Query: *[_id == "contactPage"][0]{    "title": select($locale == "vi" => coalesce(title_vi, title), title),    "body": select($locale == "vi" => coalesce(body_vi, body), body),    "namePlaceholder": select($locale == "vi" => coalesce(namePlaceholder_vi, namePlaceholder), namePlaceholder),    "companyPlaceholder": select($locale == "vi" => coalesce(companyPlaceholder_vi, companyPlaceholder), companyPlaceholder),    "emailPlaceholder": select($locale == "vi" => coalesce(emailPlaceholder_vi, emailPlaceholder), emailPlaceholder),    "submitLabel": select($locale == "vi" => coalesce(submitLabel_vi, submitLabel), submitLabel),    "metaTitle": select($locale == "vi" => coalesce(metaTitle_vi, metaTitle), metaTitle),    "metaDescription": select($locale == "vi" => coalesce(metaDescription_vi, metaDescription), metaDescription)  }
+export type CONTACT_PAGE_QUERY_RESULT = {
+  title: string;
+  body: null;
+  namePlaceholder: null;
+  companyPlaceholder: null;
+  emailPlaceholder: null;
+  submitLabel: null;
+  metaTitle: null;
+  metaDescription: null;
+} | {
+  title: null;
+  body: null;
+  namePlaceholder: null;
+  companyPlaceholder: null;
+  emailPlaceholder: null;
+  submitLabel: null;
+  metaTitle: null;
+  metaDescription: null;
+} | {
+  title: string | null;
+  body: null;
+  namePlaceholder: null;
+  companyPlaceholder: null;
+  emailPlaceholder: null;
+  submitLabel: null;
+  metaTitle: null;
+  metaDescription: null;
+} | {
+  title: string | null;
+  body: string | null;
+  namePlaceholder: string | null;
+  companyPlaceholder: string | null;
+  emailPlaceholder: string | null;
+  submitLabel: string | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
+} | null;
+
+// Source: ../dbla-nextjs/sanity/lib/queries.ts
 // Variable: PROJECTS_QUERY
-// Query: *[_type == "project" && defined(slug.current)] | order(orderRank) {    _id,    name,    "slug": slug.current,    "type": select($locale == "vi" => coalesce(type_vi, type), type),    "blurb": select($locale == "vi" => coalesce(blurb_vi, blurb), blurb),    cardImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot, "alt": select($locale == "vi" => coalesce(alt_vi, alt), alt) },    heroImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot }  }
+// Query: *[_type == "project" && defined(slug.current)] | order(orderRank) {    _id,    name,    "slug": slug.current,    "hasPage": coalesce(hasPage, true),    "type": select($locale == "vi" => coalesce(type_vi, type), type),    "blurb": select($locale == "vi" => coalesce(blurb_vi, blurb), blurb),    cardImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot, "alt": select($locale == "vi" => coalesce(alt_vi, alt), alt) },    heroImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot }  }
 export type PROJECTS_QUERY_RESULT = Array<{
   _id: string;
   name: string;
   slug: string;
+  hasPage: boolean | true;
   type: string;
   blurb: string;
   cardImage: {
@@ -408,14 +475,14 @@ export type PROJECTS_QUERY_RESULT = Array<{
 
 // Source: ../dbla-nextjs/sanity/lib/queries.ts
 // Variable: PROJECT_SLUGS_QUERY
-// Query: *[_type == "project" && defined(slug.current)]{ "slug": slug.current }
+// Query: *[_type == "project" && defined(slug.current) && coalesce(hasPage, true)]{ "slug": slug.current }
 export type PROJECT_SLUGS_QUERY_RESULT = Array<{
   slug: string;
 }>;
 
 // Source: ../dbla-nextjs/sanity/lib/queries.ts
 // Variable: PROJECT_QUERY
-// Query: *[_type == "project" && slug.current == $slug][0]{    _id,    name,    "slug": slug.current,    "type": select($locale == "vi" => coalesce(type_vi, type), type),    "blurb": select($locale == "vi" => coalesce(blurb_vi, blurb), blurb),    cardImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot, "alt": select($locale == "vi" => coalesce(alt_vi, alt), alt) },    heroImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot },    wideImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot, "alt": select($locale == "vi" => coalesce(alt_vi, alt), alt) },    "headline": select($locale == "vi" => coalesce(headline_vi, headline), headline),    "intro": select($locale == "vi" => coalesce(intro_vi, intro), intro),    facts[]{ _key, "label": select($locale == "vi" => coalesce(label_vi, label), label), "value": select($locale == "vi" => coalesce(value_vi, value), value) },    sections[]{      _key,      "label": select($locale == "vi" => coalesce(label_vi, label), label),      "lead": select($locale == "vi" => coalesce(lead_vi, lead), lead),      "body": select($locale == "vi" => coalesce(body_vi, body), body),      points[]{ _key, "title": select($locale == "vi" => coalesce(title_vi, title), title), "body": select($locale == "vi" => coalesce(body_vi, body), body) },      "coda": select($locale == "vi" => coalesce(coda_vi, coda), coda),      figures[]{        _key,        "caption": select($locale == "vi" => coalesce(caption_vi, caption), caption),        kind,        "placeholder": select($locale == "vi" => coalesce(placeholder_vi, placeholder), placeholder),        image {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot, "alt": select($locale == "vi" => coalesce(alt_vi, alt), alt) }      }    }  }
+// Query: *[_type == "project" && slug.current == $slug && coalesce(hasPage, true)][0]{    _id,    name,    "slug": slug.current,    "type": select($locale == "vi" => coalesce(type_vi, type), type),    "blurb": select($locale == "vi" => coalesce(blurb_vi, blurb), blurb),    cardImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot, "alt": select($locale == "vi" => coalesce(alt_vi, alt), alt) },    heroImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot },    wideImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot, "alt": select($locale == "vi" => coalesce(alt_vi, alt), alt) },    "headline": select($locale == "vi" => coalesce(headline_vi, headline), headline),    "intro": select($locale == "vi" => coalesce(intro_vi, intro), intro),    facts[]{ _key, "label": select($locale == "vi" => coalesce(label_vi, label), label), "value": select($locale == "vi" => coalesce(value_vi, value), value) },    sections[]{      _key,      "label": select($locale == "vi" => coalesce(label_vi, label), label),      "lead": select($locale == "vi" => coalesce(lead_vi, lead), lead),      "body": select($locale == "vi" => coalesce(body_vi, body), body),      points[]{ _key, "title": select($locale == "vi" => coalesce(title_vi, title), title), "body": select($locale == "vi" => coalesce(body_vi, body), body) },      "coda": select($locale == "vi" => coalesce(coda_vi, coda), coda),      figures[]{        _key,        "caption": select($locale == "vi" => coalesce(caption_vi, caption), caption),        kind,        "placeholder": select($locale == "vi" => coalesce(placeholder_vi, placeholder), placeholder),        image {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  },  crop,  hotspot, "alt": select($locale == "vi" => coalesce(alt_vi, alt), alt) }      }    }  }
 export type PROJECT_QUERY_RESULT = {
   _id: string;
   name: string;
@@ -570,9 +637,10 @@ export type TESTIMONIALS_QUERY_RESULT = Array<{
 declare global {
   interface SanityQueries {
     "\n  *[_id == \"siteSettings\"][0]{\n    \"description\": select($locale == \"vi\" => coalesce(description_vi, description), description),\n    email,\n    phone,\n    socialLinks[]{ _key, \"label\": select($locale == \"vi\" => coalesce(label_vi, label), label), href },\n    legalLinks[]{ _key, \"label\": select($locale == \"vi\" => coalesce(label_vi, label), label), href }\n  }\n": SITE_SETTINGS_QUERY_RESULT;
-    "\n  *[_type == \"project\" && defined(slug.current)] | order(orderRank) {\n    _id,\n    name,\n    \"slug\": slug.current,\n    \"type\": select($locale == \"vi\" => coalesce(type_vi, type), type),\n    \"blurb\": select($locale == \"vi\" => coalesce(blurb_vi, blurb), blurb),\n    cardImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n, \"alt\": select($locale == \"vi\" => coalesce(alt_vi, alt), alt) },\n    heroImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n }\n  }\n": PROJECTS_QUERY_RESULT;
-    "\n  *[_type == \"project\" && defined(slug.current)]{ \"slug\": slug.current }\n": PROJECT_SLUGS_QUERY_RESULT;
-    "\n  *[_type == \"project\" && slug.current == $slug][0]{\n    _id,\n    name,\n    \"slug\": slug.current,\n    \"type\": select($locale == \"vi\" => coalesce(type_vi, type), type),\n    \"blurb\": select($locale == \"vi\" => coalesce(blurb_vi, blurb), blurb),\n    cardImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n, \"alt\": select($locale == \"vi\" => coalesce(alt_vi, alt), alt) },\n    heroImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n },\n    wideImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n, \"alt\": select($locale == \"vi\" => coalesce(alt_vi, alt), alt) },\n    \"headline\": select($locale == \"vi\" => coalesce(headline_vi, headline), headline),\n    \"intro\": select($locale == \"vi\" => coalesce(intro_vi, intro), intro),\n    facts[]{ _key, \"label\": select($locale == \"vi\" => coalesce(label_vi, label), label), \"value\": select($locale == \"vi\" => coalesce(value_vi, value), value) },\n    sections[]{\n      _key,\n      \"label\": select($locale == \"vi\" => coalesce(label_vi, label), label),\n      \"lead\": select($locale == \"vi\" => coalesce(lead_vi, lead), lead),\n      \"body\": select($locale == \"vi\" => coalesce(body_vi, body), body),\n      points[]{ _key, \"title\": select($locale == \"vi\" => coalesce(title_vi, title), title), \"body\": select($locale == \"vi\" => coalesce(body_vi, body), body) },\n      \"coda\": select($locale == \"vi\" => coalesce(coda_vi, coda), coda),\n      figures[]{\n        _key,\n        \"caption\": select($locale == \"vi\" => coalesce(caption_vi, caption), caption),\n        kind,\n        \"placeholder\": select($locale == \"vi\" => coalesce(placeholder_vi, placeholder), placeholder),\n        image { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n, \"alt\": select($locale == \"vi\" => coalesce(alt_vi, alt), alt) }\n      }\n    }\n  }\n": PROJECT_QUERY_RESULT;
+    "\n  *[_id == \"contactPage\"][0]{\n    \"title\": select($locale == \"vi\" => coalesce(title_vi, title), title),\n    \"body\": select($locale == \"vi\" => coalesce(body_vi, body), body),\n    \"namePlaceholder\": select($locale == \"vi\" => coalesce(namePlaceholder_vi, namePlaceholder), namePlaceholder),\n    \"companyPlaceholder\": select($locale == \"vi\" => coalesce(companyPlaceholder_vi, companyPlaceholder), companyPlaceholder),\n    \"emailPlaceholder\": select($locale == \"vi\" => coalesce(emailPlaceholder_vi, emailPlaceholder), emailPlaceholder),\n    \"submitLabel\": select($locale == \"vi\" => coalesce(submitLabel_vi, submitLabel), submitLabel),\n    \"metaTitle\": select($locale == \"vi\" => coalesce(metaTitle_vi, metaTitle), metaTitle),\n    \"metaDescription\": select($locale == \"vi\" => coalesce(metaDescription_vi, metaDescription), metaDescription)\n  }\n": CONTACT_PAGE_QUERY_RESULT;
+    "\n  *[_type == \"project\" && defined(slug.current)] | order(orderRank) {\n    _id,\n    name,\n    \"slug\": slug.current,\n    \"hasPage\": coalesce(hasPage, true),\n    \"type\": select($locale == \"vi\" => coalesce(type_vi, type), type),\n    \"blurb\": select($locale == \"vi\" => coalesce(blurb_vi, blurb), blurb),\n    cardImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n, \"alt\": select($locale == \"vi\" => coalesce(alt_vi, alt), alt) },\n    heroImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n }\n  }\n": PROJECTS_QUERY_RESULT;
+    "\n  *[_type == \"project\" && defined(slug.current) && coalesce(hasPage, true)]{ \"slug\": slug.current }\n": PROJECT_SLUGS_QUERY_RESULT;
+    "\n  *[_type == \"project\" && slug.current == $slug && coalesce(hasPage, true)][0]{\n    _id,\n    name,\n    \"slug\": slug.current,\n    \"type\": select($locale == \"vi\" => coalesce(type_vi, type), type),\n    \"blurb\": select($locale == \"vi\" => coalesce(blurb_vi, blurb), blurb),\n    cardImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n, \"alt\": select($locale == \"vi\" => coalesce(alt_vi, alt), alt) },\n    heroImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n },\n    wideImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n, \"alt\": select($locale == \"vi\" => coalesce(alt_vi, alt), alt) },\n    \"headline\": select($locale == \"vi\" => coalesce(headline_vi, headline), headline),\n    \"intro\": select($locale == \"vi\" => coalesce(intro_vi, intro), intro),\n    facts[]{ _key, \"label\": select($locale == \"vi\" => coalesce(label_vi, label), label), \"value\": select($locale == \"vi\" => coalesce(value_vi, value), value) },\n    sections[]{\n      _key,\n      \"label\": select($locale == \"vi\" => coalesce(label_vi, label), label),\n      \"lead\": select($locale == \"vi\" => coalesce(lead_vi, lead), lead),\n      \"body\": select($locale == \"vi\" => coalesce(body_vi, body), body),\n      points[]{ _key, \"title\": select($locale == \"vi\" => coalesce(title_vi, title), title), \"body\": select($locale == \"vi\" => coalesce(body_vi, body), body) },\n      \"coda\": select($locale == \"vi\" => coalesce(coda_vi, coda), coda),\n      figures[]{\n        _key,\n        \"caption\": select($locale == \"vi\" => coalesce(caption_vi, caption), caption),\n        kind,\n        \"placeholder\": select($locale == \"vi\" => coalesce(placeholder_vi, placeholder), placeholder),\n        image { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n, \"alt\": select($locale == \"vi\" => coalesce(alt_vi, alt), alt) }\n      }\n    }\n  }\n": PROJECT_QUERY_RESULT;
     "\n  *[_type == \"service\"] | order(orderRank) {\n    _id,\n    \"label\": select($locale == \"vi\" => coalesce(label_vi, label), label),\n    \"title\": select($locale == \"vi\" => coalesce(title_vi, title), title),\n    \"blurb\": select($locale == \"vi\" => coalesce(blurb_vi, blurb), blurb),\n    \"items\": select($locale == \"vi\" => coalesce(items_vi, items), items)\n  }\n": SERVICES_QUERY_RESULT;
     "\n  *[_type == \"teamMember\"] | order(orderRank) {\n    _id,\n    name,\n    \"role\": select($locale == \"vi\" => coalesce(role_vi, role), role),\n    \"intro\": select($locale == \"vi\" => coalesce(intro_vi, intro), intro),\n    \"expertise\": select($locale == \"vi\" => coalesce(expertise_vi, expertise), expertise),\n    skills[]{ _key, \"name\": select($locale == \"vi\" => coalesce(name_vi, name), name), level },\n    avatar\n  }\n": TEAM_QUERY_RESULT;
     "\n  *[_type == \"testimonial\"] | order(orderRank) {\n    _id,\n    \"quote\": select($locale == \"vi\" => coalesce(quote_vi, quote), quote),\n    name,\n    \"role\": select($locale == \"vi\" => coalesce(role_vi, role), role)\n  }\n": TESTIMONIALS_QUERY_RESULT;

@@ -6,6 +6,7 @@ import type {
   SITE_SETTINGS_QUERY_RESULT,
   SanityImageCrop,
 } from "@/sanity.types";
+import type { ContactCopy } from "@/app/components/Contact";
 import type { TeamMember } from "@/app/components/OurTeam";
 import type { Testimonial } from "@/app/components/WhyUs";
 import type { Project } from "@/app/components/project-data";
@@ -19,6 +20,7 @@ import type { Locale } from "@/i18n/routing";
 import { urlFor } from "./image";
 import { SANITY_TAG, sanityFetch } from "./live";
 import {
+  CONTACT_PAGE_QUERY,
   PROJECTS_QUERY,
   PROJECT_QUERY,
   PROJECT_SLUGS_QUERY,
@@ -124,6 +126,39 @@ export async function getSiteSettings(
   return toSiteSettings(data);
 }
 
+// ── Contact page ────────────────────────────────────────────────────────────
+
+/** `||`, not `??`: an emptied field comes back as "" rather than null, and
+ *  that should fall back to messages/ just the same as one never filled in. */
+const text = (value: string | null | undefined) => value || undefined;
+
+/**
+ * The contact page's copy, every field optional — Contact fills each gap from
+ * messages/. Meta fields come along for `generateMetadata`, which calls this
+ * with stega off; the page itself ignores them.
+ */
+export async function getContactPage(
+  locale: Locale,
+  { stega }: { stega?: false } = {},
+): Promise<ContactCopy & { metaTitle?: string; metaDescription?: string }> {
+  const { data } = await sanityFetch({
+    query: CONTACT_PAGE_QUERY,
+    params: { locale },
+    stega,
+    tags: [SANITY_TAG],
+  });
+  return {
+    title: text(data?.title),
+    body: text(data?.body),
+    name: text(data?.namePlaceholder),
+    company: text(data?.companyPlaceholder),
+    email: text(data?.emailPlaceholder),
+    submit: text(data?.submitLabel),
+    metaTitle: text(data?.metaTitle),
+    metaDescription: text(data?.metaDescription),
+  };
+}
+
 // ── Projects ────────────────────────────────────────────────────────────────
 
 /**
@@ -140,6 +175,7 @@ function toProjects(data: PROJECTS_QUERY_RESULT): Project[] {
         // Clean: the slug becomes a URL, and in draft mode it would otherwise
         // carry Visual Editing's invisible markers into every href.
         slug: stegaClean(project.slug),
+        hasPage: project.hasPage,
         name: project.name,
         type: project.type,
         blurb: project.blurb,
@@ -175,11 +211,10 @@ function toFigure(figure: QueriedFigure): StoryFigure | undefined {
   const caption = figure.caption ?? undefined;
   const src = toImage(figure.image);
 
+  // A figure still waiting on its image (only a `placeholder` brief in the
+  // Studio) is left off the page rather than shown as an empty frame.
   if (src && figure.image) {
     return { kind, caption, src, alt: figure.image.alt };
-  }
-  if (figure.placeholder) {
-    return { kind, caption, placeholder: figure.placeholder };
   }
   return undefined;
 }

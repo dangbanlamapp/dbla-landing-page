@@ -10,11 +10,11 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import DashedCircle from "./DashedCircle";
 import { useRevealed } from "./Preloader";
 import { PILL } from "./pill";
+import ProjectLink from "./ProjectLink";
 import {
   type Project,
   SWEEP_CLOSED,
   SWEEP_OPEN,
-  projectHref,
   projectNumber,
 } from "./project-data";
 import type { ProjectStory, StoryFigure } from "./project-stories";
@@ -104,13 +104,7 @@ function StorySplit({
 
 /**
  * The pictures under a story section, across the full 92vw the wide image
- * uses. One figure takes the whole row; two split it from md, which keeps a
- * pair of 1000px mockups at roughly their own resolution instead of
- * stretching either one to a full-width frame it was not shot for.
- *
- * An odd count above one leads with its first figure across the whole row
- * and pairs the rest under it, so a group never ends on a lone half-width
- * frame with a hole beside it.
+ * uses — one per row, stacked, so every figure gets the whole width.
  *
  * `data-figure-frame` and `data-photo` are the entrance's hooks — the same
  * open-out-and-settle as the wide image, scrubbed per frame. Sheets and slides
@@ -118,65 +112,29 @@ function StorySplit({
  * StoryFigure).
  */
 function StoryFigures({ figures }: { figures: StoryFigure[] }) {
-  const columns = figures.length > 1;
-  const leadSpans = columns && figures.length % 2 === 1;
-
   return (
-    <div
-      className={`mt-space-4x grid grid-cols-1 gap-space-2x lg:mt-space-5x ${columns ? "md:grid-cols-2" : ""}`}
-    >
-      {figures.map((figure, i) => {
-        const spans = leadSpans && i === 0;
-
-        return (
-          <figure key={i} className={spans ? "md:col-span-2" : undefined}>
-            <FigureFrame figure={figure} half={columns && !spans} />
-            {figure.caption && (
-              <figcaption
-                // Centred under anything shown whole, which is capped at its
-                // file's width and so may sit narrower than the row.
-                className={`heading-style mt-space--1x text-xs text-secondary opacity-75 lg:text-sm ${figure.kind === "sheet" || figure.kind === "slide" ? "text-center" : ""}`}
-              >
-                {figure.caption}
-              </figcaption>
-            )}
-          </figure>
-        );
-      })}
+    <div className="mt-space-4x flex flex-col gap-space-2x lg:mt-space-5x">
+      {figures.map((figure, i) => (
+        <figure key={i}>
+          <FigureFrame figure={figure} />
+          {figure.caption && (
+            <figcaption
+              // Centred under anything shown whole, which is capped at its
+              // file's width and so may sit narrower than the row.
+              className={`heading-style mt-space--1x text-xs text-secondary opacity-75 lg:text-sm ${figure.kind === "sheet" || figure.kind === "slide" ? "text-center" : ""}`}
+            >
+              {figure.caption}
+            </figcaption>
+          )}
+        </figure>
+      ))}
     </div>
   );
 }
 
-function FigureFrame({ figure, half }: { figure: StoryFigure; half: boolean }) {
-  const t = useTranslations("Projects");
-  const { kind = "photo" } = figure;
+function FigureFrame({ figure }: { figure: StoryFigure }) {
+  const { kind = "photo", src, alt } = figure;
   const whole = kind === "sheet" || kind === "slide";
-
-  // A slot still waiting on its image: a dashed frame at the ratio the real
-  // one will take — 4:3 for a mockup, 16:9 as a stand-in for a sheet or a
-  // slide, whose true ratio is not known until it exists — with the brief
-  // printed inside.
-  // Still a data-figure-frame, so the entrance runs and the layout and motion
-  // can be judged before the asset arrives.
-  if ("placeholder" in figure) {
-    return (
-      <div
-        data-figure-frame
-        className={`flex w-full items-center justify-center rounded-md border border-dashed border-black/25 bg-black/5 p-space-2x text-center ${whole ? "aspect-video" : "aspect-4/3"}`}
-      >
-        <div className="max-w-[44ch]">
-          <p className="heading-style text-xs text-accent lg:text-sm">
-            {t("imageToCome")}
-          </p>
-          <p className="mt-space--2x text-sm leading-body text-secondary lg:text-base">
-            {figure.placeholder}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  const { src, alt } = figure;
 
   // Shown whole: the frame takes the file's own ratio, since cropping a spec
   // board or a presentation slide cuts off the labels it exists to show. A
@@ -193,11 +151,7 @@ function FigureFrame({ figure, half }: { figure: StoryFigure; half: boolean }) {
         <Image
           src={src}
           alt={alt}
-          sizes={
-            half
-              ? "(min-width: 48rem) 46vw, 92vw"
-              : `(min-width: ${src.width}px) ${src.width}px, 92vw`
-          }
+          sizes={`(min-width: ${src.width}px) ${src.width}px, 92vw`}
           className="h-auto w-full"
         />
       </div>
@@ -213,7 +167,7 @@ function FigureFrame({ figure, half }: { figure: StoryFigure; half: boolean }) {
         src={src}
         alt={alt}
         fill
-        sizes={half ? "(min-width: 48rem) 46vw, 92vw" : "92vw"}
+        sizes="92vw"
         data-photo
         className="object-cover"
       />
@@ -229,9 +183,9 @@ const heroSrc = (project: Project) => project.hero ?? project.src;
 /**
  * One project's page. Three beats, each a full composition of its own: the
  * project arriving as the homepage's circle, the picture opened out to full
- * width and the story told under it, then a hand-off to the next project —
- * which loops, so the last one leads back to the first and a reader can walk
- * the whole set without going back to the index.
+ * width and the story told under it, then a hand-off to the next project with
+ * a page — which loops, so the last one leads back to the first and a reader
+ * can walk the whole set without going back to the index.
  *
  * The story is optional (see project-stories): without one, the overview
  * falls back to the blurb and the page is the same three beats.
@@ -256,7 +210,17 @@ export default function ProjectDetail({
   const revealed = useRevealed();
 
   const project = projects[index];
-  const next = projects[(index + 1) % projects.length];
+  // The next project that has a page, looping, so the hand-off never opens on
+  // a dead end. When this is the only one, it falls back to the plain next
+  // project, which ProjectLink then renders as an unclickable picture — the
+  // section keeps its composition and its timeline keeps its targets.
+  const following = Array.from(
+    { length: projects.length - 1 },
+    (_, step) => projects[(index + 1 + step) % projects.length],
+  );
+  const next =
+    following.find((p) => p.hasPage) ??
+    projects[(index + 1) % projects.length];
 
   useGSAP(
     () => {
@@ -691,10 +655,9 @@ export default function ProjectDetail({
           {t("next", { number: projectNumber(projects.indexOf(next)) })}
         </p>
 
-        <TransitionLink
-          href={projectHref(next)}
-          aria-label={common("openProject", { name: next.name })}
-          className="group relative aspect-square h-[var(--frame-d)] rounded-full outline-offset-8 outline-accent focus-visible:outline-2"
+        <ProjectLink
+          project={next}
+          className="relative aspect-square h-[var(--frame-d)] rounded-full outline-offset-8 outline-accent focus-visible:outline-2"
         >
           <div className="absolute inset-0 rounded-full bg-accent" />
           <div
@@ -715,13 +678,7 @@ export default function ProjectDetail({
               />
             </div>
           </div>
-          <span
-            aria-hidden
-            className={`${PILL} pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-accent text-background opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100`}
-          >
-            {common("viewProject")}
-          </span>
-        </TransitionLink>
+        </ProjectLink>
 
         <h2
           data-split="down"

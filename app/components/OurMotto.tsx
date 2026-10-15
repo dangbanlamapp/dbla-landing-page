@@ -5,7 +5,6 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import DashedCircle from "./DashedCircle";
 import { useTranslations } from "next-intl";
 import { RICH } from "./rich";
 
@@ -163,7 +162,7 @@ export default function OurMotto() {
           copy.current,
           { yPercent: 0 },
           {
-            yPercent: 200,
+            yPercent: 300,
             ease: "none",
             scrollTrigger: {
               trigger: container.current,
@@ -175,6 +174,41 @@ export default function OurMotto() {
           },
         );
       });
+
+      // ── Exit ───────────────────────────────────────────────────────────────
+      // Projects slides in over the motto, and its accent circle reaches the
+      // heading about when that section's centre crosses the bottom edge. From
+      // there until Projects fills the screen ("top top" — it is h-screen) the
+      // copy shrinks and blurs away, so it recedes under the circle instead of
+      // being wiped by it.
+      //
+      // Triggered off #projects by id because the motion belongs to that
+      // section's arrival, not to anything on this one; skipped when the page
+      // renders no projects. Both triggers sit above Projects' pin, so the pin
+      // spacer it adds later shifts neither of them.
+      //
+      // scale and filter coexist with the drift's yPercent: GSAP composes them
+      // into one transform, so the two tweens never fight over the element.
+      const projects = document.getElementById("projects");
+      if (projects) {
+        gsap.fromTo(
+          copy.current,
+          { scale: 1, filter: "blur(0px)", opacity: 1 },
+          {
+            scale: 0.75,
+            filter: "blur(16px)",
+            opacity: 0,
+            ease: "power1.in",
+            scrollTrigger: {
+              trigger: projects,
+              start: "center bottom",
+              end: "top top",
+              scrub: true,
+              invalidateOnRefresh: true,
+            },
+          },
+        );
+      }
 
       // Unhide the block here, last, once every `from` above has stamped its
       // start value on. That is the flash: the server-rendered copy paints at
@@ -208,24 +242,11 @@ export default function OurMotto() {
     // `visible` on the other is the one overflow pairing CSS honours as
     // written — `hidden` would silently promote the other axis to `auto` and
     // turn this into a scroll container.
-    //
-    // What it contains: #right-outie is a DashedCircle, and DashedCircle sizes
-    // its ring by HEIGHT on an aspect-square box, so `size="58vh"` is a WIDTH
-    // of 58vh too. On any phone that is wider than the screen — 490px against
-    // a 390px viewport on a 390x844 handset — and this section had nothing
-    // clipping it, so the ring pushed the document's scroll width out and the
-    // whole page could be panned sideways. Desktop never showed it: 58vh is
-    // 626px against a 1920px viewport, and the root scrollbar is hidden, so
-    // there was no bar to reveal the extra width.
     <section
       ref={container}
       id="our-motto"
       className="relative mt-[-75vh] flex h-[101vh] flex-col items-center justify-end overflow-x-clip bg-background pt-space-4x lg:justify-start"
     >
-      <div className="absolute inset-0">
-        <DashedCircle dots="vertical" id="right-outie" spin={0} size="58vh" />
-      </div>
-
       <div id="cross-lines" className="absolute inset-0">
         <div
           id="y-line"

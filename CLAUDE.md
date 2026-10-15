@@ -47,7 +47,7 @@ public/               halftone-bg.jpg, noise-bg.jpg + default Next svgs
 
 ## Content (Sanity)
 
-Projects + case studies, services, team, testimonials and site settings (email, phone, social and legal links, meta description) all live in Sanity (project `ob6q59v5`, dataset `production`, public). Section headings and other animated copy stay in code. The Studio is a **separate repo** at `../studio-dbla-website` (`npm run dev` there → localhost:3333); schemas live in its `schemaTypes/`.
+Projects + case studies, services, team, testimonials, site settings (email, phone, social and legal links, meta description) and the contact page copy (heading, body, form placeholders, button, meta — each falls back to `messages/` when empty) all live in Sanity (project `ob6q59v5`, dataset `production`, public). Section headings and other animated copy stay in code. The Studio is a **separate repo** at `../studio-dbla-website` (`npm run dev` there → localhost:3333); schemas live in its `schemaTypes/`.
 
 - `sanity/` here holds the client, `sanityFetch` / `<SanityLive />` (`defineLive`, classic mode — `cacheComponents` is off), `urlFor`, and **every GROQ query** in `sanity/lib/queries.ts`. `<SanityLive />` is mounted once in the root layout.
 - **Data flow:** routes (server) call the getters in `sanity/lib/content.ts`, which map query results onto the components' own types (`Project`, `ProjectStory`, `Service`, `TeamMember`, `Testimonial`, `SiteSettings`) and pass them down as props. Components never import Sanity. Images become `StaticImageData`-shaped objects (CDN URL + cropped width/height), so `<Image src={…}>` and `src.width` work as with static imports.

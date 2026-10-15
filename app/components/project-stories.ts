@@ -27,16 +27,9 @@ export type StoryFigure = {
    * since it already is one.
    */
   kind?: "photo" | "sheet" | "slide";
-} & (
-  | { src: StaticImageData; alt: string }
-  /**
-   * A slot for a picture that does not exist yet. `placeholder` is the brief
-   * for it — what the shot should show — and is printed in the frame, so the
-   * page can ship its layout before the assets do. Upload the image in the
-   * Studio when it lands; the frame, caption and entrance stay as they are.
-   */
-  | { placeholder: string }
-);
+  src: StaticImageData;
+  alt: string;
+};
 
 export type StorySection = {
   /** Short label in the left column — "The challenge". */
@@ -47,9 +40,7 @@ export type StorySection = {
   points?: StoryPoint[];
   /** Paragraphs after the points. */
   coda?: string[];
-  /** Shown after the section. One runs full width; two sit side by side
-   *  from md; with an odd count above one, the first runs full width and
-   *  the rest pair up under it. */
+  /** Shown after the section, stacked one per row at full width. */
   figures?: StoryFigure[];
 };
 

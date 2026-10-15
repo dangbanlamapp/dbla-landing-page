@@ -57,7 +57,11 @@ export default async function ProjectPage({
   ]);
   const index = projects.findIndex((p) => p.slug === slug);
 
-  if (index === -1) notFound();
+  // A project with its page switched off in the Studio is still in the list —
+  // it is listed everywhere, just not linked — so it has to be turned away
+  // here, as if it did not exist. It was never prerendered either (see
+  // getProjectSlugs), so this is what a typed-in or bookmarked URL meets.
+  if (index === -1 || !projects[index].hasPage) notFound();
 
   return (
     <>

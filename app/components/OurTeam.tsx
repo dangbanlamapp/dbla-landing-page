@@ -154,10 +154,27 @@ export default function OurTeam({ team }: { team: TeamMember[] }) {
 
       // ── Explore panels ─────────────────────────────────────────────────────
       // One paused timeline per card, driven by `open` below: play opens it,
-      // reverse folds it back along the same path. Only the avatar scales —
-      // about its top edge, which pushes it up and frees the middle of the
-      // card; the number and name stay put. The details fade in once there is
-      // room, and the meters fill last so the eye lands on them as they move.
+      // reverse folds it back along the same path. The avatar shrinks into a
+      // badge and takes the number's place in the header band, the number
+      // fading out under it, so the details get the WHOLE middle slot. The old
+      // in-place shrink (scale 0.4 about the top edge) still kept 38% of the
+      // slot for the avatar, and at 1280px — four cards across, ~400px tall —
+      // what was left was ~155px for ~230px of intro, tags and meters.
+      //
+      // The badge's size and offset depend on the card's rendered size, so
+      // they are function values read off the layout, and fromTo writes the
+      // closed end out explicitly: that is what makes the timeline safe to
+      // invalidate and re-render on refresh (below) even while it is open.
+      // The header band is everything above the slot — top padding, number,
+      // gap — measured in the column's own coordinates via offsetTop, which
+      // transforms do not touch. The avatar is an <svg>, which has no
+      // offsetHeight, so its height comes from its rect divided back out by
+      // whatever scale the wrapper carries at that moment.
+      const BADGE = 0.85; // share of the header band the badge fills
+      const band = (slot: HTMLElement) => slot.offsetTop;
+      const avatarH = (wrap: HTMLElement) =>
+        (wrap.firstElementChild as Element).getBoundingClientRect().height /
+        (Number(gsap.getProperty(wrap, "scale")) || 1);
       //
       // Reduced motion collapses the durations to 0 rather than skipping the
       // timeline, so the panel still opens — it just doesn't travel. Read once
@@ -171,23 +188,64 @@ export default function OurTeam({ team }: { team: TeamMember[] }) {
         .toArray<HTMLElement>("[data-card]", grid.current)
         .map((card) => {
           const q = gsap.utils.selector(card);
-          return gsap
-            .timeline({ paused: true, defaults: { ease: "power3.out" } })
-            .to(q("[data-avatar]"), { scale: 0.4, duration: d(0.7) })
-            .to(q("[data-details]"), { autoAlpha: 1, duration: d(0.4) }, 0.25)
-            .fromTo(
-              q("[data-meter]"),
-              { scaleX: 0 },
-              {
-                scaleX: (_i: number, el: HTMLElement) =>
-                  Number(el.dataset.level),
-                duration: d(0.9),
-                ease: "power2.out",
-                stagger: 0.1,
-              },
-              0.35,
-            );
+          const wrap = q("[data-avatar]")[0] as HTMLElement;
+          const slot = wrap.parentElement as HTMLElement;
+          return (
+            gsap
+              .timeline({ paused: true, defaults: { ease: "power3.out" } })
+              // Scaled about its centre, which is the slot's centre (the
+              // wrapper fills the slot and centres the avatar), then lifted
+              // so that centre lands mid-band — where the number sits.
+              .fromTo(
+                wrap,
+                { y: 0, scale: 1 },
+                {
+                  y: () =>
+                    band(slot) / 2 - (band(slot) + slot.offsetHeight / 2),
+                  scale: () => (band(slot) * BADGE) / avatarH(wrap),
+                  duration: d(0.7),
+                },
+              )
+              .fromTo(
+                q("[data-index]"),
+                // 0.5, not 1: the number ships at opacity-50, and fromTo stamps its
+                // start value on at build time.
+                { autoAlpha: 0.5 },
+                { autoAlpha: 0, duration: d(0.25) },
+                0,
+              )
+              .fromTo(
+                q("[data-details]"),
+                { autoAlpha: 0 },
+                { autoAlpha: 1, duration: d(0.4) },
+                0.25,
+              )
+              .fromTo(
+                q("[data-meter]"),
+                { scaleX: 0 },
+                {
+                  scaleX: (_i: number, el: HTMLElement) =>
+                    Number(el.dataset.level),
+                  duration: d(0.9),
+                  ease: "power2.out",
+                  stagger: 0.1,
+                },
+                0.35,
+              )
+          );
         });
+
+      // Refresh fires after every resize (and on font load), which is exactly
+      // when the badge's measurements go stale. invalidate() drops the
+      // recorded function values; re-applying the current progress makes an
+      // open card re-measure and snap to its new badge position on the spot.
+      const remeasure = () =>
+        cardTls.current.forEach((tl) => {
+          const p = tl.progress();
+          tl.invalidate().progress(0).progress(p);
+        });
+      ScrollTrigger.addEventListener("refresh", remeasure);
+      return () => ScrollTrigger.removeEventListener("refresh", remeasure);
     },
     { scope: container },
   );
@@ -250,15 +308,18 @@ export default function OurTeam({ team }: { team: TeamMember[] }) {
                       centre while closed, and scaling that wrapper about its
                       top edge (origin-top) is what pushes the avatar up and
                       leaves the lower part of the slot for the details. */}
-                  <div className="absolute inset-x-0 top-0 bottom-14 flex flex-col items-center justify-between gap-space--2x p-space-2x">
-                    <span className="text-sm leading-none font-semibold tracking-tighter opacity-50 lg:text-lg">
+                  <div className="absolute inset-x-0 top-0 bottom-14 flex flex-col items-center justify-between gap-space--2x p-space-2x py-space--2x 3xl:py-space-base">
+                    <span
+                      data-index
+                      className="text-sm leading-none font-semibold tracking-tighter opacity-50 lg:text-lg"
+                    >
                       {String(i + 1).padStart(2, "0")}
                     </span>
 
                     <div className="relative min-h-0 w-full flex-1">
                       <div
                         data-avatar
-                        className="absolute inset-0 flex origin-top items-center justify-center"
+                        className="absolute inset-0 flex items-center justify-center"
                       >
                         <Avatar {...member.avatar} className="w-3/5" />
                       </div>
@@ -270,7 +331,7 @@ export default function OurTeam({ team }: { team: TeamMember[] }) {
                       <div
                         id={`team-details-${i}`}
                         data-details
-                        className="invisible absolute inset-x-0 top-[38%] bottom-0 flex flex-col justify-center gap-space--1x opacity-0"
+                        className="invisible absolute inset-0 flex flex-col justify-center gap-space--1x opacity-0"
                       >
                         <p className="text-center text-xs leading-body lg:text-sm 2xl:text-base 3xl:text-md">
                           <Highlighted text={member.intro} />
@@ -279,7 +340,7 @@ export default function OurTeam({ team }: { team: TeamMember[] }) {
                           {member.expertise.map((tag) => (
                             <li
                               key={tag}
-                              className="rounded-full border border-foreground/20 px-space--1x py-0.5 text-xs lg:text-sm 2xl:text-base 3xl:text-md"
+                              className="rounded-full border border-foreground/20 px-space--1x py-0.5 text-xs lg:text-sm 2xl:text-base"
                             >
                               {tag}
                             </li>
