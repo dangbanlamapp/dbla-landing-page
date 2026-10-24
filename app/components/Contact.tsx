@@ -72,17 +72,26 @@ export default function Contact({
        * short viewport, it spills out of this box and stays reachable by
        * scrolling — clipping here would silently eat the submit button instead.
        *
-       * justify-center-safe, not justify-center, for the other half of that:
-       * plain centring splits any overflow evenly and pushes the top of the
-       * heading off the top of the screen, where nothing can scroll up to it.
-       * `safe` falls back to flex-start the moment the content stops fitting.
+       * justify-end-safe: the panel sits on the bottom edge so its gap there is
+       * exactly pb, which matches the px gutter (both 1vw) and frames the
+       * orange evenly on three sides; any spare height goes above the heading.
+       * `safe`, not plain justify-end, for the other half of the overflow
+       * story: plain end-alignment pushes all overflow off the TOP, where
+       * nothing can scroll up to it. `safe` falls back to flex-start the
+       * moment the content stops fitting.
        *
        * The top pad is a calc rather than a vh because it exists to clear the
        * fixed header bar, and that bar is sized by a rem type step — it does
        * not shrink when the viewport does. 4rem is the bar plus air; the 2vh on
        * top is the part that may breathe.
+       *
+       * select-none across the whole panel, because nothing in it is prose to
+       * quote: the heading and body are display copy, and the email and phone
+       * already have copy buttons. The form is unaffected — the spec computes
+       * `auto` on an editable element to `contain` whatever its ancestors say,
+       * so inputs and the textarea still select and edit normally.
        */
-      className="relative flex h-svh flex-col justify-center-safe px-[1vw] pt-[calc(4rem+2vh)] pb-[4vh]"
+      className="relative flex h-svh flex-col justify-end-safe px-[1vw] pt-[calc(4rem+2vh)] pb-[1vw] select-none"
     >
       {/* Drawn layer, behind everything, and the one box that clips: the ring
           is deliberately wider than the viewport, and without a clip here it

@@ -15,6 +15,40 @@ import type Lenis from "lenis";
  */
 const holds = new WeakMap<Lenis, number>();
 
+/** Callbacks parked by `whenFree` until the last hold on an instance lets go. */
+const waiting = new WeakMap<Lenis, (() => void)[]>();
+
+/** Clears the fixed header — the same offset SmoothScroll gives `anchors`. */
+const ANCHOR_OFFSET = -80;
+
+/**
+ * Runs `fn` once nothing holds `lenis` — on the next frame if nothing does
+ * now. Always a frame later, never synchronously inside a release: the caller
+ * of the release that frees the page runs its `ScrollTrigger.refresh()` right
+ * after it returns, and anything that scrolls to a measured position has to
+ * wait for that re-measure.
+ */
+export function whenFree(lenis: Lenis, fn: () => void) {
+  if (!holds.get(lenis)) {
+    requestAnimationFrame(fn);
+    return;
+  }
+  waiting.set(lenis, [...(waiting.get(lenis) ?? []), fn]);
+}
+
+/**
+ * Eases to a `#hash` target once the page is free to scroll. Through
+ * `whenFree` because the links that call it are often clicked while a hold is
+ * up: from the open menu, whose hold only lifts after it closes, or across a
+ * route change, held for the whole wipe. A stopped Lenis ignores `scrollTo`,
+ * and `force` would scroll a clipped document before the incoming page had
+ * re-measured. A selector that matches nothing is a no-op in Lenis.
+ */
+export function scrollToAnchor(lenis: Lenis, hash: string) {
+  if (!hash || hash === "#") return;
+  whenFree(lenis, () => lenis.scrollTo(hash, { offset: ANCHOR_OFFSET }));
+}
+
 /**
  * Stops `lenis` and returns the matching release. The release is idempotent,
  * so it is safe to call from both a timer and an effect cleanup, and it
@@ -37,6 +71,11 @@ export function holdScroll(lenis: Lenis): () => boolean {
     if (left > 0) return false;
 
     lenis.start();
+    const queued = waiting.get(lenis);
+    if (queued) {
+      waiting.delete(lenis);
+      requestAnimationFrame(() => queued.forEach((fn) => fn()));
+    }
     return true;
   };
 }

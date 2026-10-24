@@ -13,6 +13,7 @@ import ContactInfo from "./ContactInfo";
 // import LanguageSwitch from "./LanguageSwitch";
 import { MENU_EASE as EASE, MENU_LEAD as LEAD } from "./menu-motion";
 import { holdScroll } from "./scroll-hold";
+import { NAV_LINKS, isRoute } from "./nav-links";
 import { useTranslations } from "next-intl";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -53,19 +54,6 @@ function Sheet({
     </div>
   );
 }
-
-// Home is "/" rather than "#" now that the menu also renders on /projects: a
-// bare hash only means "the top of the homepage" while you are on it.
-const NAV_LINKS = [
-  { key: "home", href: "/" },
-  { key: "about", href: "#" },
-  { key: "projects", href: "/projects" },
-  { key: "contact", href: "/contact" },
-] as const;
-
-/** In-page hashes stay plain anchors so Lenis keeps owning the scroll (its
- *  `anchors: { offset: -80 }`); only real routes go through the router. */
-const isRoute = (href: string) => href.startsWith("/");
 
 export default function MenuPanel({
   open,
