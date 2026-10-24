@@ -4,6 +4,7 @@ import { hasLocale } from "next-intl";
 import { Resend } from "resend";
 import {
   CONTACT_FIELDS,
+  HONEYPOT,
   LIMITS,
   type ContactField,
   type ContactState,
@@ -33,8 +34,10 @@ const resend = process.env.RESEND_API_KEY
  *  The confirmation email is the real test of an address. */
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/** Faster than this from first paint to submit is not a person typing. */
-const MIN_FILL_MS = 2000;
+/** Faster than this from first paint to submit is not a person. Kept short:
+ *  someone who autofills the whole form in one click can submit in about two
+ *  seconds, and a bot posts in milliseconds. */
+const MIN_FILL_MS = 1000;
 
 /**
  * The contact form's action — called by ContactForm through useActionState,
@@ -61,9 +64,20 @@ export async function submitContact(
   // see, and submits the instant the page loads. Either earns a success it
   // can learn nothing from — an error would tell it what to change. A
   // missing timer is let through: it is only absent without JavaScript.
+  //
+  // Logged, because a false positive is otherwise invisible: the visitor sees
+  // a thank-you and nothing is saved or sent. That is exactly how the first
+  // version of the honeypot failed — it was named `website`, which browser
+  // autofill and password managers fill in for real people.
   const elapsed = Number(formData.get("elapsed"));
-  if (formData.get("website") || (elapsed > 0 && elapsed < MIN_FILL_MS)) {
-    return { status: "success", confirmed: true };
+  const trap = formData.get(HONEYPOT);
+  if (trap || (elapsed > 0 && elapsed < MIN_FILL_MS)) {
+    console.warn("[contact] dropped as spam", {
+      honeypot: Boolean(trap),
+      elapsed,
+      email: values.email,
+    });
+    return { status: "success", confirmed: false };
   }
 
   const errors = validate(values);
@@ -96,6 +110,7 @@ export async function submitContact(
     return { status: "error", values };
   }
 
+  console.info(`[contact] saved ${id}`);
   const confirmed = await sendEmails(submission, id);
   return { status: "success", confirmed };
 }
