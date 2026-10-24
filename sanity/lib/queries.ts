@@ -71,6 +71,7 @@ export const CONTACT_PAGE_QUERY = defineQuery(`
     ${loc("namePlaceholder")},
     ${loc("companyPlaceholder")},
     ${loc("emailPlaceholder")},
+    ${loc("messagePlaceholder")},
     ${loc("submitLabel")},
     ${loc("metaTitle")},
     ${loc("metaDescription")}

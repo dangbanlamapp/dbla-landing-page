@@ -163,6 +163,7 @@ export async function getContactPage(
     name: text(data?.namePlaceholder),
     company: text(data?.companyPlaceholder),
     email: text(data?.emailPlaceholder),
+    message: text(data?.messagePlaceholder),
     submit: text(data?.submitLabel),
     metaTitle: text(data?.metaTitle),
     metaDescription: text(data?.metaDescription),

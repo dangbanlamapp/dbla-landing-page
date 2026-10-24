@@ -1,29 +1,10 @@
 import { Fragment } from "react";
+import ContactForm from "./ContactForm";
 import ContactInfo from "./ContactInfo";
 import DashedCircle from "./DashedCircle";
-import { PILL } from "./pill";
 import type { SiteSettings } from "./site-settings";
 import { useTranslations } from "next-intl";
 import { RICH } from "./rich";
-
-/**
- * Shared shape of the three fields. Underline-only: no box, no fill — the
- * border is the whole affordance, so the row reads as a ruled line on the
- * orange rather than as a widget sitting on top of it.
- *
- * `border-black/25` is the same stroke DashedCircle uses for the rings, which
- * is what keeps the ruled lines, the cross lines and the circle reading as one
- * drawn layer instead of three near-misses.
- *
- * bg-transparent is not redundant: a bare input paints white in every browser,
- * and on an orange panel that is the whole difference between a line and a box.
- * The autofill overrides are the same fix for Chrome's yellow.
- */
-const FIELD =
-  "w-full border-b border-black/25 bg-transparent py-space--1x text-base uppercase " +
-  "placeholder:text-foreground/70 focus:border-black/60 focus:outline-none " +
-  "[&:-webkit-autofill]:[-webkit-text-fill-color:var(--foreground)] " +
-  "[&:-webkit-autofill]:[transition:background-color_9999s]";
 
 /**
  * The two-column split, written once and applied to BOTH the heading row and
@@ -33,23 +14,12 @@ const FIELD =
  */
 const COLUMNS = "grid grid-cols-1 lg:grid-cols-2";
 
-/** label is the accessible name; text is what the reader actually sees. */
-const FIELDS = [
-  { id: "name", type: "text", autoComplete: "name" },
-  {
-    id: "company",
-    type: "text",
-    autoComplete: "organization",
-  },
-  { id: "email", type: "email", autoComplete: "email" },
-] as const;
-
 /**
  * The page's words, from the Studio's "Contact page" singleton. Every field is
  * optional and each one missing falls back to its messages/ string on its own,
- * so a blank or half-filled document still renders the page whole. The three
- * placeholder keys match FIELDS' ids, which is what lets the loop below read
- * them by id.
+ * so a blank or half-filled document still renders the page whole. The four
+ * placeholder keys match the form's field names, which is what lets
+ * ContactForm read them by name.
  */
 export type ContactCopy = {
   /** Plain text; each newline becomes a line break, as `<br></br>` does in
@@ -59,6 +29,7 @@ export type ContactCopy = {
   name?: string;
   company?: string;
   email?: string;
+  message?: string;
   submit?: string;
 };
 
@@ -222,40 +193,18 @@ export default function Contact({
             needs adjusting.
           */}
           <div className="flex flex-col justify-center px-space-2x py-space-3x lg:border-l lg:border-black/15 lg:py-[8vh] lg:pr-space-6x lg:pl-space-2x">
-            {/*
-              Real inputs, no wiring — the submit path is still to be built, so
-              the button is a `button` and not a `submit`: a submit inside a
-              form with no action reloads the page and silently drops what was
-              typed, which is a worse placeholder than a dead button. Swap the
-              type and add the action together.
-            */}
-            <form className="flex flex-col gap-space-base lg:gap-space-2x">
-              {FIELDS.map((field) => (
-                <div key={field.id}>
-                  {/* The visible text is the placeholder, so the label has to
-                      exist separately for the accessible name — once a reader
-                      starts typing, a placeholder-only field has none. */}
-                  <label htmlFor={field.id} className="sr-only">
-                    {copy[field.id] ?? t(field.id)}
-                  </label>
-                  <input
-                    id={field.id}
-                    name={field.id}
-                    type={field.type}
-                    autoComplete={field.autoComplete}
-                    placeholder={copy[field.id] ?? t(field.id)}
-                    className={FIELD}
-                  />
-                </div>
-              ))}
-
-              <button
-                type="button"
-                className={`${PILL} mt-space-2x self-start bg-background text-foreground lg:mt-space-3x`}
-              >
-                {copy.submit ?? common("contactUs")}
-              </button>
-            </form>
+            {/* The button's fallback lives in Common, which the form does not
+                read, so it is resolved here; the placeholders fall back
+                inside the form, per field. */}
+            <ContactForm
+              copy={{
+                name: copy.name,
+                company: copy.company,
+                email: copy.email,
+                message: copy.message,
+                submit: copy.submit ?? common("contactUs"),
+              }}
+            />
           </div>
         </div>
       </div>

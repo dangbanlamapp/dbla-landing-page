@@ -85,6 +85,21 @@ export type HeadingText = Array<{
   _key: string;
 }>;
 
+export type ContactSubmission = {
+  _id: string;
+  _type: "contactSubmission";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  status?: "new" | "replied" | "archived";
+  name?: string;
+  company?: string;
+  email?: string;
+  message?: string;
+  locale?: string;
+  submittedAt?: string;
+};
+
 export type Testimonial = {
   _id: string;
   _type: "testimonial";
@@ -246,6 +261,8 @@ export type ContactPage = {
   companyPlaceholder_vi?: string;
   emailPlaceholder?: string;
   emailPlaceholder_vi?: string;
+  messagePlaceholder?: string;
+  messagePlaceholder_vi?: string;
   submitLabel?: string;
   submitLabel_vi?: string;
   metaTitle?: string;
@@ -454,7 +471,7 @@ export type Geopoint = {
   alt?: number;
 };
 
-export type AllSanitySchemaTypes = StorySection | SanityImageAssetReference | StoryFigure | Link | HeadingText | Testimonial | TeamMember | Service | Project | SanityImageCrop | SanityImageHotspot | Slug | ContactPage | ProjectsPage | HomePage | SiteSettings | SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityImageMetadata | SanityFileAsset | SanityAssetSourceData | SanityImageAsset | Geopoint;
+export type AllSanitySchemaTypes = StorySection | SanityImageAssetReference | StoryFigure | Link | HeadingText | ContactSubmission | Testimonial | TeamMember | Service | Project | SanityImageCrop | SanityImageHotspot | Slug | ContactPage | ProjectsPage | HomePage | SiteSettings | SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityImageMetadata | SanityFileAsset | SanityAssetSourceData | SanityImageAsset | Geopoint;
 
 // Source: ../dbla-nextjs/sanity/lib/queries.ts
 // Variable: SITE_SETTINGS_QUERY
@@ -477,13 +494,14 @@ export type SITE_SETTINGS_QUERY_RESULT = {
 
 // Source: ../dbla-nextjs/sanity/lib/queries.ts
 // Variable: CONTACT_PAGE_QUERY
-// Query: *[_type == "contactPage" && _id == "contactPage"][0]{    "title": select($locale == "vi" => coalesce(title_vi, title), title),    "body": select($locale == "vi" => coalesce(body_vi, body), body),    "namePlaceholder": select($locale == "vi" => coalesce(namePlaceholder_vi, namePlaceholder), namePlaceholder),    "companyPlaceholder": select($locale == "vi" => coalesce(companyPlaceholder_vi, companyPlaceholder), companyPlaceholder),    "emailPlaceholder": select($locale == "vi" => coalesce(emailPlaceholder_vi, emailPlaceholder), emailPlaceholder),    "submitLabel": select($locale == "vi" => coalesce(submitLabel_vi, submitLabel), submitLabel),    "metaTitle": select($locale == "vi" => coalesce(metaTitle_vi, metaTitle), metaTitle),    "metaDescription": select($locale == "vi" => coalesce(metaDescription_vi, metaDescription), metaDescription)  }
+// Query: *[_type == "contactPage" && _id == "contactPage"][0]{    "title": select($locale == "vi" => coalesce(title_vi, title), title),    "body": select($locale == "vi" => coalesce(body_vi, body), body),    "namePlaceholder": select($locale == "vi" => coalesce(namePlaceholder_vi, namePlaceholder), namePlaceholder),    "companyPlaceholder": select($locale == "vi" => coalesce(companyPlaceholder_vi, companyPlaceholder), companyPlaceholder),    "emailPlaceholder": select($locale == "vi" => coalesce(emailPlaceholder_vi, emailPlaceholder), emailPlaceholder),    "messagePlaceholder": select($locale == "vi" => coalesce(messagePlaceholder_vi, messagePlaceholder), messagePlaceholder),    "submitLabel": select($locale == "vi" => coalesce(submitLabel_vi, submitLabel), submitLabel),    "metaTitle": select($locale == "vi" => coalesce(metaTitle_vi, metaTitle), metaTitle),    "metaDescription": select($locale == "vi" => coalesce(metaDescription_vi, metaDescription), metaDescription)  }
 export type CONTACT_PAGE_QUERY_RESULT = {
   title: string | null;
   body: string | null;
   namePlaceholder: string | null;
   companyPlaceholder: string | null;
   emailPlaceholder: string | null;
+  messagePlaceholder: string | null;
   submitLabel: string | null;
   metaTitle: string | null;
   metaDescription: string | null;
@@ -754,7 +772,7 @@ export type TESTIMONIALS_QUERY_RESULT = Array<{
 declare global {
   interface SanityQueries {
     "\n  *[_type == \"siteSettings\" && _id == \"siteSettings\"][0]{\n    \"description\": select($locale == \"vi\" => coalesce(description_vi, description), description),\n    email,\n    phone,\n    socialLinks[]{ _key, \"label\": select($locale == \"vi\" => coalesce(label_vi, label), label), href },\n    legalLinks[]{ _key, \"label\": select($locale == \"vi\" => coalesce(label_vi, label), label), href }\n  }\n": SITE_SETTINGS_QUERY_RESULT;
-    "\n  *[_type == \"contactPage\" && _id == \"contactPage\"][0]{\n    \"title\": select($locale == \"vi\" => coalesce(title_vi, title), title),\n    \"body\": select($locale == \"vi\" => coalesce(body_vi, body), body),\n    \"namePlaceholder\": select($locale == \"vi\" => coalesce(namePlaceholder_vi, namePlaceholder), namePlaceholder),\n    \"companyPlaceholder\": select($locale == \"vi\" => coalesce(companyPlaceholder_vi, companyPlaceholder), companyPlaceholder),\n    \"emailPlaceholder\": select($locale == \"vi\" => coalesce(emailPlaceholder_vi, emailPlaceholder), emailPlaceholder),\n    \"submitLabel\": select($locale == \"vi\" => coalesce(submitLabel_vi, submitLabel), submitLabel),\n    \"metaTitle\": select($locale == \"vi\" => coalesce(metaTitle_vi, metaTitle), metaTitle),\n    \"metaDescription\": select($locale == \"vi\" => coalesce(metaDescription_vi, metaDescription), metaDescription)\n  }\n": CONTACT_PAGE_QUERY_RESULT;
+    "\n  *[_type == \"contactPage\" && _id == \"contactPage\"][0]{\n    \"title\": select($locale == \"vi\" => coalesce(title_vi, title), title),\n    \"body\": select($locale == \"vi\" => coalesce(body_vi, body), body),\n    \"namePlaceholder\": select($locale == \"vi\" => coalesce(namePlaceholder_vi, namePlaceholder), namePlaceholder),\n    \"companyPlaceholder\": select($locale == \"vi\" => coalesce(companyPlaceholder_vi, companyPlaceholder), companyPlaceholder),\n    \"emailPlaceholder\": select($locale == \"vi\" => coalesce(emailPlaceholder_vi, emailPlaceholder), emailPlaceholder),\n    \"messagePlaceholder\": select($locale == \"vi\" => coalesce(messagePlaceholder_vi, messagePlaceholder), messagePlaceholder),\n    \"submitLabel\": select($locale == \"vi\" => coalesce(submitLabel_vi, submitLabel), submitLabel),\n    \"metaTitle\": select($locale == \"vi\" => coalesce(metaTitle_vi, metaTitle), metaTitle),\n    \"metaDescription\": select($locale == \"vi\" => coalesce(metaDescription_vi, metaDescription), metaDescription)\n  }\n": CONTACT_PAGE_QUERY_RESULT;
     "\n  *[_type == \"homePage\" && _id == \"homePage\"][0]{\n    hero{ \"titleStart\": select($locale == \"vi\" => coalesce(titleStart_vi, titleStart), titleStart), \"titleEnd\": select($locale == \"vi\" => coalesce(titleEnd_vi, titleEnd), titleEnd), \"body\": select($locale == \"vi\" => coalesce(body_vi, body), body) },\n    intro{ \"label\": select($locale == \"vi\" => coalesce(label_vi, label), label), \"statement\": select($locale == \"vi\" => coalesce(statement_vi, statement), statement), \"gap\": select($locale == \"vi\" => coalesce(gap_vi, gap), gap) },\n    services{ \"label\": select($locale == \"vi\" => coalesce(label_vi, label), label), \"title\": select($locale == \"vi\" => coalesce(title_vi, title), title) },\n    motto{ \"label\": select($locale == \"vi\" => coalesce(label_vi, label), label), \"lead\": select($locale == \"vi\" => coalesce(lead_vi, lead), lead), \"title\": select($locale == \"vi\" => coalesce(title_vi, title), title) },\n    projects{ \"title\": select($locale == \"vi\" => coalesce(title_vi, title), title) },\n    whyUs{\n      \"label\": select($locale == \"vi\" => coalesce(label_vi, label), label),\n      \"title\": select($locale == \"vi\" => coalesce(title_vi, title), title),\n      reasons[]{ _key, \"title\": select($locale == \"vi\" => coalesce(title_vi, title), title), \"body\": select($locale == \"vi\" => coalesce(body_vi, body), body) }\n    },\n    team{ \"label\": select($locale == \"vi\" => coalesce(label_vi, label), label), \"title\": select($locale == \"vi\" => coalesce(title_vi, title), title), \"body\": select($locale == \"vi\" => coalesce(body_vi, body), body) },\n    cta{ \"title\": select($locale == \"vi\" => coalesce(title_vi, title), title), \"body\": select($locale == \"vi\" => coalesce(body_vi, body), body) }\n  }\n": HOME_PAGE_QUERY_RESULT;
     "\n  *[_type == \"projectsPage\" && _id == \"projectsPage\"][0]{\n    \"title\": select($locale == \"vi\" => coalesce(title_vi, title), title),\n    \"intro\": select($locale == \"vi\" => coalesce(intro_vi, intro), intro),\n    \"metaTitle\": select($locale == \"vi\" => coalesce(metaTitle_vi, metaTitle), metaTitle),\n    \"metaDescription\": select($locale == \"vi\" => coalesce(metaDescription_vi, metaDescription), metaDescription)\n  }\n": PROJECTS_PAGE_QUERY_RESULT;
     "\n  *[_type == \"project\" && defined(slug.current)] | order(orderRank) {\n    _id,\n    name,\n    \"slug\": slug.current,\n    \"hasPage\": coalesce(hasPage, true),\n    \"type\": select($locale == \"vi\" => coalesce(type_vi, type), type),\n    \"blurb\": select($locale == \"vi\" => coalesce(blurb_vi, blurb), blurb),\n    cardImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n, \"alt\": select($locale == \"vi\" => coalesce(alt_vi, alt), alt) },\n    heroImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  },\n  crop,\n  hotspot\n }\n  }\n": PROJECTS_QUERY_RESULT;
