@@ -6,6 +6,7 @@ import { submitContact } from "@/app/[locale]/contact/actions";
 import { PILL } from "./pill";
 import {
   CONTACT_FIELDS,
+  HONEYPOT,
   LIMITS,
   type ContactField,
   type ContactState,
@@ -122,12 +123,18 @@ function Form({
 
       {/* The honeypot: off-screen rather than display:none, which some bots
           know to skip, and out of the tab order and the accessibility tree so
-          no person ever reaches it. Filled means a bot. */}
+          no person ever reaches it. Filled means a bot — so nothing a person
+          uses may fill it either: see HONEYPOT for the name, and the data-
+          attributes are the opt-outs 1Password, LastPass and Bitwarden
+          honour. */}
       <input
         type="text"
-        name="website"
+        name={HONEYPOT}
         tabIndex={-1}
         autoComplete="off"
+        data-1p-ignore
+        data-lpignore="true"
+        data-bwignore
         aria-hidden
         className="absolute -left-[9999px] h-px w-px opacity-0"
       />

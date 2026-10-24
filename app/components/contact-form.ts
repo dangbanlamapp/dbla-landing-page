@@ -10,6 +10,14 @@ export const CONTACT_FIELDS = ["name", "company", "email", "message"] as const;
 export type ContactField = (typeof CONTACT_FIELDS)[number];
 
 /**
+ * The hidden spam trap's name. It must mean nothing to autofill: Chrome and
+ * password managers match fields by name and ignore `autocomplete="off"`, so
+ * a trap called `website` or `url` gets filled for real people and their
+ * message is dropped as spam.
+ */
+export const HONEYPOT = "_gotcha";
+
+/**
  * Character caps, checked on the server and mirrored as `maxLength` so a
  * reader is stopped while typing rather than told afterwards. Generous on
  * purpose — they exist to refuse junk, not to edit anyone. 254 is the longest
