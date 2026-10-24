@@ -193,7 +193,7 @@ function Form({
         <button
           type="submit"
           disabled={pending}
-          className={`${PILL} bg-background text-foreground disabled:opacity-60`}
+          className={`${PILL} cursor-pointer bg-background text-foreground disabled:cursor-not-allowed disabled:opacity-60`}
         >
           {pending ? t("sending") : copy.submit}
         </button>

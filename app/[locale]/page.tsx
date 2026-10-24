@@ -42,7 +42,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
         have shown straight through. main needs its own opaque paint to be the
         sheet that slides off the footer.
 
-        `relative z-1` then settles the paint order against the footer's -z-1.
+        `relative z-1` then settles the paint order against the footer's z-0.
         Both are viewport-fixed siblings, so DOM order alone would put the
         later one — the footer — on top.
 

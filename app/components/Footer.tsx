@@ -7,6 +7,8 @@ import { useGSAP } from "@gsap/react";
 
 import DashedCircle from "./DashedCircle";
 import LocalTime from "./LocalTime";
+import TransitionLink from "./TransitionLink";
+import { NAV_LINKS, isRoute } from "./nav-links";
 // Shared with MenuPanel, which prints the same legal row inside the open menu.
 import { YEAR } from "./legal";
 import { useSiteSettings } from "./SiteSettingsProvider";
@@ -178,8 +180,10 @@ const REVEAL_SHIFT = 15;
 
 export default function Footer() {
   const t = useTranslations("Footer");
+  const nav = useTranslations("Nav");
+  const info = useTranslations("ContactInfo");
   const common = useTranslations("Common");
-  const { legalLinks } = useSiteSettings();
+  const { legalLinks, socialLinks } = useSiteSettings();
   const container = useRef<HTMLElement>(null);
   const runway = useRef<HTMLDivElement>(null);
 
@@ -282,11 +286,18 @@ export default function Footer() {
         uncovers it from the bottom edge upward, so what reads as the footer
         rising into view is really the sheet above it being pulled away.
 
-        -z-1 puts it under main (which carries `relative z-1` and the opaque
-        background that does the covering). Same idiom HeaderBg's backdrop
-        uses. Nothing paints over it from below: html has no background of its
-        own, so body's beige is propagated to the canvas, which is painted
-        before any negative-z-index content.
+        z-0 puts it under main (which carries `relative z-1` and the opaque
+        background that does the covering), and under the header, menu and
+        transition overlay (z-40 and up).
+
+        z-0 and NOT -z-1, which is what this used to be and is why none of the
+        footer's links could be clicked. A negative z-index paints below every
+        in-flow block of the root stacking context — body, the provider
+        wrappers, the runway above — and hit-testing follows paint order. Those
+        boxes are transparent, so the footer showed through them, but they were
+        still the topmost boxes under the cursor and took every click. z-0
+        lifts the footer above the plain in-flow boxes while keeping it under
+        everything that is explicitly layered.
 
         This survives Lenis only because SmoothScroll runs it in `root` mode,
         where it drives a genuine native window scroll. A transform-based
@@ -305,7 +316,7 @@ export default function Footer() {
       <section
         id="footer"
         ref={container}
-        className={`${FOOTER_VARS} fixed bottom-0 left-0 -z-1 h-screen w-full overflow-hidden`}
+        className={`${FOOTER_VARS} fixed bottom-0 left-0 z-0 h-screen w-full overflow-hidden`}
       >
         <div
           id="footer-circle"
@@ -427,33 +438,60 @@ export default function Footer() {
             </p>{" "}
           </div>
           <div className="flex w-full flex-col items-center gap-space-3x lg:flex-row lg:items-end lg:gap-0">
-            <nav className="text-base font-medium uppercase lg:flex-1 lg:text-md">
+            {/* The menu's own list and the site settings' socials, so the
+                footer can never offer a link the menu does not. */}
+            <nav
+              aria-label={nav("main")}
+              className="text-base font-medium uppercase lg:flex-1 lg:text-md"
+            >
               <ul className="text-center lg:text-left">
-                <li>{t("home")}</li>
-                <li>{t("about")}</li>
-                <li>{t("services")}</li>
-                <li>{t("contact")}</li>
+                {NAV_LINKS.map(({ key, href }) => {
+                  // Same split as MenuPanel: routes through TransitionLink,
+                  // in-page hashes as plain anchors for Lenis.
+                  const Tag = isRoute(href) ? TransitionLink : "a";
+                  return (
+                    <li key={key}>
+                      <Tag href={href} className="hover:underline">
+                        {nav(key)}
+                      </Tag>
+                    </li>
+                  );
+                })}
               </ul>
             </nav>
             <div className="flex flex-col items-center gap-space--1x">
               <p className="heading-style text-center text-xl lg:text-3xl">
                 {t("tagline")}
               </p>
-              <a
-                className="rounded-md bg-background px-space-2x py-space--2x text-base font-bold tracking-tighter uppercase lg:text-md"
-                href=""
+              {/* Inverts on hover — beige-on-dark — rather than PILL's opacity
+                  dip, which barely reads against the orange disc. */}
+              <TransitionLink
+                className="rounded-md bg-background px-space-2x py-space--2x text-base font-bold tracking-tighter uppercase transition-colors hover:bg-foreground hover:text-background focus-visible:bg-foreground focus-visible:text-background lg:text-md"
+                href="/contact"
               >
                 {common("getInTouch")}
-              </a>
-              <a className="text-base text-black lg:text-md" href="">
-                contact@dbla.com
+              </TransitionLink>
+              <a
+                className="text-base text-black hover:underline focus-visible:underline lg:text-md"
+                href="mailto:Dangbanlamapp@gmail.com"
+              >
+                Dangbanlamapp@gmail.com
               </a>
             </div>
-            <ul className="text-center text-base font-medium uppercase lg:flex-1 lg:text-right lg:text-md">
-              <li>instagram</li>
-              <li>tiktok</li>
-              <li>linkedIn</li>
-            </ul>
+            <nav
+              aria-label={info("social")}
+              className="text-base font-medium uppercase lg:flex-1 lg:text-md"
+            >
+              <ul className="text-center lg:text-right">
+                {socialLinks.map(({ label, href }) => (
+                  <li key={label}>
+                    <a href={href} className="hover:underline">
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           </div>
         </div>
       </section>

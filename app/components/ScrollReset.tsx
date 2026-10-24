@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { useLenis } from "lenis/react";
+import { scrollToAnchor, whenFree } from "./scroll-hold";
 
 /**
  * Lands every client-side route change at the top of the new page.
@@ -32,8 +33,13 @@ import { useLenis } from "lenis/react";
  *
  * Pathname only. A query-string change on the same page is not a new page, and
  * in-page `#anchor` links never change the pathname, so Lenis's `anchors`
- * option keeps handling those. A cross-page link to `/page#anchor` would land
- * at the top rather than the anchor — there are none on the site yet.
+ * option (and TransitionLink) keeps handling those.
+ *
+ * A cross-page link to `/page#anchor` — the nav's About, "/#our-team" — still
+ * lands at the top first, for the trigger reason above, and then eases to the
+ * anchor once the page is free to scroll: after the wipe's hold lifts and its
+ * ScrollTrigger.refresh() has re-measured the pins. The hash is read at that
+ * point, not now, so it never depends on when Next writes the new URL.
  */
 export default function ScrollReset() {
   const pathname = usePathname();
@@ -54,6 +60,8 @@ export default function ScrollReset() {
     // provider's effect) — the native call is then the whole job.
     if (lenis) lenis.scrollTo(0, { immediate: true, force: true });
     else window.scrollTo(0, 0);
+
+    if (lenis) whenFree(lenis, () => scrollToAnchor(lenis, location.hash));
   }, [pathname, lenis]);
 
   return null;
