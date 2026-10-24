@@ -93,7 +93,29 @@
     "body": "Đặt lịch gọi tư vấn 15 phút. Chúng ta sẽ trao đổi về dự án, mục tiêu của bạn và liệu chúng tôi có phải là đối tác phù hợp.",
     "name": "Tên của bạn",
     "company": "Tên công ty",
-    "email": "Email"
+    "email": "Email",
+    "message": "Chia sẻ về dự án của bạn (không bắt buộc)",
+    "sending": "Đang gửi…",
+    "successTitle": "Cảm ơn bạn",
+    "successBody": "Chúng tôi đã nhận được tin nhắn và sẽ sớm liên hệ để sắp xếp cuộc gọi.",
+    "successConfirmation": "Email xác nhận đang được gửi đến hộp thư của bạn.",
+    "sendAnother": "Gửi tin nhắn khác",
+    "required": "Bắt buộc",
+    "invalidEmail": "Vui lòng nhập email hợp lệ",
+    "tooLong": "Quá dài",
+    "serverError": "Đã có lỗi xảy ra và tin nhắn chưa được gửi. Vui lòng thử lại hoặc gửi email trực tiếp cho chúng tôi."
+  },
+  "ContactEmail": {
+    "subject": "Chúng tôi đã nhận được tin nhắn của bạn",
+    "greeting": "Chào {name},",
+    "body": "Cảm ơn bạn đã liên hệ với DBLA. Chúng tôi đã nhận được tin nhắn và sẽ sớm liên hệ lại để sắp xếp một cuộc gọi tư vấn 15 phút.",
+    "recap": "Đây là nội dung bạn đã gửi:",
+    "name": "Tên",
+    "company": "Công ty",
+    "email": "Email",
+    "message": "Tin nhắn",
+    "signoff": "Hẹn sớm trò chuyện,",
+    "team": "Đội ngũ DBLA"
   },
   "Footer": {
     "hcmc": "TP. Hồ Chí Minh, Việt Nam",

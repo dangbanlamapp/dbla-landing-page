@@ -47,8 +47,8 @@ export default async function ContactPage({
 
     BackHeader in place of Header, which drops the menu and everything holding
     it up — the `open` state, the Escape listener and MenuPanel itself, i.e. all
-    of the client JavaScript this route was shipping. Nothing on this page is
-    interactive yet, so it now hydrates nothing at all.
+    of the client JavaScript this route was shipping. The one thing that
+    hydrates is the form itself (ContactForm), which posts to ./actions.ts.
 
     Contact is exactly one viewport tall, so this route does not scroll.
   */

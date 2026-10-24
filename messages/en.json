@@ -93,7 +93,29 @@
     "body": "Book a 15-minute discovery call. We'll talk through your project, your goals, and whether we're the right partner.",
     "name": "Your name",
     "company": "Your company name",
-    "email": "Email"
+    "email": "Email",
+    "message": "Tell us about your project (optional)",
+    "sending": "Sending…",
+    "successTitle": "Thank you",
+    "successBody": "Your message is in. We'll get back to you shortly to set up a call.",
+    "successConfirmation": "A confirmation is on its way to your inbox.",
+    "sendAnother": "Send another message",
+    "required": "Required",
+    "invalidEmail": "Enter a valid email address",
+    "tooLong": "Too long",
+    "serverError": "Something went wrong and your message wasn't sent. Please try again, or email us directly."
+  },
+  "ContactEmail": {
+    "subject": "We've received your message",
+    "greeting": "Hi {name},",
+    "body": "Thanks for reaching out to DBLA. We've received your message and will get back to you shortly to set up a 15-minute discovery call.",
+    "recap": "Here's what you sent us:",
+    "name": "Name",
+    "company": "Company",
+    "email": "Email",
+    "message": "Message",
+    "signoff": "Talk soon,",
+    "team": "The DBLA team"
   },
   "Footer": {
     "hcmc": "Hochiminh City, Vietnam",
