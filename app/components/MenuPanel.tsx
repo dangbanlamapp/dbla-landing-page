@@ -88,8 +88,6 @@ export default function MenuPanel({
 
   useGSAP(
     () => {
-      gsap.set(container.current, { opacity: 1 });
-
       const mm = gsap.matchMedia();
 
       mm.add(
@@ -122,6 +120,24 @@ export default function MenuPanel({
               at,
             );
           };
+
+          // The panel's visibility lives in the timeline, beside the sheets,
+          // rather than in a one-off `gsap.set` on mount. It used to be the
+          // latter, and that split is what let first-time visitors land on a
+          // dropped menu: the set revealed the container, the sheets' parked
+          // -100% (their fromTo start state) went missing, and nothing hid the
+          // sheets sitting at their natural, fully-open spot. One owner means
+          // the two can only be undone together, and undone, the container
+          // falls back to the markup's `opacity-0` — closed, not open.
+          //
+          // A hair of duration rather than none: on reverse it is the last
+          // thing to go, hiding the container only once both sheets are gone.
+          tl.fromTo(
+            container.current,
+            { autoAlpha: 0 },
+            { autoAlpha: 1, duration: reduced ? 0 : 0.01 },
+            0,
+          );
 
           addSheet(backShell.current, backCurve.current, 0);
           addSheet(frontShell.current, frontCurve.current, reduced ? 0 : LEAD);

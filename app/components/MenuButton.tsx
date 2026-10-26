@@ -74,27 +74,6 @@ export default function MenuButton({
       }).chars;
 
       /**
-       * Opacity only, and deliberately so — parking the CLOSE characters at
-       * -100% here as well would break them exactly the way it broke the
-       * panel in MenuPanel: this set writes a resolved matrix, the timeline
-       * below is built inside a matchMedia context, and its fromTo re-parses
-       * that matrix from the computed style. A matrix cannot say which of its
-       * pixels came from a percentage, so the offset is banked as a literal
-       * `y` and the tween's yPercent stacks on top of it. The characters would
-       * rest two line-boxes up and "arrive" one line-box up, i.e. never.
-       *
-       * The timeline's fromTo renders its from-state the moment it is created,
-       * so it parks them itself, with one owner for the transform.
-       *
-       * Opacity is safe on this line because nothing else animates it. The
-       * markup carries `opacity-0` because the two labels share a grid cell
-       * and would otherwise print on top of each other in the server HTML;
-       * useGSAP runs in a layout effect, i.e. before the browser paints, so
-       * clearing it here is never visible as a flash.
-       */
-      gsap.set(closeLabel.current, { opacity: 1 });
-
-      /**
        * Reduced motion collapses the travel to nothing rather than dropping
        * the toggle: the label still has to change, it just changes instantly.
        *
@@ -140,7 +119,34 @@ export default function MenuButton({
             .fromTo(closeChars, { yPercent: -100 }, { yPercent: 0, stagger }, 0)
             // Position 0 and the shared defaults, so the fill arrives on the
             // same frames the roll does rather than trailing it.
-            .fromTo(disc.current, { scale: 0 }, { scale: 1 }, 0);
+            .fromTo(disc.current, { scale: 0 }, { scale: 1 }, 0)
+            /**
+             * The CLOSE label's opacity, in the timeline beside the transforms
+             * rather than a one-off `gsap.set` on mount. The markup carries
+             * `opacity-0` because the two labels share a grid cell and would
+             * otherwise print on top of each other in the server HTML. A
+             * mount-time set used to clear it — and when the characters'
+             * parked -100% (the fromTo above) went missing on a first visit,
+             * the set still held and both words printed at once. With one
+             * owner the two are undone together, and undone, the label falls
+             * back to `opacity-0`.
+             *
+             * Opacity only, never a parked transform outside the timeline: a
+             * set writes a resolved matrix, and the fromTo above would re-parse
+             * it from the computed style, banking the offset as a literal `y`
+             * that its yPercent then stacks on — resting two line-boxes up and
+             * "arriving" one up, i.e. never. The same thing once broke the
+             * panel in MenuPanel.
+             *
+             * A hair of duration so reverse hides it last, once its characters
+             * are already back behind their masks.
+             */
+            .fromTo(
+              closeLabel.current,
+              { opacity: 0 },
+              { opacity: 1, duration: reduced ? 0 : 0.01 },
+              0,
+            );
 
           timeline.current = tl;
 
