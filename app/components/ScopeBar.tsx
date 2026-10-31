@@ -56,6 +56,18 @@ type ScopeBarProps = {
    * reticle); "top" hangs them all from a shared top edge (reads as a ruler).
    */
   align?: "center" | "top";
+  /**
+   * Tick colour: "dark" for the light page, "light" for a dark ground such as
+   * the Cta's disc. Same contract as DashedCircle's `tone`, and a prop for the
+   * same reason — a `text-*`/`bg-*` override could not reliably beat the
+   * colour utility already on each tick.
+   */
+  tone?: "dark" | "light";
+};
+
+const TONES = {
+  dark: { major: "bg-foreground/60", minor: "bg-foreground/25" },
+  light: { major: "bg-background/60", minor: "bg-background/25" },
 };
 
 /**
@@ -76,6 +88,7 @@ export default function ScopeBar({
   majorLength = "1rem",
   minorLength = "0.375rem",
   align = "center",
+  tone = "dark",
 }: ScopeBarProps) {
   // Force an odd count: with an even one the centre of the bar falls in the
   // *gap* between the two middle ticks, so nothing can sit on the centre line
@@ -112,7 +125,7 @@ export default function ScopeBar({
             style={{ height: isMajor ? majorLength : minorLength }}
             className={`w-px shrink-0 ${thinned ? "max-lg:hidden" : ""} ${
               collapsed ? "scale-y-0" : ""
-            } ${isMajor ? "bg-foreground/60" : "bg-foreground/25"}`}
+            } ${isMajor ? TONES[tone].major : TONES[tone].minor}`}
           ></span>
         );
       })}

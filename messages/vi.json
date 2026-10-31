@@ -43,7 +43,8 @@
   "Hero": {
     "titleStart": "Chúng tôi xây dựng<br></br> <accent>sản phẩm số</accent>",
     "titleEnd": "giúp doanh nghiệp<br></br> <accent>tăng trưởng</accent>",
-    "body": "Chúng tôi là studio sản phẩm, đồng hành cùng các nhà sáng lập không chuyên về công nghệ trong hành trình chuyển đổi số, với trọng tâm là kết quả kinh doanh"
+    "body": "Chúng tôi là studio sản phẩm, đồng hành cùng các nhà sáng lập không chuyên về công nghệ trong hành trình chuyển đổi số, với trọng tâm là kết quả kinh doanh",
+    "services": "Web, ứng dụng, quy trình AI và hơn thế nữa.."
   },
   "Intro": {
     "label": "sứ mệnh",

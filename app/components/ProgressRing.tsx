@@ -170,8 +170,10 @@ export default function ProgressRing({ size, id }: ProgressRingProps) {
               />
             </mask>
 
-            {/* The track: the run not yet made, faint. */}
-            <use href={`#${ticksId}`} className="stroke-black/15" />
+            {/* The track: the run not yet made, faint. Light rather than dark
+                because the dial sits on the Projects backdrop — a photo under
+                an 80% black overlay — where black ticks disappeared. */}
+            <use href={`#${ticksId}`} className="stroke-white/20" />
 
             {/*
               The filled dial: the same ticks, darker, revealed by the mask. It
@@ -181,7 +183,7 @@ export default function ProgressRing({ size, id }: ProgressRingProps) {
             <use
               href={`#${ticksId}`}
               mask={`url(#${maskId})`}
-              className="stroke-black/60"
+              className="stroke-white/85"
             />
           </g>
         </svg>

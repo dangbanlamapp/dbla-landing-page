@@ -53,6 +53,19 @@ type DashedCircleProps = {
    * proportion as the ring expands, which a fixed length would not.
    */
   label?: string;
+  /**
+   * Stroke and dot colour: "dark" for the light page, "light" for a dark
+   * ground such as the Cta's disc. A prop rather than a `text-*` override in
+   * `className`: two colour utilities on one element resolve by stylesheet
+   * order, not class order, so an override there would not reliably win. Only
+   * the ring and dots take it — the label keeps inheriting its colour.
+   */
+  tone?: "dark" | "light";
+};
+
+const TONES = {
+  dark: { ring: "border-black/25", dot: "bg-black" },
+  light: { ring: "border-background/25", dot: "bg-background" },
 };
 
 export default function DashedCircle({
@@ -64,6 +77,7 @@ export default function DashedCircle({
   spin,
   growTo,
   label,
+  tone = "dark",
 }: DashedCircleProps) {
   const dotPositions =
     dots === "vertical"
@@ -87,12 +101,12 @@ export default function DashedCircle({
         data-grow={growTo}
         data-spin={spin}
         style={{ height: collapsed ? 0 : size }}
-        className="relative aspect-square rounded-full border border-dashed border-black/25"
+        className={`relative aspect-square rounded-full border border-dashed ${TONES[tone].ring}`}
       >
         {dotPositions.map((position) => (
           <div
             key={position}
-            className={`absolute ${position} h-1 w-1 rounded-full bg-black lg:h-1.5 lg:w-1.5`}
+            className={`absolute ${position} h-1 w-1 rounded-full ${TONES[tone].dot} lg:h-1.5 lg:w-1.5`}
           ></div>
         ))}
         {label && (

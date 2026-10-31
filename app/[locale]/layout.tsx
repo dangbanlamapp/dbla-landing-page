@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import "lenis/dist/lenis.css";
 import "../globals.css";
+import NoiseOverlay from "@/app/components/NoiseOverlay";
 import Preloader from "@/app/components/Preloader";
 import SmoothScroll from "@/app/components/SmoothScroll";
 import { SiteSettingsProvider } from "@/app/components/SiteSettingsProvider";
@@ -108,6 +109,12 @@ export default async function RootLayout({
           on navigation.
         */}
         <SanityLive />
+        {/*
+          Film grain over the whole page — replaces the halftone body::after in
+          globals.css. Settings per viewport live in noise-config.ts; in dev it
+          also mounts the tuner panel that edits them.
+        */}
+        <NoiseOverlay />
       </body>
     </html>
   );
