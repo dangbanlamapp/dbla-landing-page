@@ -43,7 +43,8 @@
   "Hero": {
     "titleStart": "We build<br></br> <accent>digital products</accent>",
     "titleEnd": "that grow your<br></br> <accent>business</accent>",
-    "body": "We are a product studio that helps non-technical founders go digital, with a focus on business outcomes"
+    "body": "We are a product studio that helps non-technical founders go digital, with a focus on business outcomes",
+    "services": "Web, apps, AI workflow and more.."
   },
   "Intro": {
     "label": "our mission",

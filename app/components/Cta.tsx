@@ -13,66 +13,45 @@ import { useTranslations } from "next-intl";
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
 /**
- * Both wedges share an apex at the dead centre of the square below, which is
- * also that box's transform-origin — so `scale`/`rotate` stay available for
- * later without touching the clip path.
- *
- * The reveal itself does move the points: one base corner stays put while the
- * other sweeps the full 30%–70% span, so the wedge unfolds about a held edge
- * rather than spreading symmetrically about its axis — and the two sides hold
- * opposite edges, so they open into each other. A transform cannot express
- * that: `scaleY` would open both edges at once, and it could never reach FULL
- * below. This one genuinely wants a clip-path tween.
- *
- * GSAP interpolates the polygon point by point, so all three states must carry
- * the same point count — hence six points for what reads as a triangle. Each
- * BASE CORNER is written twice; the apex is the pinned pair at either end of
- * the list and never moves. That is what makes FULL expand from the bases: on
- * the way out, one copy of each base corner runs to the box corner while the
- * other travels along to the centre line, so the wedge unwraps around the
- * corners and the orange floods in from the outer edges. The centre stays
- * pinched at the apex until the last frame, where the apex ends up collinear
- * on the rectangle's inner edge.
- *
- * Doubling the base corners rather than the apex is the whole difference from
- * an apex-driven expansion, which would part the centre seam first instead.
- *
- * Traversal is apex -> upper base pair -> lower base pair -> apex throughout,
- * so every in-between frame is a simple, non-self-intersecting polygon.
- *
- * 30%/70% puts the open base corners 20% of the box either side of centre over
- * a 50% horizontal run, i.e. a half-angle of atan(0.4) ≈ 21.8°. FULL is in the
- * square's own coordinates, so its 0%/100% edges sit far outside the viewport
- * and the rectangle over-covers at any aspect ratio; only the x: 50% seam is
- * on screen, landing exactly on #y-line.
+ * Share of the pin the text entrance occupies, from the top of the pin. What is
+ * left over at the end is a held tail with nothing moving, so the finished
+ * section sits still for half a screen before it scrolls off.
  */
-const FAN = {
-  left: {
-    closed: "polygon(50% 50%, 0% 30%, 0% 30%, 0% 30%, 0% 30%, 50% 50%)",
-    open: "polygon(50% 50%, 0% 30%, 0% 30%, 0% 70%, 0% 70%, 50% 50%)",
-    full: "polygon(51% 50%, 51% 0%, 0% 0%, 0% 100%, 51% 100%, 51% 50%)",
-  },
-  right: {
-    closed: "polygon(50% 50%, 100% 70%, 100% 70%, 100% 70%, 100% 70%, 50% 50%)",
-    open: "polygon(50% 50%, 100% 30%, 100% 30%, 100% 70%, 100% 70%, 50% 50%)",
-    full: "polygon(49% 50%, 49% 0%, 100% 0%, 100% 100%, 49% 100%, 49% 50%)",
-  },
-};
+const TEXT_IN = 0.5;
 
 /**
- * Share of the pin each entrance occupies. Both start at the top of the pin and
- * overlap; whatever is left over at the end is a held tail with nothing moving.
+ * Hero's ring stagger (HeaderBg's `i * 0.25` over a 2s growth), kept as the
+ * same proportion of the rings' run here: each ring starts this share of the
+ * run after the one inside it. The rotation is likewise 0.9 of the growth, as
+ * HeaderBg's 1.8 against 2, so a ring stops turning just before it stops
+ * growing.
  */
-const FAN_REVEAL = 0.5;
-const RING_GROW = 0.5;
+const RING_STAGGER = 0.125;
+const RING_TURN = 0.9;
 
 /**
- * The expansion picks up where the entrance ends and runs to the end of the
- * pin, so the tail that used to be a dead hold is now the flood to full-bleed
- * orange. Starts at RING_GROW rather than a literal so retiming the entrance
- * drags the flood along with it.
+ * How far into their run the rings hold back before opening, so they arrive
+ * over dark rather than on the beige. The disc owns the first half of the run
+ * and eases in (scale = progress²), so it is barely a quarter grown at the
+ * midpoint of its own scrub; 0.35 waits until it is ~70% through its scroll,
+ * about half its diameter, by which point the rings' burst lands on it.
  */
-const FAN_EXPAND = 1 - RING_GROW;
+const RING_DELAY = 0.35;
+
+/**
+ * Where the copy under the heading starts, as a share of TEXT_IN: the heading's
+ * lines lead and the body and button follow while the last line is still
+ * landing, so the three read as one arrival rather than a queue.
+ */
+const FADE_AT = TEXT_IN * 0.4;
+
+/**
+ * The dark disc's diameter: the viewport diagonal, so at scale 1 its rim lands
+ * exactly on the corners and the whole ease plays where it can be seen (same
+ * reasoning as PageTransition's DIAGONAL). +2px pushes the antialiased edge
+ * just past the corners. Pure CSS, so a resize stays covered.
+ */
+const DISC = "calc(hypot(100vw, 100vh) + 2px)";
 
 /** The Studio's Homepage → Call to action. Each field missing falls back to
  *  messages/. */
@@ -82,7 +61,6 @@ export default function Cta({ copy: words = {} }: { copy?: CtaCopy }) {
   const t = useTranslations("Cta");
   const common = useTranslations("Common");
   const container = useRef<HTMLElement>(null);
-  const ringRotator = useRef<HTMLDivElement>(null);
   const yLine = useRef<HTMLDivElement>(null);
 
   useGSAP(
@@ -98,6 +76,31 @@ export default function Cta({ copy: words = {} }: { copy?: CtaCopy }) {
         },
       });
 
+      // The dark disc grows over the last half-screen before the pin: from the
+      // section's top reaching the viewport's middle to it reaching the top,
+      // so it covers the screen on the frame the pin takes hold. Its centre is
+      // the section's, which sits on the viewport's bottom edge at the start —
+      // so the disc rises into view from below as it grows, and is centred by
+      // the time it is full.
+      //
+      // Scrubbed and on its own trigger rather than in the pinned timeline:
+      // it has to finish *before* the pin, where the text starts. fromTo so a
+      // refresh mid-scroll can never latch a half-grown start value.
+      gsap.fromTo(
+        "[data-disc]",
+        { scale: 0 },
+        {
+          scale: 1,
+          ease: "power2.in",
+          scrollTrigger: {
+            trigger: container.current,
+            start: "top center",
+            end: "top top",
+            scrub: true,
+          },
+        },
+      );
+
       // One timeline second == one viewport of scroll, same convention as
       // HeaderBg — that is what lets the constants above read directly as
       // fractions of the pin. This empty tween on a throwaway object is what
@@ -106,62 +109,82 @@ export default function Cta({ copy: words = {} }: { copy?: CtaCopy }) {
       // later cannot silently stretch the scrub. Nothing renders here.
       scroll.to({}, { duration: 1 }, 0);
 
-      // fromTo, not to: ScrollTrigger re-renders progress 0 on every refresh,
-      // and a plain `to` would have latched its start value from whatever the
-      // element read at build time. Pinning down both ends keeps a refresh
-      // mid-scroll from baking a half-open wedge in as the start state.
-      (["left", "right"] as const).forEach((side) => {
-        scroll.fromTo(
-          `[data-fan="${side}"]`,
-          { clipPath: FAN[side].closed },
-          {
-            clipPath: FAN[side].open,
-            duration: FAN_REVEAL,
-            ease: "power2.inOut",
-          },
-          0,
-        );
+      // Same contract as Hero and Intro: data-split declares which way the
+      // heading's lines travel. Linear rather than an ease, like every other
+      // scrubbed line reveal on the site: the stagger already gives the lines
+      // their rhythm, and an ease on a scrub reads as the text lagging the
+      // scroll. The lines' tween is built in onSplit and returned, so an
+      // autoSplit re-split kills it — which also lifts it out of `scroll` —
+      // and the next onSplit places a fresh one at the same position.
+      gsap.utils
+        .toArray<HTMLElement>("[data-split]", container.current)
+        .forEach((el) => {
+          const yPercent = el.dataset.split === "down" ? -150 : 150;
 
-        // immediateRender: false is load-bearing. A fromTo renders its start
-        // value the moment it is built, no matter where it sits on the
-        // timeline — so without this the OPEN wedge would be stamped in at
-        // build time and the section would arrive already revealed, undoing
-        // the CLOSED markup above it.
-        scroll.fromTo(
-          `[data-fan="${side}"]`,
-          { clipPath: FAN[side].open },
-          {
-            clipPath: FAN[side].full,
-            duration: FAN_EXPAND,
-            ease: "power2.inOut",
-            immediateRender: false,
-          },
-          RING_GROW,
-        );
+          SplitText.create(el, {
+            type: "lines",
+            mask: "lines",
+            // Keeps the mask off the caps at leading-heading (0.75), as Hero.
+            linesClass: "pb-[0.1em]",
+            autoSplit: true,
+            onSplit: (self) => {
+              // fromTo for the same refresh reason as the disc. The stagger is
+              // carved out of TEXT_IN rather than added on top, so the last
+              // line lands exactly at TEXT_IN whatever the line count.
+              const stagger = TEXT_IN / 4 / Math.max(self.lines.length - 1, 1);
+              const lines = gsap.fromTo(
+                self.lines,
+                { yPercent },
+                {
+                  yPercent: 0,
+                  duration: TEXT_IN - stagger * (self.lines.length - 1),
+                  ease: "none",
+                  stagger,
+                },
+              );
+              scroll.add(lines, 0);
+              return lines;
+            },
+          });
+        });
+
+      // The body and button: Hero's fade-and-rise for supporting copy,
+      // staggered so the button lands last, and finishing on TEXT_IN with the
+      // heading. autoAlpha so the hidden button cannot be clicked or tabbed to
+      // before it has arrived.
+      scroll.fromTo(
+        "[data-fade]",
+        { autoAlpha: 0, y: 16 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: (TEXT_IN - FADE_AT) * 0.75,
+          ease: "power2.out",
+          stagger: (TEXT_IN - FADE_AT) * 0.25,
+        },
+        FADE_AT,
+      );
+
+      // ── The rings ──────────────────────────────────────────────────────────
+      // They span both of the triggers above: they start with the disc, as the
+      // section's top crosses the viewport's middle, and finish with the text,
+      // TEXT_IN into the pin. Neither existing trigger covers that, so they get
+      // their own. Its end is measured from its start — half a screen to the
+      // pin plus TEXT_IN of the pin — and the pin spacer only pushes what comes
+      // after the pin, so the end lands on the text's last frame.
+      //
+      // scrub: 1 to match the pinned timeline, so the rings and the text
+      // trail the scroll by the same amount and really do land together.
+      // Timeline units are a share of this run, 0 to 1.
+      const orbit = gsap.timeline({
+        scrollTrigger: {
+          trigger: container.current,
+          start: "top center",
+          end: () => "+=" + window.innerHeight * (0.5 + TEXT_IN),
+          scrub: 1,
+          invalidateOnRefresh: true,
+        },
       });
-
-      // The centre line has nothing left to mark once the wedges close over it,
-      // so it retracts on the flood's beat — same position, same duration, same
-      // ease, so the two read as one move rather than two that nearly agree.
-      //
-      // scaleY collapses it about its own centre, so the line withdraws to the
-      // apex the wedges are still pinched at instead of sliding off an edge —
-      // and it stays a compositor transform, unlike tweening its height.
-      //
-      // A ref, not "#y-line": HeaderBg renders that same id, and leaning on the
-      // useGSAP scope to disambiguate a genuinely duplicated id is a trap for
-      // whoever moves this markup next.
-      // scroll.fromTo(
-      //   yLine.current,
-      //   { scaleY: 1 },
-      //   {
-      //     scaleY: 0,
-      //     duration: FAN_EXPAND,
-      //     ease: "power2.inOut",
-      //     immediateRender: false,
-      //   },
-      //   RING_GROW,
-      // );
 
       // Each ring carries its own target diameter in data-size, so the tween
       // always lands on the unit the markup declares (keeps it responsive).
@@ -172,74 +195,69 @@ export default function Cta({ copy: words = {} }: { copy?: CtaCopy }) {
         container.current,
       );
 
-      rings.forEach((ring) => {
+      // The delay and stagger are carved out of the run rather than added on
+      // top, so the last ring still lands exactly on the end whatever the ring
+      // count.
+      const grow = 1 - RING_DELAY - RING_STAGGER * (rings.length - 1);
+
+      rings.forEach((ring, i) => {
         const size = ring.dataset.size;
         if (!size || !parseFloat(size)) return;
 
-        scroll.fromTo(
+        // Hero's entrance, scrubbed: power3.out on both, so the ring bursts
+        // open and turns fast at first, then eases into place.
+        orbit.fromTo(
           ring,
           { height: 0 },
-          { height: size, duration: RING_GROW, ease: "power4.inOut" },
-          0,
+          { height: size, duration: grow, ease: "power3.out" },
+          RING_DELAY + i * RING_STAGGER,
+        );
+
+        // Turned on the ring's centering layer rather than the ring itself:
+        // the ring is mid-height-tween, and stacking a transform on the same
+        // element would put a compositor animation and a layout animation on
+        // one box. The layer is full-bleed and centred on the ring, so it
+        // pivots about the ring's centre all the same.
+        const spin = parseFloat(ring.dataset.spin ?? "");
+        if (!spin || !ring.parentElement) return;
+
+        orbit.fromTo(
+          ring.parentElement,
+          { rotate: 0 },
+          { rotate: spin, duration: grow * RING_TURN, ease: "power3.out" },
+          RING_DELAY + i * RING_STAGGER,
         );
       });
 
-      // Heading entrance: the same scrubbed line-mask recipe as OurTeam, on the
-      // same data-split contract (the markup says which way the lines travel).
-      // Built after the pin on purpose, so its start/end are measured against
-      // the section's pinned position rather than before the spacer exists.
-      // Triggered off the heading itself, exactly like OurTeam: it starts when
-      // the heading's top enters the viewport, not when the section's does —
-      // the heading sits about half a screen into the section, so a section
-      // trigger had the lines already mid-travel by the time they were on
-      // screen. The heading is well above centre once pinned, so "center
-      // center" is reached before the pin takes hold and the lines are home
-      // as the fan starts to open.
+      // ── The pulse ──────────────────────────────────────────────────────────
+      // One crest runs out from the centre line to both edges while the text
+      // arrives, each tick stretching past its resting height and dropping
+      // straight back as the wave passes — Services' pulse, played once. As
+      // there, repeat/yoyo live INSIDE the stagger so every tick does its own
+      // out-and-back and only the crest is raised; at tween level the whole
+      // bar would swell as one mass. A `to` is safe here: the bar ships
+      // uncollapsed, so the start it records is always the resting scale.
       //
-      // fromTo rather than from, so both ends are written out. And no
-      // invalidateOnRefresh: with a stagger it left every line after the first
-      // sitting visible before the entrance (see the note in WhyUs).
-      gsap.utils
-        .toArray<HTMLElement>("[data-split]", container.current)
-        .forEach((block) => {
-          const yPercent = block.dataset.split === "down" ? -150 : 150;
+      // The spread is derived so the last tick is back at rest exactly on
+      // TEXT_IN — the bar settles on the beat the text lands.
+      const PULSE_SCALE = 2.4;
+      const PULSE_LEG = 0.06; // one leg; yoyo doubles it per tick
 
-          SplitText.create(block, {
-            type: "lines",
-            mask: "lines",
-            // Keeps the mask off the caps at leading-heading (0.75).
-            linesClass: "pb-[0.1em]",
-            autoSplit: true,
-            onSplit: (self) =>
-              gsap.fromTo(
-                self.lines,
-                { yPercent },
-                {
-                  yPercent: 0,
-                  ease: "power3.out",
-                  stagger: 0.12,
-                  scrollTrigger: {
-                    trigger: block,
-                    start: "top bottom",
-                    end: "center center",
-                    scrub: true,
-                  },
-                },
-              ),
-          });
-        });
-
-      // Turned on the rings' shared parent rather than on each ring: those are
-      // mid-height-tween, and stacking a transform on the same element would
-      // put a compositor animation and a layout animation on one box. The
-      // parent keeps them apart, and one turn holds the pair in register.
-      // Shares RING_GROW so it runs exactly with the growth, not merely near it.
-      // scroll.fromTo(
-      //   ringRotator.current,
-      //   { rotate: 0 },
-      //   { rotate: 90, duration: RING_GROW, ease: "power2.out" },
-      //   0,
-      // );
+      scroll.to(
+        "[data-tick]",
+        {
+          scaleY: PULSE_SCALE,
+          duration: PULSE_LEG,
+          ease: "power4.out",
+          stagger: {
+            amount: TEXT_IN - PULSE_LEG * 2,
+            from: "center",
+            repeat: 1,
+            yoyo: true,
+          },
+        },
+        0,
+      );
     },
     { scope: container },
   );
@@ -251,67 +269,61 @@ export default function Cta({ copy: words = {} }: { copy?: CtaCopy }) {
         ref={container}
         className="relative h-screen overflow-hidden"
       >
-        {/* First in the stack: the rings, scope bar and cross lines all read on
-          top of the orange. */}
-        <div id="fans" className="absolute inset-0">
-          {/* A square box, not the viewport, because the clip-path percentages
-            are resolved against the element — against `inset-0` the vertical
-            ones would be a share of viewport *height*, so the fan angle would
-            drift with the aspect ratio. 150vmax squares that away and still
-            overshoots every corner at any rotation. */}
-          <div className="absolute top-1/2 left-1/2 h-[150vmax] w-[150vmax] -translate-x-1/2 -translate-y-1/2">
-            {/* Rendered closed so the server markup already sits at the tween's
-              start value and no full wedge flashes before hydration. */}
-            <div
-              data-fan="left"
-              style={{ clipPath: FAN.left.closed }}
-              className="absolute inset-0 bg-accent"
-            ></div>
-            <div
-              data-fan="right"
-              style={{ clipPath: FAN.right.closed }}
-              className="absolute inset-0 bg-accent"
-            ></div>
-          </div>
+        {/* Bottom of the stack: everything else reads on top of the dark. */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div
+            data-disc
+            // Inline `transform`, not Tailwind's `scale-0`: v4 compiles that to
+            // the separate CSS `scale` property, which multiplies with the
+            // `transform` GSAP writes and would hold the disc at zero forever.
+            // Starting at zero in the markup also means no full disc flashes
+            // before hydration.
+            style={{ width: DISC, height: DISC, transform: "scale(0)" }}
+            className="shrink-0 rounded-full bg-foreground"
+          />
         </div>
-        <div ref={ringRotator} className="absolute inset-0">
+        {/* Both start with their dots vertical, as Hero's rings do, and turn a
+          quarter so every dot comes to rest on the x axis. */}
+        <div className="absolute inset-0">
           <DashedCircle
-            dots="horizontal"
+            dots="vertical"
             id="innie"
             size="80vh"
             growTo="250vh"
             collapsed
+            spin={90}
+            tone="light"
           />
           <DashedCircle
-            dots="horizontal"
+            dots="vertical"
             id="outie"
             size="80vw"
             growTo="250vh"
             collapsed
+            spin={90}
+            tone="light"
           />
-          {/* <ScopeBar id="scope-bar" /> */}
         </div>
+        {/* Light on the dark disc: the y-line at the same 10% the page's black
+          lines use over the beige. The scope bar stands in for the x-line, with
+          Services' mobile thinning so the ticks don't crowd a phone. */}
         <div id="cross-lines" className="absolute inset-0">
           <div
             id="y-line"
             ref={yLine}
             className="absolute inset-0 flex items-center justify-center"
           >
-            <div className="h-screen w-px bg-black opacity-10"></div>
+            <div className="h-screen w-px bg-background opacity-10"></div>
           </div>
-          <div
-            id="x-line"
-            className="absolute inset-0 flex items-center justify-center"
-          >
-            <div className="h-px w-screen bg-black opacity-10"></div>
-          </div>
+          <ScopeBar id="cta-scope-bar" mobileEvery={2} tone="light" />
         </div>
         {/* `relative` only to enter the positioned paint order: the absolute
           layers above would otherwise paint over this static block whatever the
-          DOM order says, and the fans are solid. */}
+          DOM order says, and the disc is solid. text-background because it all
+          reads on the dark disc. */}
         <div
           id="cta-content"
-          className="relative flex h-full flex-col gap-space-2x"
+          className="relative flex h-full flex-col gap-space-2x text-background"
         >
           <div className="flex h-1/2 flex-col items-center justify-end pb-space-4x">
             <h2
@@ -322,10 +334,11 @@ export default function Cta({ copy: words = {} }: { copy?: CtaCopy }) {
             </h2>
           </div>
           <div className="flex flex-col items-center justify-start gap-space-base">
-            <p className="max-w-[36ch] text-center text-base">
+            <p data-fade className="max-w-[36ch] text-center text-base">
               {words.body ?? t("body")}
             </p>
             <TransitionLink
+              data-fade
               className="rounded-md bg-accent px-space-2x py-space--2x text-md font-bold tracking-tighter uppercase"
               href="/contact"
             >

@@ -219,12 +219,22 @@ export default function Hero({ copy: words = {} }: { copy?: HeroCopy }) {
        */
       className="grid h-svh w-full grid-cols-1 grid-rows-2 gap-space-2x lg:grid-cols-2 lg:gap-0"
     >
-      <div className="flex items-end justify-center p-space-base sm:p-space-2x lg:justify-end">
+      {/* At lg the top row also spans both columns as a two-column grid,
+          packed to the bottom: the services line takes the first grid row in
+          the right column and the heading the second in the left, so the
+          line's left edge meets the second heading's (both inset space-2x
+          from the centre) and it sits one row gap above the heading's top,
+          however many lines the heading wraps to. Padding moves off the
+          wrapper onto the cells so the two columns split at exactly 50%, like
+          the row below. */}
+      <div className="flex items-end justify-center p-space-base sm:p-space-2x lg:col-span-2 lg:grid lg:grid-cols-2 lg:content-end lg:gap-y-space-base lg:p-0 lg:pb-space-2x">
         {/* The type steps down the modular scale rather than taking an
             arbitrary value — the steps *are* the design token. text-4xl is
             ~61px at base and grows fluid past 1536px, which no phone can hold
             "DIGITAL PRODUCTs" at; it only comes back at xl, where the column
-            is wide enough for it again.
+            is wide enough for it again, as text-display: text-4xl until
+            1536px, then a hero-only ramp in globals.css sized to the column,
+            since the steps either stop growing or overflow it up there.
 
             `max-sm:vi:text-3xl` on both: Vietnamese headings need 1.25
             leading to keep their stacked accents (see :root:lang(vi) in
@@ -233,35 +243,55 @@ export default function Hero({ copy: words = {} }: { copy?: HeroCopy }) {
             rows exactly at 390x844. */}
         <h1
           data-split="up"
-          className="text-center text-4xl leading-heading font-bold tracking-tighter uppercase lg:text-right lg:text-3xl xl:text-4xl max-sm:vi:text-3xl"
+          className="text-center text-4xl leading-heading font-bold tracking-tighter uppercase lg:col-start-1 lg:row-start-2 lg:pr-space-2x lg:text-right lg:text-3xl xl:text-display max-sm:vi:text-3xl"
         >
           {words.titleStart
             ? richHeading(words.titleStart)
             : t.rich("titleStart", RICH)}
         </h1>
-      </div>
 
-      <div className="row-start-2 flex flex-col items-center justify-start gap-space-2x p-space-base sm:p-space-2x lg:col-start-2 lg:items-start lg:gap-space-base">
-        <h1
-          data-split="down"
-          className="text-center text-4xl leading-heading font-bold tracking-tighter uppercase sm:text-2xl lg:text-left lg:text-3xl xl:text-4xl max-sm:vi:text-3xl"
-        >
-          {words.titleEnd
-            ? richHeading(words.titleEnd)
-            : t.rich("titleEnd", RICH)}
-        </h1>
-        {/* leading-none is a desktop luxury: at text-base on a phone the copy
-            wraps to four or five lines and needs the body leading to stay
-            readable. */}
+        {/* Desktop only: stacked, both svh rows are already full (see
+            max-sm:vi:text-3xl above). Same small-caps label recipe as
+            Intro's. */}
         <p
           data-fade
-          className="max-w-[48ch] text-center text-base leading-body sm:text-md sm:leading-none lg:text-left"
+          className="hidden max-w-[24ch] text-sm leading-none text-secondary uppercase lg:col-start-2 lg:row-start-1 lg:block lg:pl-space-2x"
         >
-          {words.body ?? t("body")}
+          {t("services")}
         </p>
+      </div>
+
+      {/* At lg the bottom row spans both columns as its own two-column grid,
+          so the CTA can sit in the bottom-left quarter: its right edge under
+          the first heading's and its top level with the second heading's —
+          justify-self-end in the same row, with space-2x margins standing in
+          for the padding both headings' cells carry (padding on the link
+          itself would grow the button). Stacked, the
+          copy wrapper is `contents`, so heading, paragraph and CTA stay one
+          flex column in reading order, exactly as before. */}
+      <div className="row-start-2 flex flex-col items-center justify-start gap-space-2x p-space-base sm:p-space-2x lg:col-span-2 lg:grid lg:grid-cols-2 lg:items-start lg:gap-0 lg:p-0">
+        <div className="contents lg:col-start-2 lg:row-start-1 lg:flex lg:flex-col lg:items-start lg:gap-space-base lg:p-space-2x">
+          <h1
+            data-split="down"
+            className="text-center text-4xl leading-heading font-bold tracking-tighter uppercase sm:text-2xl lg:text-left lg:text-3xl xl:text-display max-sm:vi:text-3xl"
+          >
+            {words.titleEnd
+              ? richHeading(words.titleEnd)
+              : t.rich("titleEnd", RICH)}
+          </h1>
+          {/* leading-none is a desktop luxury: at text-base on a phone the copy
+            wraps to four or five lines and needs the body leading to stay
+            readable. */}
+          <p
+            data-fade
+            className="max-w-[48ch] text-center text-base leading-body sm:text-md sm:leading-none lg:text-left"
+          >
+            {words.body ?? t("body")}
+          </p>
+        </div>
         <TransitionLink
           data-fade
-          className="rounded-md bg-accent px-space-2x py-space--2x text-base font-bold tracking-tighter uppercase sm:text-md"
+          className="rounded-md bg-accent px-space-2x py-space--2x text-base font-bold tracking-tighter uppercase sm:text-md lg:col-start-1 lg:row-start-1 lg:mt-space-2x lg:mr-space-2x lg:justify-self-end"
           href="/contact"
         >
           {common("contactUs")}

@@ -26,6 +26,18 @@ export type ProjectCopy = {
  * Ships `invisible`, the markup half of the parent's `autoAlpha` crossfade —
  * without it the server-rendered column shows all four blocks piled on top of
  * one another until hydration.
+ *
+ * Light text at every size: the copy always sits inside the Projects backdrop
+ * (the dark photo circle) — 96vw beside the frame on desktop, 90vh around the
+ * stacked phone layout.
+ *
+ * Below lg the block spans the whole Projects section (its column is not
+ * positioned there) and splits in two:
+ * - the type goes to the top, under the counter: the counter's top
+ *   (space-6x) + its one line (text-lg at leading-none) + a small gap.
+ * - the name and blurb start a clear space-2x below the progress ring. The
+ *   circle is centred, so that is 50% + the ring's radius, 1.15 / 2 = 0.575
+ *   frame diameters. --frame-d is inherited from the section.
  */
 export default function ProjectBlock({ type, name, blurb }: ProjectCopy) {
   return (
@@ -33,19 +45,25 @@ export default function ProjectBlock({ type, name, blurb }: ProjectCopy) {
       data-project-block
       className="invisible absolute inset-0 flex flex-col items-center lg:items-start"
     >
-      <div className="flex items-end justify-center p-space-base lg:flex-1 lg:justify-end">
+      <div className="flex items-end justify-center p-space-base max-lg:absolute max-lg:inset-x-0 max-lg:top-[calc(var(--space-6x)+var(--text-lg)+var(--space--2x))] max-lg:py-0 lg:flex-1 lg:justify-end">
         <h3
           data-split="up"
-          className="heading-style text-sm leading-heading text-secondary opacity-75 lg:text-base"
+          className="heading-style text-sm leading-heading text-off-white opacity-75 lg:text-base"
         >
           {type}
         </h3>
       </div>
-      <div className="flex flex-1 flex-col items-center gap-space--1x p-space-base text-center lg:items-start lg:gap-space-base lg:text-left">
-        <p data-split="down" className="heading-style text-lg lg:text-xl">
+      <div className="flex flex-1 flex-col items-center gap-space--1x p-space-base text-center max-lg:absolute max-lg:inset-x-0 max-lg:top-[calc(50%+var(--frame-d)*0.575+var(--space-2x))] max-lg:pt-0 lg:items-start lg:gap-space-base lg:text-left">
+        <p
+          data-split="down"
+          className="heading-style text-lg text-white lg:text-xl"
+        >
           {name}
         </p>
-        <p data-split="down" className="max-w-[32ch] text-sm lg:text-base">
+        <p
+          data-split="down"
+          className="max-w-[32ch] text-sm text-off-white lg:text-base"
+        >
           {blurb}
         </p>
       </div>

@@ -9,7 +9,6 @@ import NumberFlow from "@number-flow/react";
 import Image from "next/image";
 import ProjectBlock from "./ProjectBlock";
 import ProjectLink from "./ProjectLink";
-import DashedCircle from "./DashedCircle";
 import ProgressRing from "./ProgressRing";
 import type { Project } from "./project-data";
 import { useTranslations } from "next-intl";
@@ -93,8 +92,8 @@ function schedule(count: number) {
   const TEARDOWN_AT = count * SLICE;
 
   // When the section furniture leaves. Block i exits at i * SLICE + (SLICE -
-  // TEXT_EXIT), so for the last i that is exactly this — the heading and the
-  // counter ride out on the last project's beat and land precisely as the
+  // TEXT_EXIT), so for the last i that is exactly this — the counter rides
+  // out on the last project's beat and land precisely as the
   // teardown begins, leaving the closing slice to the circles alone.
   const OUTRO_AT = TEARDOWN_AT - TEXT_EXIT;
 
@@ -127,8 +126,8 @@ const ROW_FIT = 0.9;
  *
  * The row is count * ROW_STEP diameters wide, so whether it fits is
  * driven entirely by the diameter against the window width. At 0.5 and the
- * desktop 75vh frame that is 165vh of row: comfortable at 16:9, flush at 3:2,
- * over the edge at 4:3. Rather than pick a scale small enough for the worst
+ * desktop 60vh frame that is 132vh of row: comfortable at 16:9 and 3:2, over
+ * the edge at 4:3. Rather than pick a scale small enough for the worst
  * case and leave widescreen looking timid, the fit is solved per viewport.
  *
  * The diameter is MEASURED off the frame rather than recomputed from a
@@ -416,6 +415,39 @@ export default function Projects({
               );
             });
 
+          // ── The backdrop ───────────────────────────────────────────────────────
+          // The big circle behind the frame echoes whichever project the frame is
+          // showing. Same stack rule as the images above — each photo fades in on
+          // top of the last over the first half of its own slice and nothing ever
+          // fades out — so at any scroll position the backdrop and the frame agree
+          // on which project is up, scrubbing backwards included.
+          //
+          // A crossfade rather than a second pinwheel: under an 80% black overlay
+          // the wipe's edges would barely read, and opacity is compositor-only, so
+          // the touch build can run the very same tween — no `touch` branch.
+          // fromTo for the same reason as the wipe: the photos ship at opacity 0.
+          //
+          // The overlay rides in with the FIRST photo, on the same tween timing,
+          // so before the first project the backdrop is not there at all — the
+          // section opens on the bare page — and photo and darkening land as one.
+          // It never leaves; the teardown's scale takes it away with the rest.
+          tl.fromTo(
+            "[data-backdrop-overlay]",
+            { opacity: 0 },
+            { opacity: 1, duration: REVEAL_HALF, ease: "power2.inOut" },
+            0,
+          );
+          gsap.utils
+            .toArray<HTMLElement>("[data-backdrop-photo]", container.current)
+            .forEach((photo, i) => {
+              tl.fromTo(
+                photo,
+                { opacity: 0 },
+                { opacity: 1, duration: REVEAL_HALF, ease: "power2.inOut" },
+                i * SLICE,
+              );
+            });
+
           // ── The project counter ────────────────────────────────────────────────
           // The number names the image ARRIVING, so it ticks at (i + STEP_AT) *
           // SLICE — just inside the top of that project's slice, while its image is
@@ -493,8 +525,12 @@ export default function Projects({
           // Plain `to` tweens: each records its start from wherever the section
           // actually is when the teardown begins, so the resting values — including
           // the last photo's ZOOM_SCALE — are never written down a second time.
+          //
+          // The backdrop collapses with the dial but does not spin: it carries a
+          // photo now, and a half turn would read as the picture tumbling rather
+          // than as a ring closing.
           tl.to(
-            ["#projects-rings", "#projects-progress"],
+            "#projects-progress",
             {
               scale: 0,
               rotate: "180deg",
@@ -503,6 +539,11 @@ export default function Projects({
             },
             TEARDOWN_AT,
           )
+            .to(
+              "#projects-backdrop",
+              { scale: 0, duration: SLICE / 2, ease: "power3.inOut" },
+              TEARDOWN_AT,
+            )
             .to(
               "[data-project-frame]",
               {
@@ -673,20 +714,10 @@ export default function Projects({
           blocks.forEach((block) => {
             const yPercent = block.dataset.split === "down" ? -150 : 150;
 
-            // The heading is the one element in the section whose entrance and exit
-            // are driven by DIFFERENT clocks: it arrives on its own pre-pin trigger
-            // (below) and leaves on the master pin timeline at OUTRO_AT. That rules
-            // out the splitInOut pattern used for the project blocks, where both
-            // halves share one returned timeline.
+            // No exit animation: the heading sits inside the frame, under the
+            // image layers, so the first project's wipe is what takes it away.
+            // See the hide on the master timeline below.
             //
-            // SplitText keeps exactly one animation per split — whatever onSplit
-            // returns — and reverts it before re-splitting. The entrance claims that
-            // slot because it owns a ScrollTrigger that has to go down with it, so
-            // the exit is held here and killed from onRevert instead. Killing it
-            // also lifts it out of the master timeline, and the next onSplit adds a
-            // replacement at the same position.
-            let exit: gsap.core.Timeline | undefined;
-
             // autoSplit re-splits on font load / resize, so onSplit holds the tween
             // and returning it lets GSAP kill it — and the ScrollTrigger built with
             // it — before each re-split.
@@ -700,46 +731,40 @@ export default function Projects({
               // font size through the type scale.
               linesClass: "pb-[0.15em]",
               autoSplit: true,
-              onRevert: () => {
-                exit?.kill();
-                exit = undefined;
-              },
-              onSplit: (self) => {
-                // The mirror of the entrance below: the SAME yPercent, so the lines
-                // retreat through the edge of the mask they arrived from rather
-                // than carrying on past it, and from: "end" reverses the stagger so
-                // the exit reads as the entrance rewound. Same shape as splitInOut,
-                // just parented to the master by hand.
-                exit = gsap.timeline();
-                exit.to(self.lines, {
-                  yPercent,
-                  duration: TEXT_EXIT,
-                  ease: "power3.in",
-                  stagger: { each: TEXT_STAGGER, from: "end" },
-                });
-                tl.add(exit, OUTRO_AT);
-
-                return gsap.from(self.lines, {
+              onSplit: (self) =>
+                gsap.from(self.lines, {
                   yPercent,
                   ease: "none",
                   stagger: 0.12,
                   // The section itself is the trigger, not the heading: the lines
-                  // arrive as the section climbs the last half of the viewport,
+                  // arrive as the section climbs from 80% to 30% of the viewport,
                   // which is a fixed run of scroll no matter where in the layout
-                  // the h2 happens to sit.
+                  // the h2 happens to sit. Done well before the pin engages, so the
+                  // title has a beat to sit on the orange before the first wipe.
                   //
                   // ease "none" because this is scrubbed — the lines track the
                   // scrollbar exactly, and any other curve reads as scroll lag.
                   scrollTrigger: {
                     trigger: container.current,
-                    start: "top 50%",
-                    end: "top top",
+                    start: "top 80%",
+                    end: "top 30%",
                     scrub,
                   },
-                });
-              },
+                }),
             });
           });
+
+          // Covering is not quite enough on its own: the teardown hides the
+          // fill and deals the layers out into a row, which would uncover the
+          // heading again. So it is switched off — instantly, not animated — at
+          // REVEAL_HALF, the moment the first wipe has closed over it, when the
+          // switch cannot be seen. A zero-length tween on the timeline rather
+          // than a set, so scrubbing back past it brings the heading back.
+          tl.to(
+            "#projects-heading",
+            { autoAlpha: 0, duration: 0, ease: "none" },
+            REVEAL_HALF,
+          );
         },
         // matchMedia keeps its own context, so it needs the scope passed
         // again or the selector strings above would query the whole page.
@@ -754,19 +779,30 @@ export default function Projects({
     // four layers well outside the centre column, and a pinned section is
     // position: fixed — transformed children hanging off it can extend the
     // document's horizontal scroll area. It also trims the x-line below and,
-    // on a phone, the dashed ring, which at 1.3 frame diameters is
+    // on a phone, the backdrop circle, which at 1.3 frame diameters is
     // deliberately wider than a portrait viewport.
     //
-    // Horizontal only, NOT overflow-hidden: on desktop the ring is 90vw, i.e.
-    // taller than the h-screen section on any landscape screen, and a vertical
-    // clip sliced its top and bottom arcs off flat. Letting it spill up over
-    // the motto is the intended look. `clip` on one axis with `visible` on the
-    // other is the one overflow pairing CSS honours as written — `hidden`
-    // would promote the other axis to `auto` and make this a scroll container.
+    // Horizontal only, NOT overflow-hidden: on desktop the backdrop is 96vw,
+    // i.e. taller than the h-screen section on any landscape screen, and a
+    // vertical clip would slice its top and bottom arcs off flat. Letting it
+    // spill up over the motto is the intended look. `clip` on one axis with
+    // `visible` on the other is the one overflow pairing CSS honours as
+    // written — `hidden` would promote the other axis to `auto` and make this
+    // a scroll container.
+    //
+    // `isolate` makes the section its own stacking context, so the backdrop's
+    // negative z-index puts it behind the heading and copy without dropping it
+    // out of the section and behind HeaderBg's -z-1 layer.
+    //
+    // --frame-d is declared here, at the top, rather than on the circle's box:
+    // below lg the project copy is positioned against the whole section and
+    // places itself off the frame's diameter (see ProjectBlock), so the number
+    // has to be inherited by more than the circle. See the circle's box for
+    // the values themselves.
     <section
       id="projects"
       ref={container}
-      className="relative h-screen overflow-x-clip"
+      className="relative isolate h-screen overflow-x-clip [--frame-d:min(80vw,40vh)] lg:[--frame-d:min(60vh,45vw)]"
     >
       {/*
         Three tracks — heading/counter, the circle, the copy — laid out as ROWS
@@ -776,24 +812,30 @@ export default function Projects({
         That is the whole reason the switch is one class rather than a second
         layout — the sizing was already expressed as "the circle takes what it
         needs, the copy shares the rest".
+
+        The gap steps up a spacing token per breakpoint from lg, where the
+        tracks sit side by side and the gap is the air between the circle and
+        the copy. The tokens are already fluid above 1280px, so between steps it
+        keeps growing with the window rather than jumping and then holding. It
+        comes out of the flex-1 copy tracks, never the circle (shrink-0).
       */}
-      <div className="flex h-full flex-col justify-end gap-space-base lg:flex-row lg:justify-center">
+      <div className="flex h-full flex-col justify-end gap-space-base lg:flex-row lg:justify-center lg:gap-space-3x xl:gap-space-5x 2xl:gap-space-6x">
         <div className="flex flex-1 flex-col items-center lg:items-end">
-          <div
-            id="projects-heading"
-            className="flex flex-1 items-end justify-center p-space-base lg:justify-end"
-          >
-            <h2
-              data-split="up"
-              className="heading-style text-center text-2xl leading-heading lg:text-right lg:text-4xl"
-            >
-              {words.title ? richHeading(words.title) : t.rich("title", RICH)}
-            </h2>
-          </div>
-          <div className="text-center lg:flex-1 lg:p-space-base lg:text-left">
+          {/* Where the heading used to sit, now inside the frame. Kept as an
+              empty flex-1 so the counter holds its place just below the centre
+              line on desktop.
+
+              Below lg the counter leaves the flow for the top of the section,
+              with the project type stacked under it (see ProjectBlock), so the
+              screen reads label above / circle / copy below instead of all of
+              it crowding the progress ring. top-space-6x clears the fixed top
+              bar. This track stays as an empty flex-1 there too — it is the
+              mirror of the copy track that keeps the circle dead centre. */}
+          <div className="flex-1" />
+          <div className="text-center max-lg:absolute max-lg:inset-x-0 max-lg:top-space-6x lg:flex-1 lg:p-space-base lg:text-left">
             <p
               data-counter
-              className="heading-style text-lg text-secondary opacity-75 lg:text-xl"
+              className="heading-style text-lg text-off-white opacity-75 lg:text-xl"
             >
               <NumberFlow
                 value={landed}
@@ -805,9 +847,10 @@ export default function Projects({
           </div>
         </div>
         {/*
-          --frame-d is the section's one diameter, declared here so the frame and
-          both rings are derived from a single number instead of three that have
-          to be kept in agreement across a breakpoint.
+          --frame-d is the section's one diameter, declared on the section so
+          the frame, the progress ring and the phone copy's placement are all
+          derived from a single number instead of several that have to be kept
+          in agreement across a breakpoint.
 
           min(80vw, 40vh) is what makes the stacked layout fit: the frame has to
           clear the width of a phone AND leave room above and below for the two
@@ -816,12 +859,65 @@ export default function Projects({
           portrait phone, 40vh on a short landscape one — with no breakpoint
           needed between the two.
 
+          From lg up the same idea in column mode: 60vh on any landscape
+          screen, so the circle grows with the display instead of stopping at
+          a pixel size, but capped at 45vw so a tall lg window (a portrait iPad
+          Pro, a half-width browser on a big monitor) cannot push it into the
+          two copy columns either side.
+
           shrink-0 because the frame's width comes from aspect-square and cannot
           respond to the track being squeezed: without it a tight viewport
           shrinks this box and the circle simply overflows it instead of the
           flex-1 tracks giving way, which is what should happen.
         */}
-        <div className="relative flex shrink-0 items-center justify-center [--dash-d:calc(var(--frame-d)*1.3)] [--frame-d:min(80vw,40vh)] lg:[--dash-d:90vw] lg:[--frame-d:75vh]">
+        <div className="relative flex shrink-0 items-center justify-center [--dash-d:90vh] lg:[--dash-d:96vw]">
+          {/*
+            The backdrop: a circle the size the dashed ring used to be (still
+            --dash-d), showing the same project as the frame under an 80% black
+            overlay, so the light copy around the frame has something dark to
+            sit on. 96vw on desktop; 90vh below lg, where the copy is stacked
+            above and below the frame and only a circle about the height of the
+            screen reaches it — which is what lets the copy be light there too.
+
+            Its own stack of photos rather than a reference to the frame's: the
+            frame's layers are masked, scaled and later dealt out into a row,
+            and none of that should reach the backdrop. They ship at opacity 0,
+            the tween's start value.
+
+            -z-10 against the section's `isolate`; see the section. The id is
+            the teardown's handle, on the centering layer so one transform takes
+            the whole circle. aria-hidden and alt="" because the frame already
+            carries each project's real alt text. shrink-0 because the circle is
+            wider than this flex box and would otherwise be squeezed to fit.
+          */}
+          {/*
+            The overlay ships at opacity 0 too, so the server frame and
+            everything before the first project show no backdrop at all — see
+            the overlay tween.
+          */}
+          <div
+            id="projects-backdrop"
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center"
+          >
+            <div className="relative aspect-square h-[var(--dash-d)] shrink-0 overflow-hidden rounded-full">
+              {projects.map((project) => (
+                <Image
+                  key={project.slug}
+                  src={project.src}
+                  alt=""
+                  fill
+                  sizes="(min-width: 64rem) 96vw, 90vh"
+                  data-backdrop-photo
+                  className="object-cover opacity-0"
+                />
+              ))}
+              <div
+                data-backdrop-overlay
+                className="absolute inset-0 bg-black/80 opacity-0"
+              />
+            </div>
+          </div>
           {/*
             The frame. Deliberately NOT overflow-hidden: it sizes and positions
             the stack, and the teardown then slides the four layers clean out of
@@ -845,6 +941,24 @@ export default function Projects({
               data-frame-fill
               className="absolute inset-0 rounded-full bg-accent"
             />
+            {/*
+              The section heading, centred on the orange. Between the fill and
+              the image layers in DOM order, so the first project's wipe covers
+              it the way each image covers the last — no exit animation of its
+              own. It is switched off once fully covered, because the teardown
+              hides the fill and deals the layers out, which would uncover it.
+            */}
+            <div
+              id="projects-heading"
+              className="absolute inset-0 flex items-center justify-center p-space-base"
+            >
+              <h2
+                data-split="up"
+                className="heading-style text-center text-2xl leading-heading text-white lg:text-4xl"
+              >
+                {words.title ? richHeading(words.title) : t.rich("title", RICH)}
+              </h2>
+            </div>
             {projects.map((project, i) => (
               // Each layer carries the circular clip, because each one has to
               // survive being translated out of the frame's box during the
@@ -887,7 +1001,7 @@ export default function Projects({
                     src={project.src}
                     alt={project.alt}
                     fill
-                    sizes="(min-width: 64rem) 75vh, 80vw"
+                    sizes="(min-width: 64rem) min(60vh, 45vw), 80vw"
                     // The drift's target, and the reason it is tagged on the
                     // picture rather than tweened through the layer: the mask
                     // lives on the layer, so scaling the layer would scale the
@@ -901,30 +1015,14 @@ export default function Projects({
             ))}
           </div>
           {/*
-            Both carry an id purely as an animation handle for the teardown —
-            the same job DashedCircle's `id` does for the ring conveyor in
-            Services. Scaling the centering layer rather than the ring inside it
-            means one transform takes the circle and its dots together.
-          */}
-          {/* pointer-events-none: its centering layer is `absolute inset-0`
-              and paints after the frame, so it would otherwise sit over the
-              circle and swallow every click meant for the image links.
-              ProgressRing already opts out on its own. */}
-          <DashedCircle
-            id="projects-rings"
-            dots="horizontal"
-            size="var(--dash-d)"
-            className="pointer-events-none"
-          />
-          {/*
-            16/15 is exactly the 80vh/75vh the desktop used to spell out, so the
-            dial keeps sitting the same hair outside the frame — now at any
-            diameter, from one expression, rather than as two vh values that
-            only happen to be in proportion at one breakpoint.
+            1.15 frame diameters: a clear ring of air (7.5% of the radius)
+            between the dial and the image circle rather than the hair it used
+            to sit at (16/15). A multiple of --frame-d, so that proportion holds
+            at every diameter and breakpoint from the one expression.
           */}
           <ProgressRing
             id="projects-progress"
-            size="calc(var(--frame-d)*16/15)"
+            size="calc(var(--frame-d)*1.15)"
           />
         </div>
         {/*
@@ -939,7 +1037,11 @@ export default function Projects({
           it was eating every click on that one. Nothing in here is
           interactive, so nothing is lost.
         */}
-        <div className="pointer-events-none relative flex-1">
+        {/* relative from lg only: below it the blocks span the whole section
+            (it is the next positioned ancestor) so each can put its type at the
+            top and its name and blurb under the circle. The column still holds
+            its flex-1 share, keeping the circle centred. */}
+        <div className="pointer-events-none flex-1 lg:relative">
           {projects.map((project) => (
             <ProjectBlock
               key={project.name}
@@ -955,10 +1057,16 @@ export default function Projects({
           the section's overflow-x-clip does the trimming (the y-line is
           exactly h-screen, so the vertical axis needs none).
 
-          pointer-events-none because it is the last thing in the section and
-          covers all of it — without it, it is the crosshair that catches the
-          click on a project image, not the image. */}
-      <div id="cross-lines" className="pointer-events-none absolute inset-0">
+          -z-5 tucks it behind the image circle (and the copy) while keeping
+          it above the backdrop's -z-10, so the lines run across the dark
+          circle but stop at the frame's edge — both against the section's
+          `isolate`. pointer-events-none still, as a guard: it covers the whole
+          section, and any later change to the stacking would otherwise let it
+          catch the clicks meant for the project images. */}
+      <div
+        id="cross-lines"
+        className="pointer-events-none absolute inset-0 -z-5"
+      >
         <div
           id="y-line"
           className="absolute inset-0 flex items-center justify-center"

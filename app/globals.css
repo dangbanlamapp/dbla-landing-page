@@ -10,6 +10,9 @@
   --color-orange: #f8612c;
   --color-beige: #e1dcd1;
   --secondary: #4d4d4d;
+  /* Body copy on a dark surface — the beige itself, so light text on the
+     Projects backdrop reads as the page's own paper rather than a new grey. */
+  --off-white: var(--color-beige);
   --background: var(--color-beige);
   --foreground: #2b2b2b;
 
@@ -29,6 +32,12 @@
   --type--text-6xl: calc(var(--type--text-5xl) * var(--font-scale-ratio));
   --type--text-7xl: calc(var(--type--text-6xl) * var(--font-scale-ratio));
   --type--text-8xl: calc(var(--type--text-7xl) * var(--font-scale-ratio));
+  /* Display — the hero headline. Rides text-4xl until 1536px, then gets its own
+     ramp (below): the scale steps stop fitting the hero's half-width column
+     up there. 4xl caps at 1920px and sits still on wider screens, while 5xl
+     overshoots the column between ~1720px and ~2100px ("DIGITAL PRODUCTS" is
+     ~7.75em wide). */
+  --type--text-display: var(--type--text-4xl);
 
   /* Line height */
   --line-height-body: 1.15;
@@ -107,12 +116,23 @@
   }
 }
 
+/* Display ramp from 1536px (where the fluid scale starts): 84px at 1536, 88px
+   at 1600, ~110px at 1920, ~145px at 2560, capped at 152px (~2680px). Tracks
+   the hero column (50vw minus its padding) with ~10% to spare for the widest
+   line, so it keeps growing past 3xl where the scale steps flatten out. */
+@media (min-width: 96rem) {
+  :root {
+    --type--text-display: clamp(5.25rem, -0.44rem + 5.94vw, 9.5rem);
+  }
+}
+
 @theme inline {
   --breakpoint-2xl: 100rem;
   --breakpoint-3xl: 120rem;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-secondary: var(--secondary);
+  --color-off-white: var(--off-white);
   --color-accent: var(--color-orange);
   --font-grotesk: var(--font-grotesk), ui-monospace, monospace;
   --text-xs: var(--type--text-xs);
@@ -129,6 +149,7 @@
   --text-6xl: var(--type--text-6xl);
   --text-7xl: var(--type--text-7xl);
   --text-8xl: var(--type--text-8xl);
+  --text-display: var(--type--text-display);
   --leading-heading: var(--line-height-heading);
   --leading-body: var(--line-height-body);
   --tracking-heading: var(--letter-spacing-heading);
@@ -181,6 +202,8 @@
   opacity: 0.9;
   mix-blend-mode: color;
 } */
+  /* Halftone overlay, swapped out for the animated <Noise /> grain rendered
+     in the root layout. Kept commented for an easy switch back.
   body::after {
     content: "";
     position: fixed;
@@ -195,18 +218,9 @@
   }
   @media (min-width: 768px) {
     body::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: 99;
-      pointer-events: none;
-      background-image: url("/halftone-bg.jpg");
-      background-repeat: repeat;
       background-size: 70vw auto;
-      opacity: 0.6;
-      mix-blend-mode: soft-light;
     }
-  }
+  } */
   /* Off on touch devices, and it is a performance call, not a design one. A
      fixed, full-viewport layer in soft-light has to be re-blended over every
      pixel that changes beneath it, every frame — and the pinned Projects scrub
@@ -337,7 +351,7 @@
       will-change: transform;
     }
     [data-project-frame],
-    #projects-rings {
+    #projects-backdrop {
       will-change: transform;
     }
   }
